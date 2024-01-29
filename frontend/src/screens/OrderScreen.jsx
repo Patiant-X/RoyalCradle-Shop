@@ -202,7 +202,6 @@ const OrderScreen = () => {
                       <div>
                         <PayPalButtons
                           createOrder={createOrder}
-                          onApprove={onApprove}
                           onError={onError}
                         ></PayPalButtons>
                       </div>
