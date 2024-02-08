@@ -32,12 +32,13 @@ app.use('/api/upload', uploadRoutes);
 
 // Execute once to get secret and store secret in env file
 // Commented out for security reasons 
-// app.use('/webhook/register', yocoWebHookRoutes);
+app.use('/webhook/register', yocoWebHookRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.resolve();
-  app.use('/uploads', express.static('/var/data/uploads'));
-  app.use(express.static(path.join(__dirname, '/frontend/build')));
+  // app.use('/uploads', express.static('/var/data/uploads'));
+  app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
+   app.use(express.static(path.join(__dirname, '/frontend/build')));
 
   app.get('*', (req, res) =>
     res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))

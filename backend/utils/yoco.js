@@ -143,7 +143,7 @@ export async function registerYocoWebHook() {
 
     const body = JSON.stringify({
       name: '5tyga-webhook',
-      url: 'https://royalcradle-shop.onrender.com//my/webhook/url',
+      url: 'https://royalcradle-shop.onrender.com/my/webhook/url',
     });
 
     const response = await fetch(YOCO_REGISTER_WEBHOOK_API_URL, {
