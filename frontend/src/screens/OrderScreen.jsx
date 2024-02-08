@@ -1,7 +1,5 @@
-import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
-import { PayPalButtons, usePayPalScriptReducer } from '@paypal/react-paypal-js';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
 import Message from '../components/Message';
@@ -9,7 +7,6 @@ import Loader from '../components/Loader';
 import {
   useDeliverOrderMutation,
   useGetOrderDetailsQuery,
-  useGetPaypalClientIdQuery,
   usePayOrderMutation,
 } from '../slices/ordersApiSlice';
 
@@ -29,52 +26,17 @@ const OrderScreen = () => {
     useDeliverOrderMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
+  const PayYoco = async () => {
+    try {
+      const res = await payOrder({ orderId });
+      const { redirectUrl } = res.data;
 
-  const [{ isPending }, paypalDispatch] = usePayPalScriptReducer();
-
-  const {
-    data: paypal,
-    isLoading: loadingPayPal,
-    error: errorPayPal,
-  } = useGetPaypalClientIdQuery();
-
-  useEffect(() => {
-    if (!errorPayPal && !loadingPayPal && paypal.clientId) {
-      const loadPaypalScript = async () => {
-        paypalDispatch({
-          type: 'resetOptions',
-          value: {
-            'client-id': paypal.clientId,
-            currency: 'USD',
-          },
-        });
-        paypalDispatch({ type: 'setLoadingStatus', value: 'pending' });
-      };
-      if (order && !order.isPaid) {
-        if (!window.paypal) {
-          loadPaypalScript();
-        }
-      }
+      // Redirect the user to the urlredirect link
+      window.location.href = redirectUrl;
+    } catch (error) {
+      toast.error('Payment failed');
     }
-  }, [errorPayPal, loadingPayPal, order, paypal, paypalDispatch]);
-
-  function onError(err) {
-    toast.error(err.message);
-  }
-
-  function createOrder(data, actions) {
-    return actions.order
-      .create({
-        purchase_units: [
-          {
-            amount: { value: order.totalPrice },
-          },
-        ],
-      })
-      .then((orderID) => {
-        return orderID;
-      });
-  }
+  };
 
   const deliverHandler = async () => {
     await deliverOrder(orderId);
@@ -92,7 +54,9 @@ const OrderScreen = () => {
         <Col md={8}>
           <ListGroup variant='flush'>
             <ListGroup.Item>
-              <h2>Shipping</h2>
+              <h2>
+                {order.shippingAddress?.delivery ? 'Delivery' : 'Pick-up'}
+              </h2>
               <p>
                 <strong>Name: </strong> {order.user.name}
               </p>
@@ -101,17 +65,28 @@ const OrderScreen = () => {
                 <a href={`mailto:${order.user.email}`}>{order.user.email}</a>
               </p>
               <p>
-                <strong>Address:</strong>
-                {order.shippingAddress.address}, {order.shippingAddress.city}{' '}
-                {order.shippingAddress.postalCode},{' '}
-                {order.shippingAddress.country}
+                {order.shippingAddress?.delivery ? (
+                  <strong> Address: </strong>
+                ) : (
+                  <strong>Pick-up Address: </strong>
+                )}
+                {order.shippingAddress.address}
               </p>
-              {order.isDelivered ? (
+
+              {order.shippingAddress.delivery ? (
+                order.isDelivered ? (
+                  <Message variant='success'>
+                    Delivered on {order.deliveredAt}
+                  </Message>
+                ) : (
+                  <Message variant='danger'>Not Delivered</Message>
+                )
+              ) : order.isDelivered ? (
                 <Message variant='success'>
-                  Delivered on {order.deliveredAt}
+                  Collected on {order.deliveredAt}
                 </Message>
               ) : (
-                <Message variant='danger'>Not Delivered</Message>
+                <Message variant='danger'>Not Collected</Message>
               )}
             </ListGroup.Item>
 
@@ -119,9 +94,15 @@ const OrderScreen = () => {
               <h2>Payment Method</h2>
               <p>
                 <strong>Method: </strong>
-                {order.paymentMethod}
+                {order.paymentMethod.toUpperCase()}
               </p>
-              {order.isPaid ? (
+              {order.isPaid &&
+              order.paymentMethod === 'card' &&
+              order.paidAt ? (
+                <Message variant='success'>Paid on {order.paidAt}</Message>
+              ) : order.isDelivered &&
+                order.paymentMethod === 'cash' &&
+                order.paidAt ? (
                 <Message variant='success'>Paid on {order.paidAt}</Message>
               ) : (
                 <Message variant='danger'>Not Paid</Message>
@@ -175,13 +156,13 @@ const OrderScreen = () => {
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Shipping</Col>
+                  <Col>Delivery</Col>
                   <Col>R{order.shippingPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Tax</Col>
+                  <Col>Services</Col>
                   <Col>R{order.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
@@ -195,15 +176,27 @@ const OrderScreen = () => {
                 <ListGroup.Item>
                   {loadingPay && <Loader />}
 
-                  {isPending ? (
+                  {isLoading ? (
                     <Loader />
                   ) : (
                     <div>
                       <div>
-                        <PayPalButtons
-                          createOrder={createOrder}
-                          onError={onError}
-                        ></PayPalButtons>
+                        <Button
+                          onClick={() => PayYoco()}
+                          style={{
+                            marginTop: `10px`,
+                            backgroundColor: '#00a9e0',
+                            width: '100%',
+                          }}
+                        >
+                          Pay using YOCO
+                        </Button>
+                        <p style={{ paddingTop : '20px' }}>
+                          Yoco offers a secure payment system trusted by
+                          businesses and customers alike. With robust encryption
+                          and advanced fraud prevention measures, your
+                          transactions are safeguarded every step of the way.
+                        </p>
                       </div>
                     </div>
                   )}

@@ -2,84 +2,106 @@ import { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import FormContainer from '../components/FormContainer';
 import CheckoutSteps from '../components/CheckoutSteps';
+import AddressData from '../components/AddressData';
 import { saveShippingAddress } from '../slices/cartSlice';
 
 const ShippingScreen = () => {
   const cart = useSelector((state) => state.cart);
-  const { shippingAddress } = cart;
+  const { cartItems } = cart;
 
-  const [address, setAddress] = useState(shippingAddress.address || '');
-  const [city, setCity] = useState(shippingAddress.city || '');
-  const [postalCode, setPostalCode] = useState(
-    shippingAddress.postalCode || ''
-  );
-  const [country, setCountry] = useState(shippingAddress.country || '');
-
+  const [address, setAddress] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const submitHandler = (e) => {
+  const submitDeliveryHandler = (e) => {
     e.preventDefault();
-    dispatch(saveShippingAddress({ address, city, postalCode, country }));
-    navigate('/payment');
+
+    if (
+      address?.place != null &&
+      address?.lat != null &&
+      address?.lng != null
+    ) {
+      const location = address.place.address_components
+        .map((component) => component.long_name)
+        .join(' ');
+      const lat = address.lat;
+      const lng = address.lng;
+      const delivery = true;
+      dispatch(saveShippingAddress({ location, lat, lng , delivery }));
+      navigate('/payment');
+    } else {
+      toast.error('Please select address from google suggestions');
+    }
+  };
+
+  const submitPickUpHandler = (e) => {
+    e.preventDefault();
+    const product = cartItems?.find((item) => item.IsFood === true);
+    const notFoodProduct = cartItems?.find((item) => item.IsFood === false);
+    if(notFoodProduct){
+      toast.error("Sorry, only food items can be collected not drinks. Please remove frink from cart")
+      return;
+    }
+      if (product) {
+      const location = product.location?.address;
+      const lat = product.location?.latitude;
+      const lng = product.location?.longitude;
+      const delivery = false;
+      dispatch(saveShippingAddress({location, lat, lng , delivery }));
+      // Navigate to the payment page or any other necessary action
+      navigate('/payment');
+    }else {
+      toast.error("Sorry, only Food items can be collected")
+      return;
+    }
   };
 
   return (
-    <FormContainer>
-      <CheckoutSteps step1 step2 />
-      <h1>Shipping</h1>
-      <Form onSubmit={submitHandler}>
-        <Form.Group className='my-2' controlId='address'>
-          <Form.Label>Address</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Enter address'
-            value={address}
-            required
-            onChange={(e) => setAddress(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
+    <>
+      <FormContainer>
+        <CheckoutSteps step1 step2 />
+        <h1>Delivery or Pick-Up</h1>
+        <Form onSubmit={submitDeliveryHandler}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ marginRight: '10px', marginBottom: '5px' }}>
+              Enter address:
+            </label>
+            <AddressData setAddressCoordinates={setAddress} />
+          </div>
+          <Form.Group className='my-4' controlId='address'>
+            <Form.Label>Confrim Address</Form.Label>
+            <Form.Control
+              type='text'
+              placeholder='Confirm address'
+              value={
+                address?.place
+                  ? address.place.address_components
+                      .map((component) => component.long_name)
+                      .join(' ')
+                  : ''
+              }
+              required
+              readOnly
+            ></Form.Control>
+          </Form.Group>
 
-        <Form.Group className='my-2' controlId='city'>
-          <Form.Label>City</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Enter city'
-            value={city}
-            required
-            onChange={(e) => setCity(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-
-        <Form.Group className='my-2' controlId='postalCode'>
-          <Form.Label>Postal Code</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Enter postal code'
-            value={postalCode}
-            required
-            onChange={(e) => setPostalCode(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-
-        <Form.Group className='my-2' controlId='country'>
-          <Form.Label>Country</Form.Label>
-          <Form.Control
-            type='text'
-            placeholder='Enter country'
-            value={country}
-            required
-            onChange={(e) => setCountry(e.target.value)}
-          ></Form.Control>
-        </Form.Group>
-
-        <Button type='submit' variant='primary'>
-          Continue
-        </Button>
-      </Form>
-    </FormContainer>
+          <Button type='submit' variant='primary'>
+            Continue with Delivery
+          </Button>
+          <Button
+            type='button'
+            variant='secondary'
+            className='mx-2'
+            onClick={submitPickUpHandler}
+          >
+            Continue with Pick-up
+          </Button>
+        </Form>
+      </FormContainer>
+    </>
   );
 };
 

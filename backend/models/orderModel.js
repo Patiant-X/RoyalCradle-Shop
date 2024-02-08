@@ -1,5 +1,17 @@
 import mongoose from 'mongoose';
 
+const locationSchema = mongoose.Schema({
+  address: { type: String, required: true },
+  latitude: { type: Number, required: true },
+  longitude: { type: Number, required: true },
+});
+const shippingSchema = mongoose.Schema({
+  address: { type: String, required: true },
+  latitude: { type: Number, required: true },
+  longitude: { type: Number, required: true },
+  delivery: { type: Boolean, required: true },
+});
+
 const orderSchema = mongoose.Schema(
   {
     user: {
@@ -7,24 +19,30 @@ const orderSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
+    checkoutId: {
+      type: String,
+    },
     orderItems: [
       {
         name: { type: String, required: true },
         qty: { type: Number, required: true },
         image: { type: String, required: true },
         price: { type: Number, required: true },
+        IsFood: {type: Boolean, required: true},
         product: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,
           ref: 'Product',
         },
+        location: {
+          type: locationSchema,
+          required: true,
+        },
       },
     ],
     shippingAddress: {
-      address: { type: String, required: true },
-      city: { type: String, required: true },
-      postalCode: { type: String, required: true },
-      country: { type: String, required: true },
+      type: shippingSchema,
+      required: true,
     },
     paymentMethod: {
       type: String,

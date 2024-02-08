@@ -2,12 +2,15 @@ import path from 'path';
 import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import { parseRawRequestBody } from './middleware/webhookCheckoutId.js';
 dotenv.config();
 import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import yocoWebHookRoutes from "./routes/yocoWebHookRoutes.js"
+import  yocoVerifyPaymentRoutes from "./routes/yocoVerifyPaymentRoutes.js"
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 
 const port = process.env.PORT || 5000;
@@ -16,18 +19,20 @@ connectDB();
 
 const app = express();
 
+app.use(parseRawRequestBody);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use("/my/webhook/url", yocoVerifyPaymentRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
 
-app.get('/api/config/paypal', (req, res) =>
-  res.send({ clientId: process.env.PAYPAL_CLIENT_ID })
-);
+// Execute once to get secret and store secret in env file
+// Commented out for security reasons 
+// app.use('/webhook/register', yocoWebHookRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   const __dirname = path.resolve();

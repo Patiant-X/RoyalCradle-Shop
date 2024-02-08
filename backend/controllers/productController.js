@@ -52,11 +52,15 @@ const createProduct = asyncHandler(async (req, res) => {
     price: 0,
     user: req.user._id,
     image: '/images/sample.jpg',
-    brand: 'Sample brand',
     category: 'Sample category',
     countInStock: 0,
     numReviews: 0,
     description: 'Sample description',
+    location: {
+      address: 'Sample address',
+      latitude: 123456,
+      longitude: 123456,
+    },
   });
 
   const createdProduct = await product.save();
@@ -67,8 +71,16 @@ const createProduct = asyncHandler(async (req, res) => {
 // @route   PUT /api/products/:id
 // @access  Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
-  const { name, price, description, image, brand, category, countInStock } =
-    req.body;
+  const {
+    name,
+    price,
+    description,
+    image,
+    category,
+    IsFood,
+    productIsAvailable,
+    address, latitude, longitude,
+  } = req.body;
 
   const product = await Product.findById(req.params.id);
 
@@ -77,14 +89,17 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.price = price;
     product.description = description;
     product.image = image;
-    product.brand = brand;
+    product.IsFood = IsFood;
     product.category = category;
-    product.countInStock = countInStock;
+    product.productIsAvailable = productIsAvailable;
+    product.location.address = address;
+    product.location.latitude = latitude;
+    product.location.longitude = longitude;
 
     const updatedProduct = await product.save();
     res.json(updatedProduct);
   } else {
-    res.status(404);
+    res.status(404).json(req.body);
     throw new Error('Product not found');
   }
 });

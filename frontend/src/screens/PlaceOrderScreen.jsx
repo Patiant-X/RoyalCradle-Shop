@@ -6,40 +6,71 @@ import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import CheckoutSteps from '../components/CheckoutSteps';
 import Loader from '../components/Loader';
-import { useCreateOrderMutation } from '../slices/ordersApiSlice';
+import {
+  useCreateOrderMutation,
+  useDeleteOrderMutation,
+} from '../slices/ordersApiSlice';
 import { clearCartItems } from '../slices/cartSlice';
+import { useGetMyOrdersQuery } from '../slices/ordersApiSlice';
 
 const PlaceOrderScreen = () => {
   const navigate = useNavigate();
-
   const cart = useSelector((state) => state.cart);
+  const { shippingAddress } = cart;
 
   const [createOrder, { isLoading, error }] = useCreateOrderMutation();
+  const [deleteOrder, { isLoading: loadingDelete }] = useDeleteOrderMutation();
+  const { data: orders, isLoading: loadingOrders } = useGetMyOrdersQuery();
 
   useEffect(() => {
-    if (!cart.shippingAddress.address) {
+    if (!cart.shippingAddress.location) {
       navigate('/shipping');
     } else if (!cart.paymentMethod) {
       navigate('/payment');
     }
-  }, [cart.paymentMethod, cart.shippingAddress.address, navigate]);
+  }, [cart.paymentMethod, cart.shippingAddress.location, navigate]);
 
   const dispatch = useDispatch();
+
   const placeOrderHandler = async () => {
     try {
+      // Check if there are any unpaid cash orders
+      const undeliveredCashOrders = orders.filter(
+        (order) => !order.isDelivered && order.paymentMethod === 'cash'
+      );
+
+      if (undeliveredCashOrders.length > 0) {
+        // Inform the user about the existing unpaid cash order
+        toast('There is a cash order in progress. Please complete order.');
+        return;
+      }
+
+      // Check if there are any unpaid card orders
+      const unpaidCardOrders = orders.filter(
+        (order) => !order.isPaid && order.paymentMethod === 'card'
+      );
+
+      if (unpaidCardOrders.length > 0) {
+        // Delete the first unpaid card order
+        await deleteOrder({ orderId: unpaidCardOrders[0]._id }).unwrap();
+      }
+
+      // create the new order
       const res = await createOrder({
         orderItems: cart.cartItems,
-        shippingAddress: cart.shippingAddress,
+        shippingAddress,
         paymentMethod: cart.paymentMethod,
         itemsPrice: cart.itemsPrice,
         shippingPrice: cart.shippingPrice,
         taxPrice: cart.taxPrice,
         totalPrice: cart.totalPrice,
       }).unwrap();
+
+      // Clear cart items and navigate to the order page
       dispatch(clearCartItems());
       navigate(`/order/${res._id}`);
     } catch (err) {
-      toast.error(err);
+      toast.error(err?.data?.message || err.error);
     }
   };
 
@@ -48,21 +79,20 @@ const PlaceOrderScreen = () => {
       <CheckoutSteps step1 step2 step3 step4 />
       <Row>
         <Col md={8}>
+          {}
           <ListGroup variant='flush'>
             <ListGroup.Item>
-              <h2>Shipping</h2>
+              <h2>{shippingAddress?.delivery ? 'Delivery' : 'Pick-up'}</h2>
               <p>
-                <strong>Address:</strong>
-                {cart.shippingAddress.address}, {cart.shippingAddress.city}{' '}
-                {cart.shippingAddress.postalCode},{' '}
-                {cart.shippingAddress.country}
+                <strong style={{ marginRight: '3px' }}>{shippingAddress?.delivery ? 'Address' : 'Pick-up Address'} :</strong>
+                {cart.shippingAddress.location}
               </p>
             </ListGroup.Item>
 
             <ListGroup.Item>
               <h2>Payment Method</h2>
               <strong>Method: </strong>
-              {cart.paymentMethod}
+              {cart.paymentMethod.toUpperCase()}
             </ListGroup.Item>
 
             <ListGroup.Item>
@@ -83,9 +113,7 @@ const PlaceOrderScreen = () => {
                           />
                         </Col>
                         <Col>
-                          <Link to={`/product/${item.product}`}>
-                            {item.name}
-                          </Link>
+                          <Link to={`/product/${item._id}`}>{item.name}</Link>
                         </Col>
                         <Col md={4}>
                           {item.qty} x R{item.price} = R
@@ -113,13 +141,13 @@ const PlaceOrderScreen = () => {
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Shipping</Col>
+                  <Col>Delivery</Col>
                   <Col>R{cart.shippingPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
-                  <Col>Tax</Col>
+                  <Col>Service</Col>
                   <Col>R{cart.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
@@ -143,7 +171,9 @@ const PlaceOrderScreen = () => {
                 >
                   Place Order
                 </Button>
+                {loadingOrders && <Loader />}
                 {isLoading && <Loader />}
+                {loadingDelete && <Loader />}
               </ListGroup.Item>
             </ListGroup>
           </Card>

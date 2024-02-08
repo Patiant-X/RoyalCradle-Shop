@@ -24,6 +24,10 @@ import { addToCart } from '../slices/cartSlice';
 
 const ProductScreen = () => {
   const { id: productId } = useParams();
+  const cart = useSelector((state) => state.cart);
+  const { cartItems } = cart;
+
+  const uniqueItem = cartItems.find((item) => item._id === productId);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -31,9 +35,29 @@ const ProductScreen = () => {
   const [qty, setQty] = useState(1);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [additionalInfo, setAdditionalInfo] = useState('');
 
   const addToCartHandler = () => {
-    dispatch(addToCart({ ...product, qty }));
+    if (uniqueItem) {
+      toast(' Item already in Cart');
+      navigate('/cart');
+      return;
+    }
+
+    if (!product.IsFood) {
+      dispatch(addToCart({ ...product, qty, additionalInfo }));
+      navigate('/cart');
+      return;
+    }
+
+    if (cartItems.length > 0) {
+      const hasFoodItem = cartItems.some((item) => item.IsFood);
+      if (hasFoodItem) {
+        toast.error('You can only order from one restaurant, please check cart.');
+        return; // Exit the function if there's a food item in the cart
+      }
+    }
+    dispatch(addToCart({ ...product, qty, additionalInfo }));
     navigate('/cart');
   };
 
@@ -94,7 +118,7 @@ const ProductScreen = () => {
                     text={`${product.numReviews} reviews`}
                   />
                 </ListGroup.Item>
-                <ListGroup.Item>Price: ${product.price}</ListGroup.Item>
+                <ListGroup.Item>Price: R{product.price}</ListGroup.Item>
                 <ListGroup.Item>
                   Description: {product.description}
                 </ListGroup.Item>
@@ -115,13 +139,15 @@ const ProductScreen = () => {
                     <Row>
                       <Col>Status:</Col>
                       <Col>
-                        {product.countInStock > 0 ? 'In Stock' : 'Out Of Stock'}
+                        {product.productIsAvailable
+                          ? 'Available'
+                          : 'Not Available'}
                       </Col>
                     </Row>
                   </ListGroup.Item>
 
                   {/* Qty Select */}
-                  {product.countInStock > 0 && (
+                  {product.productIsAvailable && (
                     <ListGroup.Item>
                       <Row>
                         <Col>Qty</Col>
@@ -131,14 +157,30 @@ const ProductScreen = () => {
                             value={qty}
                             onChange={(e) => setQty(Number(e.target.value))}
                           >
-                            {[...Array(product.countInStock).keys()].map(
-                              (x) => (
-                                <option key={x + 1} value={x + 1}>
-                                  {x + 1}
-                                </option>
-                              )
-                            )}
+                            {[...Array(5).keys()].map((x) => (
+                              <option key={x + 1} value={x + 1}>
+                                {x + 1}
+                              </option>
+                            ))}
                           </Form.Control>
+                        </Col>
+                      </Row>
+                    </ListGroup.Item>
+                  )}
+
+                  {/* Additional Information */}
+                  {product.productIsAvailable && (
+                    <ListGroup.Item>
+                      <Row>
+                        <Col>Additional Information:</Col>
+                        <Col>
+                          <Form.Control
+                            as='textarea'
+                            rows={3}
+                            value={additionalInfo}
+                            onChange={(e) => setAdditionalInfo(e.target.value)}
+                            placeholder='e.g extra hot sauce, remove cheese'
+                          />
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -148,7 +190,7 @@ const ProductScreen = () => {
                     <Button
                       className='btn-block'
                       type='button'
-                      disabled={product.countInStock === 0}
+                      disabled={!product.productIsAvailable}
                       onClick={addToCartHandler}
                     >
                       Add To Cart

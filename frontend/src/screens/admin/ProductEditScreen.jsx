@@ -4,6 +4,7 @@ import { Form, Button } from 'react-bootstrap';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import FormContainer from '../../components/FormContainer';
+import AddressData from '../../components/AddressData';
 import { toast } from 'react-toastify';
 import {
   useGetProductDetailsQuery,
@@ -17,10 +18,12 @@ const ProductEditScreen = () => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState(0);
   const [image, setImage] = useState('');
-  const [brand, setBrand] = useState('');
+  const [isFood, setIsFood] = useState(true);
   const [category, setCategory] = useState('');
-  const [countInStock, setCountInStock] = useState(0);
+  const [productIsAvailable, setProductIsAvailable] = useState(true);
   const [description, setDescription] = useState('');
+  const [address, setAddress] = useState(null);
+  const [addressCoordinates, setAddressCoordinates] = useState(null);
 
   const {
     data: product,
@@ -39,22 +42,41 @@ const ProductEditScreen = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
-    try {
-      await updateProduct({
+
+    if (
+      addressCoordinates?.place != null &&
+      addressCoordinates?.lat != null &&
+      addressCoordinates?.lng != null
+    ) {
+      const location = addressCoordinates.place.address_components
+        .map((component) => component.long_name)
+        .join(' ');
+      const lat = addressCoordinates.lat;
+      const lng = addressCoordinates.lng;
+
+      const updatedProduct = {
         productId,
         name,
         price,
         image,
-        brand,
+        IsFood: isFood,
         category,
         description,
-        countInStock,
-      }).unwrap(); // NOTE: here we need to unwrap the Promise to catch any rejection in our catch block
-      toast.success('Product updated');
-      refetch();
-      navigate('/admin/productlist');
-    } catch (err) {
-      toast.error(err?.data?.message || err.error);
+        productIsAvailable,
+        latitude: lat,
+        longitude: lng,
+        address: location,
+      };
+      try {
+        await updateProduct(updatedProduct).unwrap(); // NOTE: here we need to unwrap the Promise to catch any rejection in our catch block
+        toast.success('Product updated');
+        refetch();
+        navigate('/admin/productlist');
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+      }
+    } else {
+      toast.error('Please select address from google suggestions');
     }
   };
 
@@ -63,10 +85,11 @@ const ProductEditScreen = () => {
       setName(product.name);
       setPrice(product.price);
       setImage(product.image);
-      setBrand(product.brand);
+      setIsFood(product.IsFood);
       setCategory(product.category);
-      setCountInStock(product.countInStock);
+      setProductIsAvailable(product.productIsAvailable);
       setDescription(product.description);
+      setAddress(product.location);
     }
   }, [product]);
 
@@ -132,27 +155,31 @@ const ProductEditScreen = () => {
               {loadingUpload && <Loader />}
             </Form.Group>
 
-            <Form.Group controlId='brand'>
-              <Form.Label>Brand</Form.Label>
+            <label style={{ marginBottom: '5px', marginTop: '10px' }}>
+              Enter address:
+            </label>
+            <AddressData setAddressCoordinates={setAddressCoordinates} />
+
+            <Form.Group className='my-4' controlId='address'>
+              <Form.Label>Confrim Address</Form.Label>
               <Form.Control
                 type='text'
-                placeholder='Enter brand'
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
+                placeholder='Confirm address'
+                value={
+                  addressCoordinates?.place
+                    ? addressCoordinates.place.address_components
+                        .map((component) => component.long_name)
+                        .join(' ')
+                    : address
+                    ? address.address
+                    : ''
+                }
+                required
+                readOnly
               ></Form.Control>
             </Form.Group>
 
-            <Form.Group controlId='countInStock'>
-              <Form.Label>Count In Stock</Form.Label>
-              <Form.Control
-                type='number'
-                placeholder='Enter countInStock'
-                value={countInStock}
-                onChange={(e) => setCountInStock(e.target.value)}
-              ></Form.Control>
-            </Form.Group>
-
-            <Form.Group controlId='category'>
+            <Form.Group controlId='category' className='my-4'>
               <Form.Label>Category</Form.Label>
               <Form.Control
                 type='text'
@@ -170,6 +197,28 @@ const ProductEditScreen = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               ></Form.Control>
+            </Form.Group>
+
+            <Form.Group controlId='isFood' className='my-2'>
+              <Form.Label>IsFood</Form.Label>
+              <Form.Check
+                style={{ marginLeft: '10px' }}
+                type='checkbox'
+                label='Food'
+                checked={isFood}
+                onChange={(e) => setIsFood(e.target.checked)}
+              />
+            </Form.Group>
+
+            <Form.Group controlId='productIsAvailable'>
+              <Form.Label>Product is Available</Form.Label>
+              <Form.Check
+                style={{ marginLeft: '10px' }}
+                type='checkbox'
+                label='Available'
+                checked={productIsAvailable}
+                onChange={(e) => setProductIsAvailable(e.target.checked)}
+              />
             </Form.Group>
 
             <Button

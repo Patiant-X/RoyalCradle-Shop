@@ -1,6 +1,6 @@
 import { LinkContainer } from 'react-router-bootstrap';
 import { Table, Button, Row, Col } from 'react-bootstrap';
-import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaPlus, FaTrash, FaCheck, FaMinusCircle } from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
@@ -74,9 +74,9 @@ const ProductListScreen = () => {
                 <th>ID</th>
                 <th>NAME</th>
                 <th>PRICE</th>
+                <th>Available</th>
                 <th>CATEGORY</th>
-                <th>BRAND</th>
-                <th></th>
+                <th>IsFood</th>
               </tr>
             </thead>
             <tbody>
@@ -85,8 +85,9 @@ const ProductListScreen = () => {
                   <td>{product._id}</td>
                   <td>{product.name}</td>
                   <td>R{product.price}</td>
+                  <td>{product.productIsAvailable ? <FaCheck /> : < FaMinusCircle/>}</td>
                   <td>{product.category}</td>
-                  <td>{product.brand}</td>
+                  <td>{product.IsFood ? <FaCheck /> : < FaMinusCircle/>}</td>
                   <td>
                     <LinkContainer to={`/admin/product/${product._id}/edit`}>
                       <Button variant='light' className='btn-sm mx-2'>

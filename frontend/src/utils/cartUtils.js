@@ -1,3 +1,6 @@
+import { toast } from 'react-toastify';
+import { calculateDistance } from './calculateDeliveryDistance';
+
 export const addDecimals = (num) => {
   return (Math.round(num * 100) / 100).toFixed(2);
 };
@@ -17,14 +20,36 @@ export const updateCart = (state) => {
   state.itemsPrice = addDecimals(itemsPrice);
 
   // Calculate the shipping price
-  const shippingPrice = itemsPrice > 100 ? 0 : 10;
-  state.shippingPrice = addDecimals(shippingPrice);
 
+  let shippingPrice = 0;
+
+  const product = state.cartItems.find((item) => item.IsFood === true);
+  if (product) {
+    const latClient = state.shippingAddress.lat;
+    const lngClient = state.shippingAddress.lng;
+    if (product.location) {
+      const latShop = product.location.latitude;
+      const lngShop = product.location.longitude;
+      shippingPrice = calculateDistance(latClient, lngClient, latShop, lngShop);
+      state.shippingPrice = addDecimals(shippingPrice);
+    } else {
+      toast.error("Failed to compute delivery")
+    }
+  } else {
+    const latClient = state.shippingAddress.lat;
+    const lngClient = state.shippingAddress.lng;
+    // Set default shop coordinates
+    const latShop = -26.15905;
+    const lngShop = 27.81763;
+    shippingPrice = calculateDistance(latClient, lngClient, latShop, lngShop);
+    state.shippingPrice = addDecimals(shippingPrice);
+  }
+  
   // Calculate the tax price
-  const taxPrice = 0.15 * itemsPrice;
-  state.taxPrice = addDecimals(taxPrice);
+  const serviceFee = (10 / 100) * (itemsPrice + shippingPrice);
+  state.taxPrice = addDecimals(serviceFee);
 
-  const totalPrice = itemsPrice + shippingPrice + taxPrice;
+  const totalPrice = itemsPrice + shippingPrice + serviceFee;
   // Calculate the total price
   state.totalPrice = addDecimals(totalPrice);
 

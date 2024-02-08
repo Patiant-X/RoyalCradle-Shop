@@ -16,6 +16,12 @@ const reviewSchema = mongoose.Schema(
   }
 );
 
+const locationSchema = mongoose.Schema({
+  address: { type: String, required: true },
+  latitude: { type: Number, required: true },
+  longitude: { type: Number, required: true },
+});
+
 const productSchema = mongoose.Schema(
   {
     user: {
@@ -31,9 +37,10 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    brand: {
-      type: String,
+    IsFood: {
+      type: Boolean,
       required: true,
+      default: true,
     },
     category: {
       type: String,
@@ -59,10 +66,14 @@ const productSchema = mongoose.Schema(
       required: true,
       default: 0,
     },
-    countInStock: {
-      type: Number,
+    productIsAvailable: {
+      type: Boolean,
       required: true,
-      default: 0,
+      default: false,
+    },
+    location: {
+      type: locationSchema,
+      required: true,
     },
   },
   {
