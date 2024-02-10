@@ -19,6 +19,7 @@ const getProducts = asyncHandler(async (req, res) => {
 
   const count = await Product.countDocuments({ ...keyword });
   const products = await Product.find({ ...keyword })
+    .sort({ IsFood: -1 }) // Sort in descending order by the isFood field
     .limit(pageSize)
     .skip(pageSize * (page - 1));
 
@@ -79,7 +80,9 @@ const updateProduct = asyncHandler(async (req, res) => {
     category,
     IsFood,
     productIsAvailable,
-    address, latitude, longitude,
+    address,
+    latitude,
+    longitude,
   } = req.body;
 
   const product = await Product.findById(req.params.id);
