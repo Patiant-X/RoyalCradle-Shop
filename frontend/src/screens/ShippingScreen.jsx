@@ -39,10 +39,13 @@ const ShippingScreen = () => {
 
   const submitPickUpHandler = (e) => {
     e.preventDefault();
+    toast.error("Sorry, this product is not available for collection")
+    return;
+    // eslint-disable-next-line no-unreachable
     const product = cartItems?.find((item) => item.IsFood === true);
     const notFoodProduct = cartItems?.find((item) => item.IsFood === false);
     if(notFoodProduct){
-      toast.error("Sorry, only food items can be collected not drinks. Please remove frink from cart")
+      toast.error("Sorry, only food items can be collected not drinks. Please remove drink from cart")
       return;
     }
       if (product) {

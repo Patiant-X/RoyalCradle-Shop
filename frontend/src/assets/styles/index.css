@@ -51,3 +51,14 @@ table th {
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
 }
+
+/* Header.css */
+@media only screen and (max-width: 991px) {
+  .fa-house-user {
+    /* Your styles for medium to large screens */
+    color: #ffffff; /* Example color */
+    margin: 5px; /* Example margin */
+    margin-left: 40%; 
+  }
+}
+

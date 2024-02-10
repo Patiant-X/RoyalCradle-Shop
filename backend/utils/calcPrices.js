@@ -31,7 +31,7 @@ export function calcPrices(orderItems, shippingAddress) {
       // shippingPrice = addDecimals(shippingPrice);
     } else {
       // shippingPrice = addDecimals(20);
-       shippingPrice = 20;
+      shippingPrice = 20;
     }
   } else {
     const latClient = shippingAddress.lat;
@@ -44,7 +44,12 @@ export function calcPrices(orderItems, shippingAddress) {
   }
 
   // Calculate the tax price
-  const taxPrice = (10 / 100) * (itemsPrice + shippingPrice);
+  // Calculate the service fee
+  const YocoFee = (3 / 100) * (itemsPrice + shippingPrice);
+  const YocoVat = (15 / 100) * YocoFee;
+  const YocoTotalFee = YocoFee + YocoVat;
+  const taxPrice = YocoTotalFee + 6; // This is because Capitec charges R2 for payments
+ 
   // Calculate the total price
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
@@ -54,5 +59,5 @@ export function calcPrices(orderItems, shippingAddress) {
     shippingPrice: addDecimals(shippingPrice),
     taxPrice: addDecimals(taxPrice),
     totalPrice: addDecimals(totalPrice),
-  }; 
+  };
 }

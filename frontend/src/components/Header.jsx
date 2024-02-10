@@ -1,5 +1,5 @@
 import { Navbar, Nav, Container, NavDropdown, Badge } from 'react-bootstrap';
-import { FaShoppingCart, FaUser } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaHouseUser } from 'react-icons/fa';
 import { LinkContainer } from 'react-router-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { logout } from '../slices/authSlice';
 import SearchBox from './SearchBox';
 import logo from '../assets/logo.png';
 import { resetCart } from '../slices/cartSlice';
+import { toast } from 'react-toastify';
 
 const Header = () => {
   const { cartItems } = useSelector((state) => state.cart);
@@ -27,7 +28,7 @@ const Header = () => {
       dispatch(resetCart());
       navigate('/login');
     } catch (err) {
-      console.error(err);
+      toast.error(err?.data?.message || err.error);
     }
   };
 
@@ -43,8 +44,16 @@ const Header = () => {
           </LinkContainer>
           <Navbar.Toggle aria-controls='basic-navbar-nav' />
           <Navbar.Collapse id='basic-navbar-nav'>
+          <FaHouseUser
+                size={30}
+                onClick={() => navigate('/')}
+                style={{ color: '#9b9b9b' }}
+                className="fa-house-user"
+              />
             <Nav className='ms-auto'>
+              
               <SearchBox />
+
               <LinkContainer to='/cart'>
                 <Nav.Link>
                   <FaShoppingCart /> Cart

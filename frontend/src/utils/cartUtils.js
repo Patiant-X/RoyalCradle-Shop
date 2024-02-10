@@ -33,7 +33,7 @@ export const updateCart = (state) => {
       shippingPrice = calculateDistance(latClient, lngClient, latShop, lngShop);
       state.shippingPrice = addDecimals(shippingPrice);
     } else {
-      toast.error("Failed to compute delivery")
+      toast.error('Sorry, failed to calculate delivery Fee');
     }
   } else {
     const latClient = state.shippingAddress.lat;
@@ -44,9 +44,12 @@ export const updateCart = (state) => {
     shippingPrice = calculateDistance(latClient, lngClient, latShop, lngShop);
     state.shippingPrice = addDecimals(shippingPrice);
   }
-  
-  // Calculate the tax price
-  const serviceFee = (10 / 100) * (itemsPrice + shippingPrice);
+
+  // Calculate the service fee
+  const YocoFee = (3 / 100) * (itemsPrice + shippingPrice);
+  const YocoVat = (15 / 100) * YocoFee;
+  const YocoTotalFee = YocoFee + YocoVat;
+  const serviceFee = YocoTotalFee + 6; // This is because Capitec charges R2 for payments
   state.taxPrice = addDecimals(serviceFee);
 
   const totalPrice = itemsPrice + shippingPrice + serviceFee;
