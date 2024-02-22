@@ -28,7 +28,7 @@ const SendEmail = async (res, email, token, userId, name) => {
   };
 
   //send email
-  transporter.sendMail(mailOptions, function (err, info) {
+  await transporter.sendMail(mailOptions, function (err, info) {
     if (err) {
       console.log(err);
       res.status(400);
