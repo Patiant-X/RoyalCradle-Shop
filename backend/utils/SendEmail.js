@@ -17,7 +17,7 @@ const SendEmail = async (res, email, token, userId, name) => {
   var message = `<p>Dear ${name},</p><p>We have received a request to reset your password. 
   If you did not make this request, please ignore this email.</p>
   <p>To reset your password, please click on the following link:</p>
-  <p><a href="https://royalcradle-shop.onrender.com//reset-password/${userId}/${token}/">
+  <p><a href="https://royalcradle-shop.onrender.com/reset-password/${userId}/${token}/">
         Reset Password</a></p>
   <p>Thank you.</p>`;
   var mailOptions = {
@@ -30,6 +30,7 @@ const SendEmail = async (res, email, token, userId, name) => {
   //send email
   transporter.sendMail(mailOptions, function (err, info) {
     if (err) {
+      console.log(err);
       res.status(400);
       throw new Error(err);
     } else {

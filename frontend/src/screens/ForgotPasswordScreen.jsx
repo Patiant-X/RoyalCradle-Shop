@@ -31,6 +31,7 @@ const ForgotPasswordScreen = () => {
       toast.success(res)
       navigate('/login');
     } catch (err) {
+      console.log(err);
       toast.error(err?.data?.message || err.error);
     }
   };
