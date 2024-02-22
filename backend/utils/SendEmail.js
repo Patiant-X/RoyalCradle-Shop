@@ -7,10 +7,10 @@ const { EMAIL_PASS, EMAIL_SERVICE, EMAIL_USER } =
 const SendEmail = async (res, email, token, userId, name) => {
   //create email transporter
   const transporter = nodemailer.createTransport({
-    service: process.env.EMAIL_SERVICE,
+    service: EMAIL_SERVICE,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: EMAIL_USER,
+      pass: EMAIL_PASS,
     },
   });
 
