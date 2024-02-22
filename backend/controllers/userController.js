@@ -33,16 +33,19 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users/forgot-password
 // @access  Public
 const userForgotPassword = asyncHandler(async (req, res) => {
-  const { email } = req.body;
-
-  await User.findOne({ email }).then((user) => {
+  try {
+    const { email } = req.body;
+    await User.findOne({ email }).then((user) => {
     if (!user) {
-      res.status(400);
-      throw new Error('Invalid Email');
-    }
-    const token = generateTokenForgotPassword(user._id);
-    SendEmail(res, email, token, user._id, user.name);
-  });
+        res.status(400);
+        throw new Error('Invalid Email');
+      }
+      const token = generateTokenForgotPassword(user._id);
+      SendEmail(res, email, token, user._id, user.name);
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message || error });
+  }
 });
 
 // @desc    Register a new user
@@ -232,10 +235,9 @@ const updateUser = asyncHandler(async (req, res) => {
     }
   } catch (error) {
     // Handle different errors
-    res.status(500).json({ message: 'Server Error' || error.message  });
+    res.status(500).json({ message: 'Server Error' || error.message });
   }
 });
-
 
 export {
   authUser,
