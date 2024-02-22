@@ -72,6 +72,14 @@ const LoginScreen = () => {
 
         {isLoading && <Loader />}
       </Form>
+      <Row>
+        <Col>
+          Already Have an Account?
+          <Link to="/forgot-password">
+            Forgot Password
+          </Link>
+        </Col>
+      </Row>
 
       <Row className='py-3'>
         <Col>

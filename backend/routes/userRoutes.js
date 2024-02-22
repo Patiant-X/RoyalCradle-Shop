@@ -9,14 +9,18 @@ import {
   deleteUser,
   getUserById,
   updateUser,
+  userForgotPassword,
+  userResetPassword,
 } from '../controllers/userController.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
+import { protect, admin, protectResetPassword } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.route('/').post(registerUser).get(protect, admin, getUsers);
 router.post('/auth', authUser);
 router.post('/logout', logoutUser);
+router.post('/forgot-password', userForgotPassword);
+router.post('/reset-password', protectResetPassword, userResetPassword )
 router
   .route('/profile')
   .get(protect, getUserProfile)

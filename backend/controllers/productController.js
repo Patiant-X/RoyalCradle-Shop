@@ -26,6 +26,15 @@ const getProducts = asyncHandler(async (req, res) => {
   res.json({ products, page, pages: Math.ceil(count / pageSize) });
 });
 
+// @desc    Fetch restaurant product
+// @route   GET /api/products/restaurant
+// @access  Public
+const getRestaurantProduct = asyncHandler(async (req, res) => {
+  const restaurantId = req.user._id;
+  const product = await Product.find({ user: restaurantId });
+  res.json({ product });
+});
+
 // @desc    Fetch single product
 // @route   GET /api/products/:id
 // @access  Public
@@ -48,24 +57,31 @@ const getProductById = asyncHandler(async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
-  const product = new Product({
-    name: 'Sample name',
-    price: 0,
-    user: req.user._id,
-    image: '/images/sample.jpg',
-    category: 'Sample category',
-    countInStock: 0,
-    numReviews: 0,
-    description: 'Sample description',
-    location: {
-      address: 'Sample address',
-      latitude: 123456,
-      longitude: 123456,
-    },
-  });
-
-  const createdProduct = await product.save();
-  res.status(201).json(createdProduct);
+  if (req.user.roles[0] === 'restaurant') {
+    const restaurantId = req.user._id;
+    const data = await Product.find({ user: restaurantId });
+    if (data?.length > 0) {
+      res.status(400);
+      throw new Error('Restaurant can only have one product');
+    }
+  } 
+    const product = new Product({
+      name: 'Sample name',
+      price: 0,
+      user: req.user._id,
+      image: '/images/sample.jpg',
+      category: 'Sample category',
+      countInStock: 0,
+      numReviews: 0,
+      description: 'Sample description',
+      location: {
+        address: 'Sample address',
+        latitude: 123456,
+        longitude: 123456,
+      },
+    });
+    const createdProduct = await product.save();
+    res.status(201).json(createdProduct);
 });
 
 // @desc    Update a product
@@ -180,4 +196,5 @@ export {
   deleteProduct,
   createProductReview,
   getTopProducts,
+  getRestaurantProduct,
 };

@@ -5,21 +5,50 @@ const userSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, 'Please enter a name'],
     },
     email: {
       type: String,
-      required: true,
+      required: [true, 'Please enter an email'],
+      trim: true,
       unique: true,
+      validate: {
+        validator: function (v) {
+          // Regular expression for email validation
+          return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
+            v
+          );
+        },
+        message: (props) => `${props.value} is not a valid email address!`,
+      },
+    },
+    mobileNumber: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+      validate: {
+        validator: function (v) {
+          return /\d{3}[-\s]?\d{3}[-\s]?\d{4}/.test(v); // Validates South African cellphone number format
+        },
+        message: (props) =>
+          `${props.value} is not a valid South African cellphone number!`,
+      },
     },
     password: {
       type: String,
-      required: true,
+      required: [true, 'Please enter a password'],
+      minLength: [8, 'Password must be a minimum of 8 characters'],
     },
-    isAdmin: {
-      type: Boolean,
+    roles: {
+      type: [
+        {
+          type: String,
+          enum: ['admin', 'driver', 'restaurant', 'customer'],
+        },
+      ],
       required: true,
-      default: false,
+      default: ['customer'], // Default role set to customer
     },
   },
   {

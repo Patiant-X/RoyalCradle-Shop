@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import { FaCcMastercard, FaCcVisa } from 'react-icons/fa';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import {
@@ -19,6 +20,11 @@ const OrderScreen = () => {
     isLoading,
     error,
   } = useGetOrderDetailsQuery(orderId);
+
+  /* This is driver logic */
+  const restaurantAddress =
+    order?.orderItems.find((item) => item.IsFood)?.location?.address ||
+    'Find Item at closest shop';
 
   const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
 
@@ -42,7 +48,6 @@ const OrderScreen = () => {
     await deliverOrder(orderId);
     refetch();
   };
-
   return isLoading ? (
     <Loader />
   ) : error ? (
@@ -58,7 +63,10 @@ const OrderScreen = () => {
                 {order.shippingAddress?.delivery ? 'Delivery' : 'Pick-up'}
               </h2>
               <p>
-                <strong>Name: </strong> {order.user.name}
+                <strong>Name: </strong> {order.user?.name || 'Client Name'}
+              </p>
+              <p>
+                <strong>Cellphone Number: </strong> {order?.user?.mobileNumber}
               </p>
               <p>
                 <strong>Email: </strong>{' '}
@@ -71,6 +79,12 @@ const OrderScreen = () => {
                   <strong>Pick-up Address: </strong>
                 )}
                 {order.shippingAddress.address}
+              </p>
+
+              <p>
+                {userInfo &&
+                  (userInfo.role === 'driver' || userInfo.role === 'admin') &&
+                  `Restaurant address: ${restaurantAddress}`}
               </p>
 
               {order.shippingAddress.delivery ? (
@@ -172,41 +186,60 @@ const OrderScreen = () => {
                   <Col>R{order.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
-              {!order.isPaid && (
-                <ListGroup.Item>
-                  {loadingPay && <Loader />}
+              {userInfo &&
+                (userInfo.role === 'admin' || userInfo.role === 'customer') &&
+                !order.isPaid && (
+                  <ListGroup.Item>
+                    {loadingPay && <Loader />}
 
-                  {isLoading ? (
-                    <Loader />
-                  ) : (
-                    <div>
+                    {isLoading ? (
+                      <Loader />
+                    ) : (
                       <div>
-                        <Button
-                          onClick={() => PayYoco()}
-                          style={{
-                            marginTop: `10px`,
-                            backgroundColor: '#00a9e0',
-                            width: '100%',
-                          }}
-                        >
-                          Pay using YOCO
-                        </Button>
-                        <p style={{ paddingTop : '20px' }}>
-                          Yoco offers a secure payment system trusted by
-                          businesses and customers alike. With robust encryption
-                          and advanced fraud prevention measures, your
-                          transactions are safeguarded every step of the way.
-                        </p>
+                        <div>
+                          <Button
+                            onClick={() => PayYoco()}
+                            style={{
+                              marginTop: `10px`,
+                              backgroundColor: '#00a9e0',
+                              width: '100%',
+                            }}
+                          >
+                            Procceed to Payment
+                          </Button>
+                          <p style={{ paddingTop: '20px' }}>We accept Visa Mastercard InstantEFT:</p>
+                          <Row style={{ marginLeft: '15%', marginTop: '20px' }}>
+                            <Col>
+                              <FaCcVisa
+                                size='50'
+                                color='#1e3050'
+                                style={{ marginTop: `5px` }}
+                              />
+
+                              <FaCcMastercard
+                                size='50'
+                                color='#1e3050'
+                                style={{ marginTop: `5px`, marginLeft: '7px' }}
+                              />
+                            </Col>
+                          </Row>
+                          <p style={{ paddingTop: '20px' }}>
+                            Yoco offers a secure payment system trusted by
+                            businesses and customers alike. With robust
+                            encryption and advanced fraud prevention measures,
+                            your transactions are safeguarded every step of the
+                            way.
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </ListGroup.Item>
-              )}
+                    )}
+                  </ListGroup.Item>
+                )}
 
               {loadingDeliver && <Loader />}
 
               {userInfo &&
-                userInfo.isAdmin &&
+                (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
                 !order.isDelivered && (
                   <ListGroup.Item>

@@ -5,8 +5,22 @@ import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import { useGetOrdersQuery } from '../../slices/ordersApiSlice';
 
-const OrderListScreen = () => {
+const DriverOrderListScreen = () => {
   const { data: orders, isLoading, error } = useGetOrdersQuery();
+  const paidOrders = orders
+    ?.filter((order) => order.isPaid)
+    ?.sort((a, b) => {
+      // If a is not delivered and b is delivered, a should come before b
+      if (a.isDelivered === false && b.isDelivered === true) {
+        return -1;
+      }
+      // If b is not delivered and a is delivered, b should come before a
+      if (b.isDelivered === false && a.isDelivered === true) {
+        return 1;
+      }
+      // For all other cases, maintain the original order
+      return 0;
+    });
   return (
     <>
       <h1>Orders</h1>
@@ -20,37 +34,24 @@ const OrderListScreen = () => {
         <Table striped bordered hover responsive className='table-sm'>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>USER</th>
+              <th>Restaurant</th>
               <th></th>
               <th>DATE</th>
-              <th>TOTAL</th>
-              <th>PAID</th>
-              <th>DELIVERED/COLLECTED</th>
+              <th>Dfee</th>
+              <th>DELIVERED/COLL</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
+            {paidOrders.map((order) => (
               <tr key={order._id}>
-                <td>{order._id}</td>
-                <td>{order.user && order.user.name}</td>
+                <td>
+                  {order.orderItems?.find((item) => item.IsFood)?.name ||
+                    'Find closest shop'}
+                </td>
                 <td>{order.paymentMethod.toUpperCase()}</td>
                 <td>{order.createdAt && order.createdAt.substring(0, 10)}</td>
-                <td>R{order.totalPrice}</td>
-                <td>
-                  {order.isPaid &&
-                  order.paymentMethod === 'card' &&
-                  order.paidAt ? (
-                    order.paidAt.substring(0, 10)
-                  ) : order.isDelivered &&
-                    order.paymentMethod === 'cash' &&
-                    order.paidAt ? (
-                    order.paidAt.substring(0, 10)
-                  ) : (
-                    <FaTimes style={{ color: 'red' }} />
-                  )}
-                </td>
+                <td>{order.shippingPrice}</td>
                 <td>
                   {order.isDelivered ? (
                     order.deliveredAt.substring(0, 10)
@@ -74,4 +75,4 @@ const OrderListScreen = () => {
   );
 };
 
-export default OrderListScreen;
+export default DriverOrderListScreen;

@@ -13,10 +13,12 @@ const addOrderItems = asyncHandler(async (req, res) => {
     res.status(400).json({ error: 'Invalid payment method' });
     throw new Error('Invalid payment method');
   }
-  if (orderItems && orderItems.length === 0) {
+  if (!orderItems || orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');
-  } else {
+  }
+
+  try {
     // NOTE: here we must assume that the prices from our client are incorrect.
     // We must only trust the price of the item as it exists in
     // our DB. This prevents a user paying whatever they want by hacking our client
@@ -39,7 +41,6 @@ const addOrderItems = asyncHandler(async (req, res) => {
         _id: undefined,
       };
     });
-
     // calculate prices
     const { itemsPrice, taxPrice, shippingPrice, totalPrice } = calcPrices(
       dbOrderItems,
@@ -56,16 +57,16 @@ const addOrderItems = asyncHandler(async (req, res) => {
         delivery: shippingAddress.delivery,
       },
       paymentMethod,
-      isPaid: paymentMethod === 'cash' ? true : false,
+      isPaid: paymentMethod === 'cash',
       itemsPrice,
       taxPrice,
       shippingPrice,
       totalPrice,
     });
-
     const createdOrder = await order.save();
-
     res.status(201).json(createdOrder);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -73,26 +74,31 @@ const addOrderItems = asyncHandler(async (req, res) => {
 // @route   GET /api/orders/myorders
 // @access  Private
 const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).sort({
-    updatedAt: -1,
-  });
-  res.json(orders);
+  try {
+    const orders = await Order.find({ user: req.user._id }).sort({
+      updatedAt: -1,
+    });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // @desc    Get order by ID
 // @route   GET /api/orders/:id
 // @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id).populate(
-    'user',
-    'name email'
-  );
-
-  if (order) {
+  try {
+    const order = await Order.findById(req.params.id).populate(
+      'user',
+      'name email mobileNumber'
+    );
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
     res.json(order);
-  } else {
-    res.status(404);
-    throw new Error('Order not found');
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -100,43 +106,47 @@ const getOrderById = asyncHandler(async (req, res) => {
 // @route   PUT /api/orders/:id/pay
 // @access  Private
 const updateOrderToPaid = asyncHandler(async (req, res) => {
-  // NOTE: here we need to verify the payment was made to Yoco before marking
-  // the order as paid
-  const { type, payload } = req.body;
+  try {
+    // NOTE: here we need to verify the payment was made to Yoco before marking
+    // the order as paid
+    const { type, payload } = req.body;
 
-  const orderId = payload.metadata.orderId;
-  const value = payload.amount;
-  const checkoutId = payload.metadata.checkoutId;
-  const order = await Order.findById(orderId);
+    const orderId = payload.metadata.orderId;
+    const value = payload.amount;
+    const checkoutId = payload.metadata.checkoutId;
+    const order = await Order.findById(orderId);
 
-  if (!order) {
-    // Order not found, send a response with success status to resolve the webhook
-    return res.status(200).send('Order not found');
+    if (!order) {
+      // Order not found, send a response with success status to resolve the webhook
+      return res.status(200).send('Order not found');
+    }
+
+    if (type != 'payment.succeeded' || checkoutId != order.checkoutId) {
+      // If the event type is not 'payment.succeeded' or the id does not match the checkoutId,
+      // send a response with success status to resolve the webhook
+      return res.status(200).send('Invalid payment event');
+    }
+
+    // check the correct amount was paid
+    if ((order.totalPrice * 100).toFixed(0) != value) {
+      return res.status(200).send('Incorrect amount paid');
+    }
+
+    // Update the order status
+    order.isPaid = true;
+    order.paidAt = Date.now();
+    order.paymentResult = {
+      id: payload.metadata.checkoutId,
+      status: payload.status,
+      update_time: req.body.createdDate,
+      email_address: payload.metadata.email_address,
+    };
+
+    await order.save();
+    res.status(200).send('Order updated successfully');
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-
-  if (type != 'payment.succeeded' || checkoutId != order.checkoutId) {
-    // If the event type is not 'payment.succeeded' or the id does not match the checkoutId,
-    // send a response with success status to resolve the webhook
-    return res.status(200).send('Invalid payment event');
-  }
-
-  // check the correct amount was paid
-  if ((order.totalPrice * 100).toFixed(0) != value) {
-    return res.status(200).send('Incorrect amount paid');
-  }
-
-  // Update the order status
-  order.isPaid = true;
-  order.paidAt = Date.now();
-  order.paymentResult = {
-    id: payload.metadata.checkoutId,
-    status: payload.status,
-    update_time: req.body.createdDate,
-    email_address: payload.metadata.email_address,
-  };
-
-  await order.save();
-  res.status(200).send('Order updated successfully');
 });
 
 // @desc   Pay order  using yoco, and update checkoutId
@@ -223,26 +233,62 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 
 // @desc    Get all orders
 // @route   GET /api/orders
-// @access  Private/Admin
+// @access  Private/Admin/Driver
 const getOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({}).populate('user', 'id name').sort({
-    updatedAt: -1,
-  });
-  res.json(orders);
+  try {
+    if (req.user.roles[0] === 'restaurant') {
+      const orders = await Order.find({});
+      const productRestaurantId = await Product.find({
+        user: req.user._id,
+      }).select('_id');
+
+      if (productRestaurantId && orders) {
+        if (productRestaurantId && orders) {
+          for (let i = orders.length - 1; i >= 0; i--) {
+            let orderContainsValidProduct = false;
+            for (let k = 0; k < orders[i].orderItems.length; k++) {
+              if (
+                productRestaurantId.some((product) =>
+                  product.equals(orders[i].orderItems[k].product)
+                )
+              ) {
+                orderContainsValidProduct = true;
+                break;
+              }
+            }
+            if (!orderContainsValidProduct) {
+              orders.splice(i, 1);
+            }
+          }
+        }
+        return res.status(200).json(orders);
+      }
+    }
+    const orders = await Order.find({}).populate('user', 'id name roles').sort({
+      updatedAt: -1,
+    });
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // @desc    Delete an order
 // @route   DELETE /api/oders/:id
 // @access  Private
 const deleteOrder = asyncHandler(async (req, res) => {
-  const { orderId } = req.body;
-  const order = await Order.findById(orderId);
-  if (order) {
-    await Order.deleteOne({ _id: order._id });
-    res.json({ message: 'Order removed' });
-  } else {
-    res.status(404);
-    throw new Error('Order not found');
+  try {
+    const { orderId } = req.body;
+    const order = await Order.findById(orderId);
+    if (order) {
+      await Order.deleteOne({ _id: order._id });
+      return res.json({ message: 'Order removed' });
+    } else {
+      res.status(404);
+      throw new Error('Order not found');
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

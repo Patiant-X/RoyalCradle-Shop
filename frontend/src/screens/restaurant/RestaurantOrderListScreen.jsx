@@ -4,9 +4,27 @@ import { FaTimes } from 'react-icons/fa';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import { useGetOrdersQuery } from '../../slices/ordersApiSlice';
+import { useSelector } from 'react-redux';
 
-const OrderListScreen = () => {
+const RestaurantOrderListScreen = () => {
   const { data: orders, isLoading, error } = useGetOrdersQuery();
+  const { userInfo } = useSelector((state) => state.auth);
+  var paidOrders = orders
+    ?.filter((order) => order.isPaid)
+    ?.sort((a, b) => {
+      // If a is not delivered and b is delivered, a should come before b
+      if (a.isDelivered === false && b.isDelivered === true) {
+        return -1;
+      }
+      // If b is not delivered and a is delivered, b should come before a
+      if (b.isDelivered === false && a.isDelivered === true) {
+        return 1;
+      }
+      // For all other cases, maintain the original order
+      return 0;
+    });
+    //paidOrders = paidOrders?.filter(order => order.user._id === userInfo._id)
+    console.log(paidOrders, userInfo._id);
   return (
     <>
       <h1>Orders</h1>
@@ -20,8 +38,6 @@ const OrderListScreen = () => {
         <Table striped bordered hover responsive className='table-sm'>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>USER</th>
               <th></th>
               <th>DATE</th>
               <th>TOTAL</th>
@@ -31,10 +47,8 @@ const OrderListScreen = () => {
             </tr>
           </thead>
           <tbody>
-            {orders.map((order) => (
+            {paidOrders?.map((order) => (
               <tr key={order._id}>
-                <td>{order._id}</td>
-                <td>{order.user && order.user.name}</td>
                 <td>{order.paymentMethod.toUpperCase()}</td>
                 <td>{order.createdAt && order.createdAt.substring(0, 10)}</td>
                 <td>R{order.totalPrice}</td>
@@ -74,4 +88,4 @@ const OrderListScreen = () => {
   );
 };
 
-export default OrderListScreen;
+export default RestaurantOrderListScreen;

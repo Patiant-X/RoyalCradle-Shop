@@ -1,12 +1,12 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const AdminRoute = () => {
+function RestaurantRoute() {
   const { userInfo } = useSelector((state) => state.auth);
-  return userInfo && userInfo.role === 'admin' ? (
+  return userInfo && (userInfo.role === "restaurant") ? (
     <Outlet />
   ) : (
-    <Navigate to='/login' replace />
+     <Navigate to='/login' replace />
   );
-};
-export default AdminRoute;
+}
+export default RestaurantRoute;

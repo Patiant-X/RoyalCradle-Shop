@@ -1,6 +1,9 @@
 import asyncHandler from '../middleware/asyncHandler.js';
-import generateToken from '../utils/generateToken.js';
+import generateToken, {
+  generateTokenForgotPassword,
+} from '../utils/generateToken.js';
 import User from '../models/userModel.js';
+import SendEmail from '../utils/SendEmail.js';
 
 // @desc    Auth user & get token
 // @route   POST /api/users/auth
@@ -17,7 +20,8 @@ const authUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      isAdmin: user.isAdmin,
+      mobileNumber: user.mobileNumber,
+      role: user.roles[0],
     });
   } else {
     res.status(401);
@@ -25,13 +29,29 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Forgot Password
+// @route   POST /api/users/forgot-password
+// @access  Public
+const userForgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  await User.findOne({ email }).then((user) => {
+    if (!user) {
+      res.status(400);
+      throw new Error('Invalid Email');
+    }
+    const token = generateTokenForgotPassword(user._id);
+    SendEmail(res, email, token, user._id, user.name);
+  });
+});
+
 // @desc    Register a new user
 // @route   POST /api/users
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, mobileNumber } = req.body;
 
-  const userExists = await User.findOne({ email });
+  const userExists = await User.findOne({ email, mobileNumber });
 
   if (userExists) {
     res.status(400);
@@ -42,6 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
     name,
     email,
     password,
+    mobileNumber,
   });
 
   if (user) {
@@ -51,7 +72,8 @@ const registerUser = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      isAdmin: user.isAdmin,
+      mobileNumber: user.mobileNumber,
+      roles: user.roles,
     });
   } else {
     res.status(400);
@@ -75,6 +97,7 @@ const logoutUser = (req, res) => {
 // @route   GET /api/users/profile
 // @access  Private
 const getUserProfile = asyncHandler(async (req, res) => {
+  // this user data comes from using the jwt token
   const user = await User.findById(req.user._id);
 
   if (user) {
@@ -82,8 +105,29 @@ const getUserProfile = asyncHandler(async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
-      isAdmin: user.isAdmin,
+      mobileNumber: user.mobileNumber,
+      role: user.roles[0],
     });
+  } else {
+    res.status(404);
+    throw new Error('User not found');
+  }
+});
+
+// @desc    Reset User Password
+// @route   GET /api/users/reset-password
+// @access  Private
+const userResetPassword = asyncHandler(async (req, res) => {
+  const { password, id } = req.body;
+  const user = await User.findById(id);
+  if (user) {
+    if (password) {
+      user.password = password;
+    }
+
+    await user.save();
+
+    res.status(201).json('Password reset successfully');
   } else {
     res.status(404);
     throw new Error('User not found');
@@ -99,6 +143,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   if (user) {
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
+    user.mobileNumber = req.body.mobileNumber || user.mobileNumber;
 
     if (req.body.password) {
       user.password = req.body.password;
@@ -110,7 +155,8 @@ const updateUserProfile = asyncHandler(async (req, res) => {
       _id: updatedUser._id,
       name: updatedUser.name,
       email: updatedUser.email,
-      isAdmin: updatedUser.isAdmin,
+      mobileNumber: updatedUser.mobileNumber,
+      role: updatedUser.roles[0],
     });
   } else {
     res.status(404);
@@ -133,7 +179,7 @@ const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
-    if (user.isAdmin) {
+    if (user.roles[0] == 'admin') {
       res.status(400);
       throw new Error('Can not delete admin user');
     }
@@ -162,33 +208,43 @@ const getUserById = asyncHandler(async (req, res) => {
 // @route   PUT /api/users/:id
 // @access  Private/Admin
 const updateUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id);
+  try {
+    const user = await User.findById(req.params.id);
 
-  if (user) {
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
-    user.isAdmin = Boolean(req.body.isAdmin);
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+      user.mobileNumber = req.body.mobileNumber || user.mobileNumber;
+      user.roles = req.body.roles || user.roles;
 
-    const updatedUser = await user.save();
+      const updatedUser = await user.save();
 
-    res.json({
-      _id: updatedUser._id,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      isAdmin: updatedUser.isAdmin,
-    });
-  } else {
-    res.status(404);
-    throw new Error('User not found');
+      res.json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        mobileNumber: updatedUser.mobileNumber,
+        role: updatedUser.roles[0],
+      });
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
+  } catch (error) {
+    // Handle different errors
+    res.status(500).json({ message: 'Server Error' || error.message  });
   }
 });
 
+
 export {
   authUser,
+  userForgotPassword,
   registerUser,
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  userResetPassword,
   getUsers,
   deleteUser,
   getUserById,

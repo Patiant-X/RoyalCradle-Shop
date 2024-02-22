@@ -31,11 +31,20 @@ import UserListScreen from './screens/admin/UserListScreen';
 import UserEditScreen from './screens/admin/UserEditScreen';
 import store from './store';
 import { Provider } from 'react-redux';
-import { PayPalScriptProvider } from '@paypal/react-paypal-js';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import ResetPasswordScreen from './screens/ResetPassword';
+import DriverRoute from './components/DriverRoute';
+import RestaurantRoute from './components/RestaurantRoute';
+import DriverOrderListScreen from './screens/driver/DriverOrderListScreen';
+import RestaurantOrderListScreen from './screens/restaurant/RestaurantOrderListScreen';
+import RestaurantProductListScreen from './screens/restaurant/RestaurantProductListScreen';
+import RestaurantProductEditScreen from './screens/restaurant/RestaurantProductEditScreen';
+import OrdersScreen from './screens/Orders';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='/' element={<App />}>
+      {/* Public Routes */}
       <Route index={true} path='/' element={<HomeScreen />} />
       <Route path='/search/:keyword' element={<HomeScreen />} />
       <Route path='/page/:pageNumber' element={<HomeScreen />} />
@@ -45,8 +54,13 @@ const router = createBrowserRouter(
       />
       <Route path='/product/:id' element={<ProductScreen />} />
       <Route path='/cart' element={<CartScreen />} />
+      <Route path='/forgot-password' element={<ForgotPasswordScreen />} />
       <Route path='/login' element={<LoginScreen />} />
       <Route path='/register' element={<RegisterScreen />} />
+      <Route
+        path='/reset-password/:id/:token'
+        element={<ResetPasswordScreen />}
+      />
 
       {/* Registered users */}
       <Route path='' element={<PrivateRoute />}>
@@ -55,7 +69,9 @@ const router = createBrowserRouter(
         <Route path='/placeorder' element={<PlaceOrderScreen />} />
         <Route path='/order/:id' element={<OrderScreen />} />
         <Route path='/profile' element={<ProfileScreen />} />
+        <Route path='/orders' element={<OrdersScreen />} />
       </Route>
+
       {/* Admin users */}
       <Route path='' element={<AdminRoute />}>
         <Route path='/admin/orderlist' element={<OrderListScreen />} />
@@ -68,6 +84,34 @@ const router = createBrowserRouter(
         <Route path='/admin/product/:id/edit' element={<ProductEditScreen />} />
         <Route path='/admin/user/:id/edit' element={<UserEditScreen />} />
       </Route>
+
+      {/*restaurant user */}
+      <Route path='' element={<RestaurantRoute />}>
+        <Route
+          path='/restaurant/restaurantorderlist'
+          element={<RestaurantOrderListScreen />}
+        />
+        <Route
+          path='/restaurant/restaurantproductlist'
+          element={<RestaurantProductListScreen />}
+        />
+        <Route
+          path='/restaurant/restaurantproductlist/:pageNumber'
+          element={<RestaurantProductListScreen />}
+        />
+        <Route
+          path='/restaurant/restaurantproduct/:id/edit'
+          element={<RestaurantProductEditScreen />}
+        />
+      </Route>
+
+      {/*Driver user */}
+      <Route path='' element={<DriverRoute />}>
+        <Route
+          path='/driver/driverorderlist'
+          element={<DriverOrderListScreen />}
+        />
+      </Route>
     </Route>
   )
 );
@@ -77,9 +121,7 @@ root.render(
   <React.StrictMode>
     <HelmetProvider>
       <Provider store={store}>
-        <PayPalScriptProvider deferLoading={true}>
-          <RouterProvider router={router} />
-        </PayPalScriptProvider>
+        <RouterProvider router={router} />
       </Provider>
     </HelmetProvider>
   </React.StrictMode>

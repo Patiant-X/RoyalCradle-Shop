@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLogoutMutation } from '../slices/usersApiSlice';
 import { logout } from '../slices/authSlice';
 import SearchBox from './SearchBox';
-import logo from '../assets/logo.png';
+//import logo from '../assets/logo.png';
 import { resetCart } from '../slices/cartSlice';
 import { toast } from 'react-toastify';
 
@@ -39,19 +39,18 @@ const Header = () => {
           <LinkContainer to='/'>
             <Navbar.Brand>
               {/* <img src={logo} alt='5-tyga' /> */}
-              <span className='italic'>5-tyga</span>
+              <span className='italic'>Eats4_50</span>
             </Navbar.Brand>
           </LinkContainer>
           <Navbar.Toggle aria-controls='basic-navbar-nav' />
           <Navbar.Collapse id='basic-navbar-nav'>
-          <FaHouseUser
-                size={30}
-                onClick={() => navigate('/')}
-                style={{ color: '#9b9b9b' }}
-                className="fa-house-user"
-              />
+            <FaHouseUser
+              size={30}
+              onClick={() => navigate('/')}
+              style={{ color: '#9b9b9b' }}
+              className='fa-house-user'
+            />
             <Nav className='ms-auto'>
-              
               <SearchBox />
 
               <LinkContainer to='/cart'>
@@ -67,6 +66,9 @@ const Header = () => {
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id='username'>
+                    <LinkContainer to='/orders'>
+                      <NavDropdown.Item>Orders</NavDropdown.Item>
+                    </LinkContainer>
                     <LinkContainer to='/profile'>
                       <NavDropdown.Item>Profile</NavDropdown.Item>
                     </LinkContainer>
@@ -84,7 +86,7 @@ const Header = () => {
               )}
 
               {/* Admin Links */}
-              {userInfo && userInfo.isAdmin && (
+              {userInfo && userInfo.role === 'admin' && (
                 <NavDropdown title='Admin' id='adminmenu'>
                   <LinkContainer to='/admin/productlist'>
                     <NavDropdown.Item>Products</NavDropdown.Item>
@@ -96,6 +98,26 @@ const Header = () => {
                     <NavDropdown.Item>Users</NavDropdown.Item>
                   </LinkContainer>
                 </NavDropdown>
+              )}
+
+              {/* Restaurant Links */}
+              {userInfo && userInfo.role === 'restaurant' && (
+                <NavDropdown title='Restaurant' id='restaurantmenu'>
+                  <LinkContainer to='/restaurant/restaurantorderlist'>
+                    <NavDropdown.Item>Orders</NavDropdown.Item>
+                  </LinkContainer>
+                  <LinkContainer to='/restaurant/restaurantproductlist'>
+                    <NavDropdown.Item>Product</NavDropdown.Item>
+                  </LinkContainer>
+                </NavDropdown>
+              )}
+
+
+              {/* Driver Links */}
+              {userInfo && userInfo.role === 'driver' && (
+                <LinkContainer to='/driver/driverorderlist'>
+                    <Nav.Link>Orders</Nav.Link>
+                  </LinkContainer>
               )}
             </Nav>
           </Navbar.Collapse>

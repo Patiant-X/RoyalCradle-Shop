@@ -1,7 +1,7 @@
 import React from 'react';
 import { LinkContainer } from 'react-router-bootstrap';
 import { Table, Button } from 'react-bootstrap';
-import { FaTrash, FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaCheck} from 'react-icons/fa';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import {
@@ -42,7 +42,8 @@ const UserListScreen = () => {
               <th>ID</th>
               <th>NAME</th>
               <th>EMAIL</th>
-              <th>ADMIN</th>
+              <th>Number</th>
+              <th>ROLE</th>
               <th></th>
             </tr>
           </thead>
@@ -54,15 +55,12 @@ const UserListScreen = () => {
                 <td>
                   <a href={`mailto:${user.email}`}>{user.email}</a>
                 </td>
+                <td>{user.mobileNumber}</td>
                 <td>
-                  {user.isAdmin ? (
-                    <FaCheck style={{ color: 'green' }} />
-                  ) : (
-                    <FaTimes style={{ color: 'red' }} />
-                  )}
+                  {user.roles[0]}
                 </td>
                 <td>
-                  {!user.isAdmin && (
+                  {(user.roles[0] === 'admin') ? (<FaCheck style={{ color: 'green' }}/>)  : (
                     <>
                       <LinkContainer
                         to={`/admin/user/${user._id}/edit`}
