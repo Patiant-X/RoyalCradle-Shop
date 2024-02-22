@@ -51,7 +51,7 @@ const DriverOrderListScreen = () => {
                 </td>
                 <td>{order.paymentMethod.toUpperCase()}</td>
                 <td>{order.createdAt && order.createdAt.substring(0, 10)}</td>
-                <td>{order.shippingPrice}</td>
+                <td>R{order.shippingPrice}</td>
                 <td>
                   {order.isDelivered ? (
                     order.deliveredAt.substring(0, 10)
