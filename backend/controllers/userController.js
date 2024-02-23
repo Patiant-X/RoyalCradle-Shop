@@ -46,7 +46,7 @@ const userForgotPassword = asyncHandler(async (req, res) => {
       }
       const token = generateTokenForgotPassword(user._id);
       const emailContent = UserResetPasswordContent(
-        user._name,
+        user.name,
         user._id,
         token
       );
