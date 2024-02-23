@@ -156,7 +156,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     const emailContent = OrderConfirmationContent(order);
     SendEmail(
       res,
-      user.email,
+      order.user.email,
       emailContent.message,
       emailContent.subject,
       state
