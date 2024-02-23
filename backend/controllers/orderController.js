@@ -151,10 +151,10 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     order = await Order.findById(orderId).populate(
       'user',
       'name email mobileNumber'
-    );;
+    );
     const state = true;
     const emailContent = OrderConfirmationContent(order);
-    SendEmail(
+    await SendEmail(
       res,
       order.user.email,
       emailContent.message,
