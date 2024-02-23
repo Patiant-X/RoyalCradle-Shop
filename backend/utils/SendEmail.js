@@ -24,14 +24,14 @@ const SendEmail = async (res, email, message, subject, state) => {
   await transporter.sendMail(mailOptions, function (err, info) {
     if (err) {
       if (state) {
-        res.send(200);
+        return
       } else {
         res.status(400);
         throw new Error(err);
       }
     } else { 
       if (state) {
-        res.send(200) 
+        return 
       }
       res.status(200).json('Please check your email');
     }

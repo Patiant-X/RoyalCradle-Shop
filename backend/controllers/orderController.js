@@ -147,8 +147,6 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       email_address: payload.metadata.email_address,
     };
 
-    // Save the updated order to the database
-    await order.save();
     const state = true;
     const emailContent = OrderConfirmationContent(order);
      SendEmail(
@@ -158,6 +156,10 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       emailContent.subject,
       state
     );
+
+    // Save the updated order to the database
+    await order.save();
+    res.send(200);
   } catch (error) {
     res.send(200);
   }
