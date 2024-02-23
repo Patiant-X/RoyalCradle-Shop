@@ -98,6 +98,15 @@ const getOrderById = asyncHandler(async (req, res) => {
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
+    const state = true;
+    const emailContent = OrderConfirmationContent(order);
+    await SendEmail(
+      res,
+      order.user.email,
+      emailContent.message,
+      emailContent.subject,
+      state
+    );
     res.json(order);
   } catch (error) {
     res.status(500).json({ error: error.message });
