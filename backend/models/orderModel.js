@@ -102,10 +102,10 @@ const orderSchema = mongoose.Schema(
 // Define pre-save hook to update timestamps with South African time
 orderSchema.pre('save', function (next) {
   if (this.isPaid && !this.paidAt) {
-    this.paidAt = moment().tz('Africa/Johannesburg');
+    this.paidAt = moment().format();
   }
   if (this.isDelivered && !this.deliveredAt) {
-    this.deliveredAt = moment().tz('Africa/Johannesburg');
+    this.deliveredAt = moment().format();
   }
   next();
 });

@@ -85,10 +85,10 @@ const productSchema = mongoose.Schema(
 // Define pre-save hook to update timestamps with South African time
 productSchema.pre('save', function (next) {
   if (!this.createdAt) {
-    this.createdAt = moment().tz('Africa/Johannesburg');
+    this.createdAt = moment().format();
   }
   if (!this.updatedAt) {
-    this.updatedAt = moment().tz('Africa/Johannesburg');
+    this.updatedAt = moment().format();
   }
   next();
 });

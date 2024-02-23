@@ -120,8 +120,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     const order = await Order.findById(orderId).populate(
       'user',
       'name email mobileNumber'
-    );;
-
+    );
     if (!order) {
       // Order not found, send a response with success status to resolve the webhook
       return res.status(200).send('Order not found');
@@ -140,7 +139,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 
     // Update the order status
     order.isPaid = true;
-    order.paidAt = moment().tz('Africa/Johannesburg');
+    order.paidAt =  moment().format();
     order.paymentResult = {
       id: payload.metadata.checkoutId,
       status: payload.status,
