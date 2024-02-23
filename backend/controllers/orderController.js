@@ -1,3 +1,4 @@
+import moment from 'moment-timezone';
 import asyncHandler from '../middleware/asyncHandler.js';
 import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
@@ -98,15 +99,6 @@ const getOrderById = asyncHandler(async (req, res) => {
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
-    const state = true;
-    const emailContent = OrderConfirmationContent(order);
-    await SendEmail(
-      res,
-      order.user.email,
-      emailContent.message,
-      emailContent.subject,
-      state
-    );
     res.json(order);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -125,7 +117,10 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     const orderId = payload.metadata.orderId;
     const value = payload.amount;
     const checkoutId = payload.metadata.checkoutId;
-    const order = await Order.findById(orderId);
+    const order = await Order.findById(orderId).populate(
+      'user',
+      'name email mobileNumber'
+    );;
 
     if (!order) {
       // Order not found, send a response with success status to resolve the webhook
@@ -145,7 +140,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 
     // Update the order status
     order.isPaid = true;
-    order.paidAt = Date.now();
+    order.paidAt = moment().tz('Africa/Johannesburg').toDate();
     order.paymentResult = {
       id: payload.metadata.checkoutId,
       status: payload.status,
@@ -154,13 +149,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     };
 
     // Save the updated order to the database
-    order = await order.save();
-
-    // Fetch the updated order to get the most current information
-    order = await Order.findById(orderId).populate(
-      'user',
-      'name email mobileNumber'
-    );
+    await order.save();
     const state = true;
     const emailContent = OrderConfirmationContent(order);
     await SendEmail(
