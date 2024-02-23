@@ -1,4 +1,4 @@
-export function OrderConfirmationContent(clientName, order) {
+export function OrderConfirmationContent(order) {
   let html = `<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -63,7 +63,7 @@ export function OrderConfirmationContent(clientName, order) {
   <body>
     <div class="container">
       <h1>Order Confirmation</h1>
-      <p>Dear ${clientName},</p>
+      <p>Dear ${order.user.name},</p>
       <p>Thank you for your order! We are pleased to confirm that your order has been successfully placed on ${order.paidAt}. Below are the details of your purchase:</p>
       <table>
         <thead>
@@ -101,13 +101,13 @@ export function OrderConfirmationContent(clientName, order) {
   </tr>
   <tr>
     <td colspan="2">Total</td>
-    <td>R ${totalPrice.toFixed(2)}</td>
+    <td>R ${order.totalPrice.toFixed(2)}</td>
   </tr>
 </tfoot>
     </table>
     <p>Thank you for choosing us. We hope you enjoy your purchase!</p>
     <div class="website-link">
-      <a href="https://royalcradle-shop.onrende.com">Visit our website</a>
+      <a href="https://royalcradle-shop.onrender.com">Visit our website</a>
     </div>
   </div>
   `;

@@ -149,11 +149,12 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     order = await order.save();
 
     // Fetch the updated order to get the most current information
-    order = await Order.findById(orderId);
+    order = await Order.findById(orderId).populate(
+      'user',
+      'name email mobileNumber'
+    );;
     const state = true;
-    const user = await User.findById(order.user);
-    const emailContent = OrderConfirmationContent(user.name, order);
-
+    const emailContent = OrderConfirmationContent(order);
     SendEmail(
       res,
       user.email,
@@ -161,6 +162,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       emailContent.subject,
       state
     );
+
     res.status(200);
   } catch (error) {
     res.status(200);
