@@ -30,6 +30,9 @@ const SendEmail = async (res, email, message, subject, state) => {
         throw new Error(err);
       }
     } else {
+      if (state) {
+        return 
+      }
       res.status(200).json('Please check your email');
     }
   });

@@ -1,8 +1,4 @@
-export function OrderConfirmationContent(
-  clientName,
-  products,
-  totalAmount
-) {
+export function OrderConfirmationContent(clientName, order, date) {
   let html = `<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -53,13 +49,22 @@ export function OrderConfirmationContent(
         text-align: center;
         margin-top: 20px;
       }
+      
+    .website-link {
+        margin-top: 40px;
+        text-align: center;
+      }
+      .website-link a {
+        color: #00a9e0;
+        text-decoration: none;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>Order Confirmation</h1>
       <p>Dear ${clientName},</p>
-      <p>Thank you for your order! We are pleased to confirm that your order has been successfully placed. Below are the details of your purchase:</p>
+      <p>Thank you for your order! We are pleased to confirm that your order has been successfully placed on ${date}. Below are the details of your purchase:</p>
       <table>
         <thead>
           <tr>
@@ -69,24 +74,42 @@ export function OrderConfirmationContent(
           </tr>
         </thead>
         <tbody>`;
-     // Loop through the products array and generate table rows
-  products.forEach(product => {
+  // Loop through the products array and generate table rows
+  order.orderItems.forEach((product) => {
     html += `
       <tr>
         <td>${product.name}</td>
         <td>${product.qty}</td>
-        <td>R ${product.price}</td>
+        <td>R ${product.price.toFixed(2)}</td>
       </tr>
     `;
-  }); 
-  
+  });
+
   // Add total amount row
-  
+
   html += `
       </tbody>
+      <tfoot>
+  <tr>
+    <td colspan="2">Delivery</td>
+    <td>R ${order.shippingPrice.toFixed(2)}</td>
+  </tr>
+  <tr>
+    <td colspan="2">Services</td>
+    <td>R ${order.taxPrice.toFixed(2)
+    }</td>
+  </tr>
+  <tr>
+    <td colspan="2">Total</td>
+    <td>R ${totalPrice.toFixed(2)}</td>
+  </tr>
+</tfoot>
     </table>
-    <p>Total: R ${totalAmount.toFixed(2)}</p>
     <p>Thank you for choosing us. We hope you enjoy your purchase!</p>
+    <div class="website-link">
+      <a href="https://royalcradle-shop.onrende.com">Visit our website</a>
+    </div>
+  </div>
   `;
 
   // Add closing tags
@@ -94,7 +117,6 @@ export function OrderConfirmationContent(
       </body>
     </html>
   `;
-
 
   return {
     message: html,
