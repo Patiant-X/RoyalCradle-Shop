@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import moment from 'moment-timezone'; 
 
 const locationSchema = mongoose.Schema({
   address: { type: String, required: true },
@@ -96,6 +97,18 @@ const orderSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+
+// Define pre-save hook to update timestamps with South African time
+orderSchema.pre('save', function (next) {
+  if (this.isPaid && !this.paidAt) {
+    this.paidAt = moment().tz('Africa/Johannesburg').toDate();
+  }
+  if (this.isDelivered && !this.deliveredAt) {
+    this.deliveredAt = moment().tz('Africa/Johannesburg').toDate();
+  }
+  next();
+});
 
 const Order = mongoose.model('Order', orderSchema);
 

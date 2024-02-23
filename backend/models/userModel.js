@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import moment from 'moment-timezone';
 
 const userSchema = mongoose.Schema(
   {
@@ -69,6 +70,17 @@ userSchema.pre('save', async function (next) {
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Define pre-save hook to update timestamps with South African time
+userSchema.pre('save', function (next) {
+  if (!this.createdAt) {
+    this.createdAt = moment().tz('Africa/Johannesburg').toDate();
+  }
+  if (!this.updatedAt) {
+    this.updatedAt = moment().tz('Africa/Johannesburg').toDate();
+  }
+  next();
 });
 
 const User = mongoose.model('User', userSchema);

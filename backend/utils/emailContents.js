@@ -1,4 +1,4 @@
-export function OrderConfirmationContent(clientName, order, date) {
+export function OrderConfirmationContent(clientName, order) {
   let html = `<!DOCTYPE html>
   <html lang="en">
   <head>
@@ -64,7 +64,7 @@ export function OrderConfirmationContent(clientName, order, date) {
     <div class="container">
       <h1>Order Confirmation</h1>
       <p>Dear ${clientName},</p>
-      <p>Thank you for your order! We are pleased to confirm that your order has been successfully placed on ${date}. Below are the details of your purchase:</p>
+      <p>Thank you for your order! We are pleased to confirm that your order has been successfully placed on ${order.paidAt}. Below are the details of your purchase:</p>
       <table>
         <thead>
           <tr>

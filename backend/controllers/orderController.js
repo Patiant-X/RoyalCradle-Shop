@@ -145,14 +145,12 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       email_address: payload.metadata.email_address,
     };
 
-    await order.save();
+    await order.save().unwrap();
     const state = true;
     const user = await User.findById(order.user);
-    const date = order.paidAt?.split(',')[0].trim();
     const emailContent = OrderConfirmationContent(
       user.name,
       order,
-      date
     );
 
     SendEmail(
