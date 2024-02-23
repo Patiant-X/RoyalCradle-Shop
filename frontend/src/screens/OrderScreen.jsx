@@ -43,11 +43,11 @@ const OrderScreen = () => {
       toast.error('Payment failed');
     }
   };
-
   const deliverHandler = async () => {
     await deliverOrder(orderId);
     refetch();
   };
+
   return isLoading ? (
     <Loader />
   ) : error ? (
@@ -149,6 +149,12 @@ const OrderScreen = () => {
                           {item.qty} x R{item.price} = R{item.qty * item.price}
                         </Col>
                       </Row>
+                      <Row>
+                        <Col className='p-2'>
+                          <strong>Customer note: </strong>
+                          {item.additionalInfo}
+                        </Col>
+                      </Row>
                     </ListGroup.Item>
                   ))}
                 </ListGroup>
@@ -207,19 +213,25 @@ const OrderScreen = () => {
                           >
                             Procceed to Payment
                           </Button>
-                          <p style={{ paddingTop: '20px' }}>We accept Visa Mastercard InstantEFT:</p>
-                          <Row style={{ marginLeft: '15%', marginTop: '20px' }}>
-                            <Col>
+                          <p style={{ paddingTop: '20px' }}>
+                            We accept Visa Mastercard InstantEFT:
+                          </p>
+                          <Row
+                            className='justify-content-center'
+                            style={{ marginTop: '20px' }}
+                          >
+                            <Col xs={6} sm={4}>
                               <FaCcVisa
                                 size='50'
                                 color='#1e3050'
                                 style={{ marginTop: `5px` }}
                               />
-
+                            </Col>
+                            <Col xs={6} sm={4}>
                               <FaCcMastercard
                                 size='50'
                                 color='#1e3050'
-                                style={{ marginTop: `5px`, marginLeft: '7px' }}
+                                style={{ marginTop: `5px` }}
                               />
                             </Col>
                           </Row>

@@ -4,6 +4,7 @@ import generateToken, {
 } from '../utils/generateToken.js';
 import User from '../models/userModel.js';
 import SendEmail from '../utils/SendEmail.js';
+import { UserResetPasswordContent } from '../utils/emailContents.js';
 
 // @desc    Auth user & get token
 // @route   POST /api/users/auth
@@ -36,12 +37,17 @@ const userForgotPassword = asyncHandler(async (req, res) => {
   try {
     const { email } = req.body;
     await User.findOne({ email }).then((user) => {
-    if (!user) {
+      if (!user) {
         res.status(400);
         throw new Error('Invalid Email');
       }
       const token = generateTokenForgotPassword(user._id);
-      SendEmail(res, email, token, user._id, user.name);
+      const emailContent = UserResetPasswordContent(
+        user._name,
+        user._id,
+        token
+      );
+      SendEmail(res, email, emailContent.message, emailContent.subject);
     });
   } catch (error) {
     res.status(500).json({ error: error.message || error });

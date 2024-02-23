@@ -22,8 +22,8 @@ const CartScreen = () => {
 
   // NOTE: no need for an async function here as we are not awaiting the
   // resolution of a Promise
-  const addToCartHandler = (product, qty) => {
-    dispatch(addToCart({ ...product, qty }));
+  const addToCartHandler = (product, qty, additionalInfo) => {
+    dispatch(addToCart({ ...product, qty, additionalInfo }));
   };
 
   const removeFromCartHandler = (id) => {
@@ -33,7 +33,6 @@ const CartScreen = () => {
   const checkoutHandler = () => {
     navigate('/login?redirect=/shipping');
   };
-
   return (
     <Row>
       <Col md={8}>
@@ -50,16 +49,22 @@ const CartScreen = () => {
                   <Col md={2}>
                     <Image src={item.image} alt={item.name} fluid rounded />
                   </Col>
-                  <Col md={3}>
+                  <Col md={3} className='mt-2 mt-md-0'>
                     <Link to={`/product/${item._id}`}>{item.name}</Link>
                   </Col>
-                  <Col md={2}>R{item.price}</Col>
-                  <Col md={2}>
+                  <Col md={2} className='mt-2 mt-md-0'>
+                    R{item.price}
+                  </Col>
+                  <Col md={2} className='mt-2 mt-md-0'>
                     <Form.Control
                       as='select'
                       value={item.qty}
                       onChange={(e) =>
-                        addToCartHandler(item, Number(e.target.value))
+                        addToCartHandler(
+                          item,
+                          Number(e.target.value),
+                          item.additionalInfo
+                        )
                       }
                     >
                       {[...Array(5).keys()].map((x) => (
@@ -69,7 +74,7 @@ const CartScreen = () => {
                       ))}
                     </Form.Control>
                   </Col>
-                  <Col md={2}>
+                  <Col md={2} className='mt-2 mt-md-0'>
                     <Button
                       type='button'
                       variant='light'
@@ -79,11 +84,28 @@ const CartScreen = () => {
                     </Button>
                   </Col>
                 </Row>
+                <Row className='my-3 mb-md-0'>
+                  <Col>
+                    <Form.Group controlId='customerNote'>
+                      <Form.Control
+                        as='textarea'
+                        rows={1}
+                        defaultValue={
+                          item.additionalInfo || 'Add a note (optional)'
+                        }
+                        onChange={(e) =>
+                          addToCartHandler(item, item.qty, e.target.value)
+                        }
+                      />
+                    </Form.Group>
+                  </Col>
+                </Row>
               </ListGroup.Item>
             ))}
           </ListGroup>
         )}
       </Col>
+
       <Col md={4}>
         <Card>
           <ListGroup variant='flush'>

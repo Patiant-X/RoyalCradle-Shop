@@ -29,6 +29,7 @@ const orderSchema = mongoose.Schema(
         image: { type: String, required: true },
         price: { type: Number, required: true },
         IsFood: {type: Boolean, required: true},
+        additionalInfo: {type: String, default : 'Customer did not provide any.'},
         product: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,

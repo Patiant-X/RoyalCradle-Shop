@@ -73,6 +73,7 @@ const PlaceOrderScreen = () => {
       toast.error(err?.data?.message || err.error);
     }
   };
+  console.log(cart);
 
   return (
     <>
@@ -84,7 +85,9 @@ const PlaceOrderScreen = () => {
             <ListGroup.Item>
               <h2>{shippingAddress?.delivery ? 'Delivery' : 'Pick-up'}</h2>
               <p>
-                <strong style={{ marginRight: '3px' }}>{shippingAddress?.delivery ? 'Address' : 'Pick-up Address'} :</strong>
+                <strong style={{ marginRight: '3px' }}>
+                  {shippingAddress?.delivery ? 'Address' : 'Pick-up Address'} :
+                </strong>
                 {cart.shippingAddress.location}
               </p>
             </ListGroup.Item>
@@ -97,16 +100,16 @@ const PlaceOrderScreen = () => {
 
             <ListGroup.Item>
               <h2>Order Items</h2>
-              {cart.cartItems.length === 0 ? (
+              {cart?.cartItems?.length === 0 ? (
                 <Message>Your cart is empty</Message>
               ) : (
                 <ListGroup variant='flush'>
-                  {cart.cartItems.map((item, index) => (
+                  {cart?.cartItems.map((item, index) => (
                     <ListGroup.Item key={index}>
                       <Row>
                         <Col md={1}>
                           <Image
-                            src={item.image}
+                            src={item?.image}
                             alt={item.name}
                             fluid
                             rounded
@@ -118,6 +121,12 @@ const PlaceOrderScreen = () => {
                         <Col md={4}>
                           {item.qty} x R{item.price} = R
                           {(item.qty * (item.price * 100)) / 100}
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col className='p-2'>
+                          <strong>Customer note: </strong>
+                          {item.additionalInfo}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -166,7 +175,7 @@ const PlaceOrderScreen = () => {
                 <Button
                   type='button'
                   className='btn-block'
-                  disabled={cart.cartItems === 0}
+                  disabled={cart?.cartItems?.length === 0}
                   onClick={placeOrderHandler}
                 >
                   Place Order

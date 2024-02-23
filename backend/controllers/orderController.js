@@ -1,6 +1,8 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
+import User from '../models/userModel.js';
+import SendEmail from '../utils/SendEmail.js';
 import { calcPrices } from '../utils/calcPrices.js';
 import { makeYocoPayment, registerYocoWebHook } from '../utils/yoco.js';
 
@@ -143,6 +145,13 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     };
 
     await order.save();
+    const user = await User.findById(order.user)
+    const emailContent = OrderConfirmationContent(
+      user._name,
+      order.orderItems,
+      order.totalPrice
+    );
+    SendEmail(res,user.email, emailContent.message, emailContent.subject)
     res.status(200).send('Order updated successfully');
   } catch (error) {
     res.status(500).json({ error: error.message });

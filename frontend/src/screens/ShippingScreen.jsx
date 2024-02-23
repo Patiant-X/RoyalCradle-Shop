@@ -30,7 +30,7 @@ const ShippingScreen = () => {
       const lat = address.lat;
       const lng = address.lng;
       const delivery = true;
-      dispatch(saveShippingAddress({ location, lat, lng , delivery }));
+      dispatch(saveShippingAddress({ location, lat, lng, delivery }));
       navigate('/payment');
     } else {
       toast.error('Please select address from google suggestions');
@@ -39,25 +39,27 @@ const ShippingScreen = () => {
 
   const submitPickUpHandler = (e) => {
     e.preventDefault();
-    toast.error("Sorry, this product is not available for collection")
+    toast.error('Sorry, this product is not available for collection');
     return;
     // eslint-disable-next-line no-unreachable
     const product = cartItems?.find((item) => item.IsFood === true);
     const notFoodProduct = cartItems?.find((item) => item.IsFood === false);
-    if(notFoodProduct){
-      toast.error("Sorry, only food items can be collected not drinks. Please remove drink from cart")
+    if (notFoodProduct) {
+      toast.error(
+        'Sorry, only food items can be collected not drinks. Please remove drink from cart'
+      );
       return;
     }
-      if (product) {
+    if (product) {
       const location = product.location?.address;
       const lat = product.location?.latitude;
       const lng = product.location?.longitude;
       const delivery = false;
-      dispatch(saveShippingAddress({location, lat, lng , delivery }));
+      dispatch(saveShippingAddress({ location, lat, lng, delivery }));
       // Navigate to the payment page or any other necessary action
       navigate('/payment');
-    }else {
-      toast.error("Sorry, only Food items can be collected")
+    } else {
+      toast.error('Sorry, only Food items can be collected');
       return;
     }
   };
@@ -97,7 +99,7 @@ const ShippingScreen = () => {
           <Button
             type='button'
             variant='secondary'
-            className='mx-2'
+            className='mx-0 mx-sm-2 mt-2 mt-sm-0'
             onClick={submitPickUpHandler}
           >
             Continue with Pick-up

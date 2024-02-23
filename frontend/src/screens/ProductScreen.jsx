@@ -172,14 +172,14 @@ const ProductScreen = () => {
                   {product.productIsAvailable && (
                     <ListGroup.Item>
                       <Row>
-                        <Col>Additional Information:</Col>
+                        <Col>Customer Note:</Col>
                         <Col>
                           <Form.Control
                             as='textarea'
                             rows={3}
                             value={additionalInfo}
                             onChange={(e) => setAdditionalInfo(e.target.value)}
-                            placeholder='e.g extra hot sauce, remove cheese'
+                            placeholder='Add a note (optional)'
                           />
                         </Col>
                       </Row>
