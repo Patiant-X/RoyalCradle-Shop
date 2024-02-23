@@ -145,13 +145,14 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       email_address: payload.metadata.email_address,
     };
 
-    await order.save().unwrap();
+    // Save the updated order to the database
+    order = await order.save();
+
+    // Fetch the updated order to get the most current information
+    order = await Order.findById(orderId);
     const state = true;
     const user = await User.findById(order.user);
-    const emailContent = OrderConfirmationContent(
-      user.name,
-      order,
-    );
+    const emailContent = OrderConfirmationContent(user.name, order);
 
     SendEmail(
       res,
@@ -160,7 +161,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       emailContent.subject,
       state
     );
-    res.status(200).send('Order updated successfully');
+    res.status(200);
   } catch (error) {
     res.status(200);
   }
