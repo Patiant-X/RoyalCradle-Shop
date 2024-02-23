@@ -151,7 +151,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       order.orderItems,
       order.totalPrice
     );
-    SendEmail(res,user.email, emailContent.message, emailContent.subject)
+    SendEmail(res, user.email, emailContent.message, emailContent.subject)
     res.status(200).send('Order updated successfully');
   } catch (error) {
     res.status(500).json({ error: error.message });

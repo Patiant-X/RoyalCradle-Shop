@@ -3,103 +3,101 @@ export function OrderConfirmationContent(
   products,
   totalAmount
 ) {
-  let productsHtml = '';
-  products.forEach((product) => {
-    productsHtml += `
+  let html = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <style>
+      /* Your CSS styles here */
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        background-color: #f4f4f4;
+        padding: 20px;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      p {
+        color: #666;
+        margin-bottom: 20px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      th, td {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .total {
+        font-weight: bold;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Order Confirmation</h1>
+      <p>Dear ${clientName},</p>
+      <p>Thank you for your order! We are pleased to confirm that your order has been successfully placed. Below are the details of your purchase:</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>`;
+     // Loop through the products array and generate table rows
+  products.forEach(product => {
+    html += `
       <tr>
         <td>${product.name}</td>
         <td>${product.qty}</td>
-        <td>R ${product.price.toFixed(2)}</td>
+        <td>R ${product.price}</td>
       </tr>
     `;
-  });
+  }); 
+  
+  // Add total amount row
+  
+  html += `
+      </tbody>
+    </table>
+    <p>Total: R ${totalAmount.toFixed(2)}</p>
+    <p>Thank you for choosing us. We hope you enjoy your purchase!</p>
+  `;
+
+  // Add closing tags
+  html += `
+      </body>
+    </html>
+  `;
+
 
   return {
-    message: `
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Order Confirmation</title>
-        <style>
-          /* Your CSS styles here */
-          body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f4f4f4;
-            padding: 20px;
-          }
-          .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-          }
-          h1 {
-            color: #333;
-            text-align: center;
-          }
-          p {
-            color: #666;
-            margin-bottom: 20px;
-          }
-          table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-          }
-          th, td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-          }
-          th {
-            background-color: #f2f2f2;
-          }
-          .total {
-            font-weight: bold;
-          }
-          .footer {
-            text-align: center;
-            margin-top: 20px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Order Confirmation</h1>
-          <p>Dear ${clientName},</p>
-          <p>Thank you for your order! We are pleased to confirm that your order has been successfully placed. Below are the details of your purchase:</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>${productName}</td>
-                <td>1</td>
-                <td>R ${productPrice}</td>
-              </tr>
-              <!-- Add more rows for additional items if needed -->
-            </tbody>
-          </table>
-          <p class="total">Total: R ${totalAmount}</p>
-          <p>Thank you for choosing us. We hope you enjoy your meal!</p>
-          <div class="footer">
-            <p>If you have any questions or concerns regarding your order, please don't hesitate to contact us at [Email Address] or [Phone Number].</p>
-            <p>Best regards,<br>[Your Restaurant Name]</p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
+    message: html,
     subject: `Receipt for Your Payment`,
   };
 }

@@ -4,7 +4,10 @@ import generateToken, {
 } from '../utils/generateToken.js';
 import User from '../models/userModel.js';
 import SendEmail from '../utils/SendEmail.js';
-import { UserResetPasswordContent } from '../utils/emailContents.js';
+import {
+  OrderConfirmationContent,
+  UserResetPasswordContent,
+} from '../utils/emailContents.js';
 
 // @desc    Auth user & get token
 // @route   POST /api/users/auth
@@ -47,7 +50,8 @@ const userForgotPassword = asyncHandler(async (req, res) => {
         user._id,
         token
       );
-      SendEmail(res, email, emailContent.message, emailContent.subject);
+
+      SendEmail(res, user.email, emailContent.message, emailContent.subject);
     });
   } catch (error) {
     res.status(500).json({ error: error.message || error });
