@@ -150,7 +150,8 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       order.orderItems,
       order.totalPrice
     );
-    SendEmail(res, user.email, emailContent.message, emailContent.subject, state)
+    
+    SendEmail(res, "ngwenyathabani080@gmail.com", emailContent.message, emailContent.subject, state)
 
     await order.save();
     res.status(200).send('Order updated successfully');

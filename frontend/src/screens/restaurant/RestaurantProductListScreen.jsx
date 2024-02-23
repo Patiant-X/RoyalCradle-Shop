@@ -44,7 +44,7 @@ const RestaurantProductListScreen = () => {
       }
     }
   };
-  console.log(data);
+  
 
   return (
     <>

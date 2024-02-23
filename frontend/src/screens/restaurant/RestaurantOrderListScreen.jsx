@@ -23,8 +23,7 @@ const RestaurantOrderListScreen = () => {
       // For all other cases, maintain the original order
       return 0;
     });
-    //paidOrders = paidOrders?.filter(order => order.user._id === userInfo._id)
-    console.log(paidOrders, userInfo._id);
+  
   return (
     <>
       <h1>Orders</h1>
