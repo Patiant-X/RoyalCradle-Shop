@@ -4,6 +4,7 @@ import Product from '../models/productModel.js';
 import User from '../models/userModel.js';
 import SendEmail from '../utils/SendEmail.js';
 import { calcPrices } from '../utils/calcPrices.js';
+import { OrderConfirmationContent } from '../utils/emailContents.js';
 import { makeYocoPayment, registerYocoWebHook } from '../utils/yoco.js';
 
 // @desc    Create new order
@@ -151,7 +152,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
       order.totalPrice
     );
     
-    SendEmail(res, "ngwenyathabani080@gmail.com", emailContent.message, emailContent.subject, state)
+    SendEmail(res, user.email, emailContent.message, emailContent.subject, state)
 
     await order.save();
     res.status(200).send('Order updated successfully');
