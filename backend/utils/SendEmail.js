@@ -1,10 +1,9 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 dotenv.config();
-const { EMAIL_PASS, EMAIL_SERVICE, EMAIL_USER } =
-  process.env;
+const { EMAIL_PASS, EMAIL_SERVICE, EMAIL_USER } = process.env;
 
-const SendEmail = async (res, email, message, subject) => {
+const SendEmail = async (res, email, message, subject, state) => {
   //create email transporter
   const transporter = nodemailer.createTransport({
     service: EMAIL_SERVICE,
@@ -24,9 +23,12 @@ const SendEmail = async (res, email, message, subject) => {
   //send email
   await transporter.sendMail(mailOptions, function (err, info) {
     if (err) {
-      console.log(err);
-      res.status(200);
-      throw new Error(err);
+      if (state) {
+        return err;
+      } else {
+        res.status(400);
+        throw new Error(err);
+      }
     } else {
       res.status(200).json('Please check your email');
     }

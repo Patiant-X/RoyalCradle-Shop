@@ -50,8 +50,14 @@ const userForgotPassword = asyncHandler(async (req, res) => {
         user._id,
         token
       );
-
-      SendEmail(res, user.email, emailContent.message, emailContent.subject);
+      const state = false;
+      SendEmail(
+        res,
+        user.email,
+        emailContent.message,
+        emailContent.subject,
+        state
+      );
     });
   } catch (error) {
     res.status(500).json({ error: error.message || error });
