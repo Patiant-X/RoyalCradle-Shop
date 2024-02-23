@@ -140,7 +140,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 
     // Update the order status
     order.isPaid = true;
-    order.paidAt = moment().tz('Africa/Johannesburg').toDate();
+    order.paidAt = moment().tz('Africa/Johannesburg');
     order.paymentResult = {
       id: payload.metadata.checkoutId,
       status: payload.status,
@@ -152,17 +152,15 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     await order.save();
     const state = true;
     const emailContent = OrderConfirmationContent(order);
-    await SendEmail(
+     SendEmail(
       res,
       order.user.email,
       emailContent.message,
       emailContent.subject,
       state
     );
-
-    res.status(200);
   } catch (error) {
-    res.status(200);
+    res.send(200);
   }
 });
 
