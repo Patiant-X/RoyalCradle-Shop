@@ -75,10 +75,10 @@ userSchema.pre('save', async function (next) {
 // Define pre-save hook to update timestamps with South African time
 userSchema.pre('save', function (next) {
   if (!this.createdAt) {
-    this.createdAt = moment().tz('Africa/Johannesburg').toDate();
+    this.createdAt = moment().tz('Africa/Johannesburg');
   }
   if (!this.updatedAt) {
-    this.updatedAt = moment().tz('Africa/Johannesburg').toDate();
+    this.updatedAt = moment().tz('Africa/Johannesburg');
   }
   next();
 });
