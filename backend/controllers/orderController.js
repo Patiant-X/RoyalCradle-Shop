@@ -94,7 +94,7 @@ const getOrderById = asyncHandler(async (req, res) => {
   try {
     const order = await Order.findById(req.params.id).populate(
       'user',
-      'name email mobileNumber'
+      'name email mobileNumber roles'
     );
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });

@@ -37,6 +37,7 @@ const ShippingScreen = () => {
     }
   };
 
+
   const submitPickUpHandler = (e) => {
     e.preventDefault();
     toast.error('Sorry, this product is not available for collection');

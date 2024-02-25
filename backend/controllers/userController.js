@@ -45,11 +45,7 @@ const userForgotPassword = asyncHandler(async (req, res) => {
         throw new Error('Invalid Email');
       }
       const token = generateTokenForgotPassword(user._id);
-      const emailContent = UserResetPasswordContent(
-        user.name,
-        user._id,
-        token
-      );
+      const emailContent = UserResetPasswordContent(user.name, user._id, token);
       const state = false;
       SendEmail(
         res,
@@ -93,6 +89,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email: user.email,
       mobileNumber: user.mobileNumber,
       roles: user.roles,
+      role: user.roles[0],
     });
   } else {
     res.status(400);

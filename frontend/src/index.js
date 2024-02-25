@@ -40,6 +40,8 @@ import RestaurantOrderListScreen from './screens/restaurant/RestaurantOrderListS
 import RestaurantProductListScreen from './screens/restaurant/RestaurantProductListScreen';
 import RestaurantProductEditScreen from './screens/restaurant/RestaurantProductEditScreen';
 import OrdersScreen from './screens/Orders';
+import PrivacyPolicy from './screens/Legal/PrivacyPolicy';
+import TermsAndConditions from './screens/Legal/TermsAndConditions';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -52,6 +54,8 @@ const router = createBrowserRouter(
         path='/search/:keyword/page/:pageNumber'
         element={<HomeScreen />}
       />
+      <Route path='/privacy-policy' element={<PrivacyPolicy />} />
+      <Route path='/terms-and-conditions' element={<TermsAndConditions />} />
       <Route path='/product/:id' element={<ProductScreen />} />
       <Route path='/cart' element={<CartScreen />} />
       <Route path='/forgot-password' element={<ForgotPasswordScreen />} />

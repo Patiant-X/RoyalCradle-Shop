@@ -134,7 +134,3 @@ Reset Password</a></p> <p>Thank you.</p>`,
     subject: 'Password Reset Request',
   };
 }
-
-// Example usage:
-//   const emailHtml = generateOrderConfirmationEmail("John Doe", "Pizza", 50.00, 50.00);
-//   console.log(emailHtml);
