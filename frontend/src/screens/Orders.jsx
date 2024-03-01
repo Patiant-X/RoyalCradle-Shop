@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
-import { FaCheck, FaTimes } from 'react-icons/fa';
+import { FaCheck} from 'react-icons/fa';
 
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -11,9 +11,9 @@ import { useGetMyOrdersQuery } from '../slices/ordersApiSlice';
 
 const OrdersScreen = () => {
   const { data: orders, isLoading, error } = useGetMyOrdersQuery();
-  const unpaidOrders =  orders?.slice()?.sort((a, b) => {
-     // If a is not paid and b is paid, a should come before b
-     if (a.isPaid === false && b.isPaid === true) {
+  const unpaidOrders = orders?.slice()?.sort((a, b) => {
+    // If a is not paid and b is paid, a should come before b
+    if (a.isPaid === false && b.isPaid === true) {
       return -1;
     }
     // If b is not paid and a is paid, b should come before a
@@ -57,16 +57,30 @@ const OrdersScreen = () => {
                     ) : order.isDelivered &&
                       order.paymentMethod === 'cash' &&
                       order.paidAt ? (
-                        <FaCheck style={{ color: 'green' }} />
+                      <FaCheck style={{ color: 'green' }} />
                     ) : (
-                      <FaTimes style={{ color: 'red' }} />
+                      <p>Please pay for your order. 😊</p>
                     )}
                   </td>
                   <td>
-                    {order.isDelivered ? (
-                      order.deliveredAt.substring(0, 10)
+                    {order.isPaid &&
+                    order.paymentMethod === 'card' &&
+                    order.paidAt &&
+                    order.isDelivered ? (
+                      <FaCheck style={{ color: 'green' }} />
+                    ) : order.isDelivered &&
+                      order.paymentMethod === 'cash' &&
+                      order.paidAt &&
+                      order.isPaid ? (
+                      <FaCheck style={{ color: 'green' }} />
+                    ) : order.isPaid &&
+                      (order.paymentMethod === 'card' ||
+                        order.paymentMethod === 'cash') &&
+                      order.paidAt &&
+                      !order.isDelivered ? (
+                      <p>Order is coming, please be patient. ⏳😊</p>
                     ) : (
-                      <FaTimes style={{ color: 'red' }} />
+                      ''
                     )}
                   </td>
                   <td>
