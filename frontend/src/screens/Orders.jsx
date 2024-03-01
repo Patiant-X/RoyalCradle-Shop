@@ -48,7 +48,7 @@ const OrdersScreen = () => {
               {unpaidOrders.map((order) => (
                 <tr key={order._id}>
                   <td>{order.createdAt.substring(0, 10)}</td>
-                  <td>{order.totalPrice}</td>
+                  <td>R{order.totalPrice}</td>
                   <td>
                     {order.isPaid &&
                     order.paymentMethod === 'card' &&

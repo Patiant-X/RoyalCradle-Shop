@@ -42,6 +42,7 @@ import RestaurantProductEditScreen from './screens/restaurant/RestaurantProductE
 import OrdersScreen from './screens/Orders';
 import PrivacyPolicy from './screens/Legal/PrivacyPolicy';
 import TermsAndConditions from './screens/Legal/TermsAndConditions';
+import Error from './screens/Error';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -116,6 +117,7 @@ const router = createBrowserRouter(
           element={<DriverOrderListScreen />}
         />
       </Route>
+      <Route path='/*' exact element={<Error />} />
     </Route>
   )
 );
