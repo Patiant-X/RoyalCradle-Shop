@@ -51,7 +51,7 @@ const Footer = () => {
             <Col md='3' lg='4' xl='3' className='mx-auto mb-4'>
               <h6 className='text-uppercase fw-bold mb-4'>
                 <FaGem className='me-3' />
-                RoyalEats
+                RC-Shop
               </h6>
               <p>Affordable eats, local connections..</p>
             </Col>
