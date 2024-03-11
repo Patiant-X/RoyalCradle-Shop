@@ -140,8 +140,8 @@ const ProductScreen = () => {
                       <Col>Status:</Col>
                       <Col>
                         {product.productIsAvailable
-                          ? 'Available'
-                          : 'Not Available'}
+                          ? <span style={{ color: 'green' }} >Available</span>
+                          : <span style={{ color: 'red' }} >Not Availabe</span>}
                       </Col>
                     </Row>
                   </ListGroup.Item>

@@ -19,13 +19,13 @@ const PaymentScreen = () => {
   }, [navigate, shippingAddress]);
 
   const [paymentMethod, setPaymentMethod] = useState('');
- 
+
   const dispatch = useDispatch();
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if(!paymentMethod){
-      toast.error("Please select a payment Method")
+    if (!paymentMethod) {
+      toast.error('Please select a payment Method');
       return;
     }
     dispatch(savePaymentMethod(paymentMethod));
@@ -51,7 +51,7 @@ const PaymentScreen = () => {
               onChange={(e) => setPaymentMethod(e.target.value)}
             ></Form.Check>
           </Col>
-         { /**  <Col>
+          <Col>
             <Form.Check
               className='my-2'
               type='radio'
@@ -59,10 +59,10 @@ const PaymentScreen = () => {
               id='Cash'
               name='paymentMethod'
               value='cash'
-              checked= {paymentMethod === 'cash'}
+              checked={paymentMethod === 'cash'}
               onChange={(e) => setPaymentMethod(e.target.value)}
             ></Form.Check>
-          </Col> */}
+          </Col>
         </Form.Group>
 
         <Button type='submit' variant='primary'>
