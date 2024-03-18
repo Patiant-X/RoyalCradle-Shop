@@ -39,8 +39,13 @@ export const updateCart = (state) => {
     const latClient = state.shippingAddress.lat;
     const lngClient = state.shippingAddress.lng;
     // Set default shop coordinates
-    const latShop = -26.15905;
-    const lngShop = 27.81763;
+    // const latShop = -26.15905;
+    // const lngShop = 27.81763;
+
+    // This is 2nd shop
+    const latShop = -26.147148954967506;
+    const lngShop = 27.8160062928267;
+
     shippingPrice = calculateDistance(latClient, lngClient, latShop, lngShop);
     state.shippingPrice = addDecimals(shippingPrice);
   }

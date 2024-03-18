@@ -21,7 +21,7 @@ function toRadians(degrees) {
 
 function calculateDeliveryfee(distance) {
   if (distance === 0) {
-    return 0;
+    return 10;
   }
   const baseFee = 10; //Base Delivery fee
   const feeIncrement = 5;

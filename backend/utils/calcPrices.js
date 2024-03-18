@@ -37,8 +37,13 @@ export function calcPrices(orderItems, shippingAddress) {
     const latClient = shippingAddress.lat;
     const lngClient = shippingAddress.lng;
     // Set default shop coordinates for drinks or bread or chips at Arizona
-    const latShop = -26.15824523119767;
-    const lngShop = 27.817694505487587;
+    // const latShop = -26.15824523119767;
+    // const lngShop = 27.817694505487587;
+
+    // This is 2nd shop
+    const latShop = -26.147148954967506;
+    const lngShop = 27.8160062928267;
+
     shippingPrice = calculateDistance(latClient, lngClient, latShop, lngShop);
     // shippingPrice = addDecimals(shippingPrice);
   }
@@ -49,7 +54,7 @@ export function calcPrices(orderItems, shippingAddress) {
   const YocoVat = (15 / 100) * YocoFee;
   const YocoTotalFee = YocoFee + YocoVat;
   const taxPrice = YocoTotalFee + 6; // This is because Capitec charges R2 for payments
- 
+
   // Calculate the total price
   const totalPrice = itemsPrice + shippingPrice + taxPrice;
 
