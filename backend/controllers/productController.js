@@ -8,6 +8,12 @@ const getProducts = asyncHandler(async (req, res) => {
   const pageSize = process.env.PAGINATION_LIMIT;
   const page = Number(req.query.pageNumber) || 1;
 
+  // Array of specific product IDs to filter
+  const specificProductIds = [
+    '65eeec9a53b10467dcac780e',
+    '65fdb1dcc20aa1ee82444f28',
+  ];
+
   const keyword = req.query.keyword
     ? {
         name: {
@@ -17,8 +23,10 @@ const getProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
-  const count = await Product.countDocuments({ ...keyword });
-  const products = await Product.find({ ...keyword })
+  const count = await Product.countDocuments({
+    _id: { $in: specificProductIds },
+  });
+  const products = await Product.find({ _id: { $in: specificProductIds } })
     .sort({ IsFood: -1 }) // Sort in descending order by the isFood field
     .limit(pageSize)
     .skip(pageSize * (page - 1));
@@ -64,24 +72,24 @@ const createProduct = asyncHandler(async (req, res) => {
       res.status(400);
       throw new Error('Restaurant can only have one product');
     }
-  } 
-    const product = new Product({
-      name: 'Sample name',
-      price: 0,
-      user: req.user._id,
-      image: '/images/sample.jpg',
-      category: 'Sample category',
-      countInStock: 0,
-      numReviews: 0,
-      description: 'Sample description',
-      location: {
-        address: 'Sample address',
-        latitude: 123456,
-        longitude: 123456,
-      },
-    });
-    const createdProduct = await product.save();
-    res.status(201).json(createdProduct);
+  }
+  const product = new Product({
+    name: 'Sample name',
+    price: 0,
+    user: req.user._id,
+    image: '/images/sample.jpg',
+    category: 'Sample category',
+    countInStock: 0,
+    numReviews: 0,
+    description: 'Sample description',
+    location: {
+      address: 'Sample address',
+      latitude: 123456,
+      longitude: 123456,
+    },
+  });
+  const createdProduct = await product.save();
+  res.status(201).json(createdProduct);
 });
 
 // @desc    Update a product
@@ -183,7 +191,15 @@ const createProductReview = asyncHandler(async (req, res) => {
 // @route   GET /api/products/top
 // @access  Public
 const getTopProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find({}).sort({ rating: -1 }).limit(3);
+  // Array of specific product IDs to filter
+  const specificProductIds = [
+    '65eeec9a53b10467dcac780e',
+    '65fdb1dcc20aa1ee82444f28',
+  ];
+
+  const products = await Product.find({ _id: { $in: specificProductIds } })
+    .sort({ rating: -1 })
+    .limit(3);
 
   res.json(products);
 });
