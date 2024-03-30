@@ -20,6 +20,15 @@ const orderSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
+    driver: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    driverAccepted : {
+      type : Boolean,
+      default: false,
+    }
+    ,
     checkoutId: {
       type: String,
     },

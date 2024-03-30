@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
-import { Button, Row, Col, ListGroup, Image, Card } from 'react-bootstrap';
+import { Row, Col, ListGroup, Image, Card } from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import Message from '../components/Message';
 import CheckoutSteps from '../components/CheckoutSteps';
@@ -12,6 +11,7 @@ import {
 } from '../slices/ordersApiSlice';
 import { clearCartItems } from '../slices/cartSlice';
 import { useGetMyOrdersQuery } from '../slices/ordersApiSlice';
+import PayYocoButton from '../components/PayYocoButton';
 
 const PlaceOrderScreen = () => {
   const navigate = useNavigate();
@@ -22,6 +22,10 @@ const PlaceOrderScreen = () => {
   const [deleteOrder, { isLoading: loadingDelete }] = useDeleteOrderMutation();
   const { data: orders, isLoading: loadingOrders } = useGetMyOrdersQuery();
 
+  const dispatch = useDispatch();
+
+  const { userInfo } = useSelector((state) => state.auth);
+
   useEffect(() => {
     if (!cart.shippingAddress.location) {
       navigate('/shipping');
@@ -30,54 +34,10 @@ const PlaceOrderScreen = () => {
     }
   }, [cart.paymentMethod, cart.shippingAddress.location, navigate]);
 
-  const dispatch = useDispatch();
-
-  const placeOrderHandler = async () => {
-    try {
-      // Check if there are any unpaid cash orders
-      const undeliveredCashOrders = orders.filter(
-        (order) => !order.isDelivered && order.paymentMethod === 'cash'
-      );
-
-      if (undeliveredCashOrders.length > 0) {
-        // Inform the user about the existing unpaid cash order
-        toast('There is a cash order in progress. Please complete order.');
-        return;
-      }
-
-      // Check if there are any unpaid card orders
-      const unpaidCardOrders = orders.filter(
-        (order) => !order.isPaid && order.paymentMethod === 'card'
-      );
-
-      if (unpaidCardOrders.length > 0) {
-        // Delete the first unpaid card order
-        await deleteOrder({ orderId: unpaidCardOrders[0]._id }).unwrap();
-      }
-
-      // create the new order
-      const res = await createOrder({
-        orderItems: cart.cartItems,
-        shippingAddress,
-        paymentMethod: cart.paymentMethod,
-        itemsPrice: cart.itemsPrice,
-        shippingPrice: cart.shippingPrice,
-        taxPrice: cart.taxPrice,
-        totalPrice: cart.totalPrice,
-      }).unwrap();
-
-      // Clear cart items and navigate to the order page
-      dispatch(clearCartItems());
-      navigate(`/order/${res._id}`);
-    } catch (err) {
-      toast.error(err?.data?.message || err.error);
-    }
-  };
-
   return (
     <>
       <CheckoutSteps step1 step2 step3 step4 />
-      <Row>
+      <Row className='pb-5'>
         <Col md={8}>
           {}
           <ListGroup variant='flush'>
@@ -170,19 +130,21 @@ const PlaceOrderScreen = () => {
                   <Message variant='danger'>{error.data.message}</Message>
                 )}
               </ListGroup.Item>
-              <ListGroup.Item>
-                <Button
-                  type='button'
-                  className='btn-block'
-                  disabled={cart?.cartItems?.length === 0}
-                  onClick={placeOrderHandler}
-                >
-                  Place Order
-                </Button>
-                {loadingOrders && <Loader />}
-                {isLoading && <Loader />}
-                {loadingDelete && <Loader />}
-              </ListGroup.Item>
+              <PayYocoButton
+                userInfo={userInfo}
+                cart={cart}
+                orders={orders}
+                deleteOrder={deleteOrder}
+                createOrder={createOrder}
+                shippingAddress={shippingAddress}
+                dispatch={dispatch}
+                clearCartItems={clearCartItems}
+                navigate={navigate}
+                isLoading={isLoading}
+              />
+              {loadingOrders && <Loader />}
+              {isLoading && <Loader />}
+              {loadingDelete && <Loader />}
             </ListGroup>
           </Card>
         </Col>

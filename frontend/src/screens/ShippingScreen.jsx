@@ -37,7 +37,6 @@ const ShippingScreen = () => {
     }
   };
 
-
   const submitPickUpHandler = (e) => {
     e.preventDefault();
     toast.error('Sorry, this product is not available for collection');
@@ -97,14 +96,14 @@ const ShippingScreen = () => {
           <Button type='submit' variant='primary'>
             Continue with Delivery
           </Button>
-          <Button
+          {/* <Button
             type='button'
             variant='secondary'
             className='mx-0 mx-sm-2 mt-2 mt-sm-0'
             onClick={submitPickUpHandler}
           >
             Continue with Pick-up
-          </Button>
+          </Button> */}
         </Form>
       </FormContainer>
     </>

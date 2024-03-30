@@ -1,14 +1,21 @@
 import { Link, useParams } from 'react-router-dom';
-import { Row, Col, ListGroup, Image, Card, Button } from 'react-bootstrap';
+import {
+  Row,
+  Col,
+  ListGroup,
+  Image,
+  Card,
+  Button,
+  Alert,
+} from 'react-bootstrap';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { FaCcMastercard, FaCcVisa } from 'react-icons/fa';
 import Message from '../components/Message';
 import Loader from '../components/Loader';
 import {
+  useCollectOrderMutation,
   useDeliverOrderMutation,
   useGetOrderDetailsQuery,
-  usePayOrderMutation,
 } from '../slices/ordersApiSlice';
 
 const OrderScreen = () => {
@@ -26,27 +33,42 @@ const OrderScreen = () => {
     order?.orderItems.find((item) => item.IsFood)?.location?.address ||
     'Find Item at closest shop';
 
-  const [payOrder, { isLoading: loadingPay }] = usePayOrderMutation();
-
   const [deliverOrder, { isLoading: loadingDeliver }] =
     useDeliverOrderMutation();
 
-  const { userInfo } = useSelector((state) => state.auth);
-  const PayYoco = async () => {
-    try {
-      const res = await payOrder({ orderId });
-      const { redirectUrl } = res.data;
+  const [collectOrder, { isLoading: loadingCollect }] =
+    useCollectOrderMutation();
 
-      // Redirect the user to the urlredirect link
-      window.location.href = redirectUrl;
-    } catch (error) {
-      toast.error('Payment failed');
-    }
-  };
+  const { userInfo } = useSelector((state) => state.auth);
   const deliverHandler = async () => {
     await deliverOrder(orderId);
+    toast.success('Order has been delivered; Thank You!');
     refetch();
   };
+
+  const handleOrderCollected = async () => {
+    await collectOrder(orderId);
+    toast.success('Order Collect; Please Deliver order to Client');
+    refetch();
+  };
+
+  // Determine the status message based on the order status
+  let statusMessage = {
+    time: '',
+    orderMessage: ''
+  };
+  if (order?.isDelivered) {
+    statusMessage.orderMessage = 'Order delivered';
+  } else if (order?.isPaid && userInfo && order?.driverAccepted) {
+    statusMessage.orderMessage = 'Driver is on his way...';
+    statusMessage.time = '15 minutes'
+  } else if (order?.isPaid && userInfo) {
+    statusMessage.orderMessage = 'Restaurant is preparing order...';
+    statusMessage.time = '45 minutes'
+  } else {
+    statusMessage.orderMessage = 'Order pending...';
+    statusMessage.time = '...'
+  }
 
   return isLoading ? (
     <Loader />
@@ -54,7 +76,11 @@ const OrderScreen = () => {
     <Message variant='danger'>{error?.data?.message || error.error}</Message>
   ) : (
     <>
-      <h1>Order {order?._id}</h1>
+      <Alert variant='info'>
+        <h2>Order Status: {statusMessage.orderMessage}</h2>
+        <h4>Estimated Time: {statusMessage.time}</h4>
+        <p style={{ margin: '0' }}>Order Number:{order?._id}</p>
+      </Alert>
       <Row>
         <Col md={8}>
           <ListGroup variant='flush'>
@@ -192,75 +218,40 @@ const OrderScreen = () => {
                   <Col>R{order.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
-              {userInfo &&
-                (userInfo.role === 'admin' || userInfo.role === 'customer') &&
-                !order.isPaid && (
-                  <ListGroup.Item>
-                    {loadingPay && <Loader />}
-
-                    {isLoading ? (
-                      <Loader />
-                    ) : (
-                      <div>
-                        <div>
-                          <Button
-                            onClick={() => PayYoco()}
-                            style={{
-                              marginTop: `10px`,
-                              backgroundColor: '#00a9e0',
-                              width: '100%',
-                            }}
-                          >
-                            Procceed to Payment
-                          </Button>
-                          <p style={{ paddingTop: '20px' }}>
-                            We accept Visa Mastercard InstantEFT:
-                          </p>
-                          <Row
-                            className='justify-content-center'
-                            style={{ marginTop: '20px' }}
-                          >
-                            <Col xs={6} sm={4}>
-                              <FaCcVisa
-                                size='50'
-                                color='#1e3050'
-                                style={{ marginTop: `5px` }}
-                              />
-                            </Col>
-                            <Col xs={6} sm={4}>
-                              <FaCcMastercard
-                                size='50'
-                                color='#1e3050'
-                                style={{ marginTop: `5px` }}
-                              />
-                            </Col>
-                          </Row>
-                          <p style={{ paddingTop: '20px' }}>
-                            Yoco offers a secure payment system trusted by
-                            businesses and customers alike. With robust
-                            encryption and advanced fraud prevention measures,
-                            your transactions are safeguarded every step of the
-                            way.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </ListGroup.Item>
-                )}
 
               {loadingDeliver && <Loader />}
 
               {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
-                !order.isDelivered && (
+                !order.isDelivered &&
+                order?.driverAccepted && (
                   <ListGroup.Item>
+                    {loadingDeliver && <Loader />}
                     <Button
                       type='button'
-                      className='btn btn-block'
+                      className='btn btn-block danger'
+                      style={{ backgroundColor: 'red' }}
                       onClick={deliverHandler}
                     >
-                      Mark As Delivered
+                      Order Delivered
+                    </Button>
+                  </ListGroup.Item>
+                )}
+              {userInfo &&
+                (userInfo.role === 'admin' || userInfo.role === 'driver') &&
+                order.isPaid &&
+                !order.isDelivered &&
+                !order?.driverAccepted && (
+                  <ListGroup.Item>
+                    {loadingCollect && <Loader />}
+                    <Button
+                      type='button'
+                      className='btn btn-block btn-order'
+                      style={{ backgroundColor: 'red' }}
+                      onClick={handleOrderCollected}
+                    >
+                      Collect Order
                     </Button>
                   </ListGroup.Item>
                 )}

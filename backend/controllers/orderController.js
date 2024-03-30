@@ -12,7 +12,8 @@ import { makeYocoPayment, registerYocoWebHook } from '../utils/yoco.js';
 // @access  Private
 const addOrderItems = asyncHandler(async (req, res) => {
   const { orderItems, shippingAddress, paymentMethod } = req.body;
-  if (paymentMethod !== 'card' && paymentMethod !== 'cash') {
+
+  if (!['card', 'cash'].includes(paymentMethod)) {
     res.status(400).json({ error: 'Invalid payment method' });
     throw new Error('Invalid payment method');
   }
@@ -67,8 +68,23 @@ const addOrderItems = asyncHandler(async (req, res) => {
       totalPrice,
     });
     const createdOrder = await order.save();
+
+    if (createdOrder.paymentMethod === 'card') {
+      const resYoco = await makeYocoPayment(createdOrder);
+
+      createdOrder.checkoutId = resYoco.id;
+      await createdOrder.save();
+
+      // Extracting id and redirectUrl from resYoco
+      const { redirectUrl } = resYoco;
+
+      // Responding with only id and redirectUrl
+      return res.status(200).json({ redirectUrl });
+    }
+
     res.status(201).json(createdOrder);
   } catch (error) {
+    console.log(`${error.message}`);
     res.status(500).json({ error: error.message });
   }
 });
@@ -139,7 +155,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 
     // Update the order status
     order.isPaid = true;
-    order.paidAt =  moment().format();
+    order.paidAt = moment().format();
     order.paymentResult = {
       id: payload.metadata.checkoutId,
       status: payload.status,
@@ -149,7 +165,7 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 
     const state = true;
     const emailContent = OrderConfirmationContent(order);
-     SendEmail(
+    SendEmail(
       res,
       order.user.email,
       emailContent.message,
@@ -162,31 +178,6 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     res.send(200);
   } catch (error) {
     res.send(200);
-  }
-});
-
-// @desc   Pay order  using yoco, and update checkoutId
-// @route  PUT /api/orders/:id/payorder
-// @access Private
-const payOrderYoco = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id);
-  if (order) {
-    try {
-      const resYoco = await makeYocoPayment(order);
-
-      order.checkoutId = resYoco.id;
-      await order.save();
-
-      // Extracting id and redirectUrl from resYoco
-      const { redirectUrl } = resYoco;
-
-      // Responding with only id and redirectUrl
-      res.json({ redirectUrl });
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  } else {
-    res.status(404).json({ error: 'Order not found' });
   }
 });
 
@@ -225,6 +216,41 @@ const registerWebHookYoco = asyncHandler(async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// @desc    Accept order by driver
+// @route   PUT /api/orders/:id/accept
+// @access  Private/Driver
+const acceptOrder = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const driverId = req.user._id;
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+
+  if (order.driver && order.driver.toString() !== driverId.toString()) {
+    return res.status(400).json({ error: 'Order already Picked by driver' });
+  }
+
+  if (order.isPaid && order.driver && order.driverAccepted) {
+    return res
+      .status(400)
+      .json({ message: 'You have already Picked up the order' });
+  } else if (order.isPaid) {
+    order.driver = driverId;
+    order.driverAccepted = true;
+  } else {
+    res.status(400);
+    throw new Error('Order is not paid');
+  }
+
+  await order.save();
+
+  res.status(200).json({ message: 'Order Picked up successfully' });
+});
+
 // @desc    Update order to delivered
 // @route   GET /api/orders/:id/deliver
 // @access  Private/Admin
@@ -315,7 +341,7 @@ export {
   updateOrderToPaid,
   updateOrderToDelivered,
   getOrders,
-  payOrderYoco,
   registerWebHookYoco,
   deleteOrder,
+  acceptOrder,
 };

@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, Button, Row, Col } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
-import { FaCheck} from 'react-icons/fa';
+import { FaCheck } from 'react-icons/fa';
 
 import Message from '../components/Message';
 import Loader from '../components/Loader';
@@ -23,6 +23,7 @@ const OrdersScreen = () => {
     // For all other cases, maintain the original order
     return 0;
   });
+
   return (
     <Row>
       <Col>

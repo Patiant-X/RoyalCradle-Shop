@@ -25,7 +25,7 @@ export async function makeYocoPayment(order) {
         'Idempotency-Key': idempotencyKey,
         'Content-Type': 'application/json', // Add Content-Type header
       };
-  
+
       // // Construct lineItems array
       // const lineItems = order.orderItems.map((item) => ({
       //   displayName: item.name,
@@ -34,40 +34,38 @@ export async function makeYocoPayment(order) {
       //     price: (item.price * 100).toFixed(0),
       //   },
       // }));
-    
+
       const body = JSON.stringify({
         amount: amount,
         currency: 'ZAR',
         successUrl: `https://royalcradle-shop.onrender.com/orders/${order._id}`,
-        cancelUrl: `https://royalcradle-shop.onrender.com/order/${order._id}`,
-        failureUrl: `https://royalcradle-shop.onrender.com/order/${order._id}`,
+        cancelUrl: `https://royalcradle-shop.onrender.com/placeorder`,
+        failureUrl: `https://royalcradle-shop.onrender.com/placeorder`,
         metadata: {
           orderId: order._id,
           userId: order.user,
-        }
+        },
       });
-  
+
       const response = await fetch(YOCO_API_URL, {
         method: 'POST',
         headers,
         body,
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to make payment');
       }
-  
+
       const responseData = await response.json(); // Parse JSON response
       return responseData;
     } catch (error) {
       throw new Error(`Failed to make payment: ${error.message}`);
     }
-  }else {
+  } else {
     throw new Error('Order already Paid');
   }
-  
 }
-
 
 /**
  * Refund Order by making a request to the YOCO Checkout API LIbrary.
@@ -90,7 +88,7 @@ export async function refundYocoPayment(order) {
         'Idempotency-Key': idempotencyKey,
         'Content-Type': 'application/json', // Add Content-Type header
       };
-  
+
       const body = JSON.stringify({
         amount: amount,
         currency: 'ZAR',
@@ -100,30 +98,28 @@ export async function refundYocoPayment(order) {
         metadata: {
           orderId: order._id,
           email_address: order.user.email,
-        }
+        },
       });
-  
+
       const response = await fetch(YOCO_API_URL, {
         method: 'POST',
         headers,
         body,
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to make payment');
       }
-  
+
       const responseData = await response.json(); // Parse JSON response
       return responseData;
     } catch (error) {
       throw new Error(`Failed to make payment: ${error.message}`);
     }
-  }else {
+  } else {
     throw new Error('Order has not been paid');
   }
-  
 }
-
 
 /**
  * Register a webhook to verify Yoco payment by making a request to the Yoco API.
@@ -162,5 +158,3 @@ export async function registerYocoWebHook() {
     throw new Error(`Failed to register webhook: ${error.message}`);
   }
 }
-
-

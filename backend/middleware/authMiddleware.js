@@ -4,26 +4,29 @@ import User from '../models/userModel.js';
 
 // User must be authenticated
 const protect = asyncHandler(async (req, res, next) => {
-  let token;
+  try {
+    let token;
 
-  // Read JWT from the 'jwt' cookie
-  token = req.cookies.jwt;
+    // Read JWT from the 'jwt' cookie
+    token = req.cookies.jwt;
 
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      req.user = await User.findById(decoded.userId).select('-password');
+        req.user = await User.findById(decoded.userId).select('-password');
 
-      next();
-    } catch (error) {
-      console.error(error);
+        next();
+      } catch (error) {
+        res.status(401);
+        throw new Error('Not authorized, token failed');
+      }
+    } else {
       res.status(401);
-      throw new Error('Not authorized, token failed');
+      throw new Error('Not authorized, no token');
     }
-  } else {
-    res.status(401);
-    throw new Error('Not authorized, no token');
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -95,4 +98,11 @@ const adminDriverRestaurant = (req, res, next) => {
   }
 };
 
-export { protect, adminDriver,adminRestaurant , protectResetPassword, adminDriverRestaurant, admin };
+export {
+  protect,
+  adminDriver,
+  adminRestaurant,
+  protectResetPassword,
+  adminDriverRestaurant,
+  admin,
+};

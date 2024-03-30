@@ -12,7 +12,11 @@
     "data:import": "node backend/seeder",
     "data:destroy": "node backend/seeder -d",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
-    "generate-toc": "markdown-toc -i readme.md"
+    "generate-toc": "markdown-toc -i readme.md",
+    "test": "jest"
+  },
+  "jest" : {
+    "testEnvironment" : "node"
   },
   "author": "Thabani Ngwenya",
   "license": "MIT",
@@ -34,7 +38,10 @@
   "devDependencies": {
     "@types/express": "^4.17.17",
     "concurrently": "^7.6.0",
+    "jest": "^29.7.0",
     "markdown-toc": "^1.2.0",
-    "nodemon": "^2.0.21"
+    "mongodb-memory-server": "^9.1.8",
+    "nodemon": "^2.0.21",
+    "supertest": "^6.3.4"
   }
 }

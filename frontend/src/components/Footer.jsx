@@ -1,11 +1,3 @@
-import {
-  MDBFooter,
-  MDBContainer,
-  MDBRow,
-  MDBCol,
-  MDBIcon,
-} from 'mdb-react-ui-kit';
-
 import { LinkContainer } from 'react-router-bootstrap';
 import {
   FaFacebook,
@@ -71,7 +63,11 @@ const Footer = () => {
                 |
               </p>
               <p>
-                <a href='https://www.yoco.com/za/' className='text-reset' target='_blank'>
+                <a
+                  href='https://www.yoco.com/za/'
+                  className='text-reset'
+                  target='_blank'
+                >
                   Powered by Yoco
                 </a>
               </p>
@@ -128,7 +124,11 @@ const Footer = () => {
         style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}
       >
         © {new Date().getFullYear()} RoyalCradle-Shop{'  '}
-        <a className='text-reset fw-bold' href='https://grandkids.vercel.app/' style={{ textDecoration: 'none'}}>
+        <a
+          className='text-reset fw-bold'
+          href='https://grandkids.vercel.app/'
+          style={{ textDecoration: 'none' }}
+        >
           Designed By Grandkids
         </a>
       </div>
