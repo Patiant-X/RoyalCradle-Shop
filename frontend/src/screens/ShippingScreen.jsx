@@ -68,15 +68,15 @@ const ShippingScreen = () => {
     <>
       <FormContainer>
         <CheckoutSteps step1 step2 />
-        <h1>Delivery or Pick-Up</h1>
+        <h1>Delivery</h1>
         <Form onSubmit={submitDeliveryHandler}>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ marginRight: '10px', marginBottom: '5px' }}>
+            <label style={{ marginRight: '10px', marginBottom: '5px', padding: '5px' }}>
               Enter address:
             </label>
             <AddressData setAddressCoordinates={setAddress} />
           </div>
-          <Form.Group className='my-4' controlId='address'>
+          {/* <Form.Group className='my-4' controlId='address'>
             <Form.Label>Confrim Address</Form.Label>
             <Form.Control
               type='text'
@@ -91,7 +91,7 @@ const ShippingScreen = () => {
               required
               readOnly
             ></Form.Control>
-          </Form.Group>
+          </Form.Group> */}
 
           <Button type='submit' variant='primary'>
             Continue with Delivery

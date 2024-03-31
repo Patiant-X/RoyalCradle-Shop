@@ -83,6 +83,7 @@ const MapComponent = ({ setAddressCoordinates }) => {
           borderRadius: '5px',
           border: '1px solid #b5c0c1',
           marginBottom: '10px',
+          height: '50px'
         }}
         placeholder='Enter address'
       />

@@ -160,25 +160,6 @@ const RestaurantProductEditScreen = () => {
             </label>
             <AddressData setAddressCoordinates={setAddressCoordinates} />
 
-            <Form.Group className='my-4' controlId='address'>
-              <Form.Label>Confrim Address</Form.Label>
-              <Form.Control
-                type='text'
-                placeholder='Confirm address'
-                value={
-                  addressCoordinates?.place
-                    ? addressCoordinates.place.address_components
-                        .map((component) => component.long_name)
-                        .join(' ')
-                    : address
-                    ? address.address
-                    : ''
-                }
-                required
-                readOnly
-              ></Form.Control>
-            </Form.Group>
-
             <Form.Group controlId='category' className='my-4'>
               <Form.Label>Category</Form.Label>
               <Form.Control
