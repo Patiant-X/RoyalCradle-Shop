@@ -34,7 +34,7 @@ const PlaceOrderScreen = () => {
     }
   }, [cart.paymentMethod, cart.shippingAddress.location, navigate]);
 
-  console.log(cart);
+
 
   return (
     <>
