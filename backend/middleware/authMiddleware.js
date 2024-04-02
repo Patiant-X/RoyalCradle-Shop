@@ -18,11 +18,11 @@ const protect = asyncHandler(async (req, res, next) => {
 
         next();
       } catch (error) {
-        res.status(401);
+        res.status(401).json("not authorized no token");
         throw new Error('Not authorized, token failed');
       }
     } else {
-      res.status(401);
+      res.status(401).json("not authorized no token");
       throw new Error('Not authorized, no token');
     }
   } catch (error) {
@@ -43,7 +43,7 @@ const protectResetPassword = asyncHandler(async (req, res, next) => {
       throw new Error('Not authorized, token failed');
     }
   } else {
-    res.status(401);
+    res.status(401).json("not authorized no token");
     throw new Error('Not authorized, no token');
   }
 });
@@ -53,7 +53,7 @@ const admin = (req, res, next) => {
   if (req.user && req.user.roles[0] === 'admin') {
     next();
   } else {
-    res.status(401);
+    res.status(401).json("not authorized no token");
     throw new Error('Not authorized');
   }
 };
@@ -66,7 +66,7 @@ const adminDriver = (req, res, next) => {
   ) {
     next();
   } else {
-    res.status(401);
+    res.status(401).json("not authorized no token");
     throw new Error('Not authorized');
   }
 };
@@ -78,7 +78,7 @@ const adminRestaurant = (req, res, next) => {
   ) {
     next();
   } else {
-    res.status(401);
+    res.status(401).json("not authorized no token");
     throw new Error('Not authorized');
   }
 };
@@ -93,7 +93,7 @@ const adminDriverRestaurant = (req, res, next) => {
   ) {
     next();
   } else {
-    res.status(401);
+    res.status(401).json("not authorized no token");
     throw new Error('Not authorized');
   }
 };
