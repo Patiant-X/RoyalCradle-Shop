@@ -34,6 +34,8 @@ const PlaceOrderScreen = () => {
     }
   }, [cart.paymentMethod, cart.shippingAddress.location, navigate]);
 
+  console.log(cart);
+
   return (
     <>
       <CheckoutSteps step1 step2 step3 step4 />

@@ -21,13 +21,12 @@ import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Meta from '../components/Meta';
 import { addToCart } from '../slices/cartSlice';
+import { calculateRestaurantDistance } from '../utils/calculateDeliveryDistance';
 
 const ProductScreen = () => {
   const { id: productId } = useParams();
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
-
-  const uniqueItem = cartItems.find((item) => item._id === productId);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -38,24 +37,14 @@ const ProductScreen = () => {
   const [additionalInfo, setAdditionalInfo] = useState('');
 
   const addToCartHandler = () => {
-    if (uniqueItem) {
+    const existingItem = cartItems.find((item) => item._id === productId);
+    if (existingItem) {
       toast(' Item already in Cart');
       navigate('/cart');
       return;
     }
-
-    if (!product.IsFood) {
-      dispatch(addToCart({ ...product, qty, additionalInfo }));
-      navigate('/cart');
+    if (maxItemsInCart(cartItems, product, qty)) {
       return;
-    }
-
-    if (cartItems.length > 0) {
-      const hasFoodItem = cartItems.some((item) => item.IsFood);
-      if (hasFoodItem) {
-        toast.error('You can only order from one restaurant, please check cart.');
-        return; // Exit the function if there's a food item in the cart
-      }
     }
     dispatch(addToCart({ ...product, qty, additionalInfo }));
     navigate('/cart');
@@ -139,9 +128,11 @@ const ProductScreen = () => {
                     <Row>
                       <Col>Status:</Col>
                       <Col>
-                        {product.productIsAvailable
-                          ? <span style={{ color: 'green' }} >Available</span>
-                          : <span style={{ color: 'red' }} >Not Availabe</span>}
+                        {product.productIsAvailable ? (
+                          <span style={{ color: 'green' }}>Available</span>
+                        ) : (
+                          <span style={{ color: 'red' }}>Not Availabe</span>
+                        )}
                       </Col>
                     </Row>
                   </ListGroup.Item>
@@ -267,6 +258,46 @@ const ProductScreen = () => {
       )}
     </>
   );
+};
+
+const maxItemsInCart = (cartItems, newProduct, qty) => {
+  let productsQty = 0;
+  let notFoodProductQty = 0;
+  const countFoodProducts = cartItems?.filter((item) => item.IsFood);
+  if (countFoodProducts?.length > 0 && newProduct.IsFood) {
+    for (let product of countFoodProducts) {
+      const restLat = product.location.latitude;
+      const restlng = product.location.longitude;
+      const newRestLat = newProduct.location.latitude;
+      const newRestLng = newProduct.location.longitude;
+      const restaurantDistance = calculateRestaurantDistance(
+        restLat,
+        restlng,
+        newRestLat,
+        newRestLng
+      );
+      if (restaurantDistance > 1) {
+        toast.error('Restaurants too far apart');
+        return true;
+      }
+    }
+    toast.warning("You are ordering from different restaurants. Delivery prices may vary.");
+  }
+
+  for (let product of cartItems) {
+    if (product.IsFood === true) {
+      //if (newProduct.IsFood) productsQty += product.qty;
+      productsQty += product.qty;
+    } else {
+      notFoodProductQty += product.qty;
+    }
+  }
+  if (productsQty + qty + notFoodProductQty > 5) {
+    toast.error("Maximum of 5 items in the cart");
+    return true;
+  } else {
+    return false;
+  }
 };
 
 export default ProductScreen;

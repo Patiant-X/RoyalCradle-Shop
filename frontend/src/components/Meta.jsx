@@ -11,7 +11,7 @@ const Meta = ({ title, description, keywords }) => {
 };
 
 Meta.defaultProps = {
-  title: 'Welcome To RoyalCradle-Shop food Market',
+  title: 'Welcome To 5TygaEats food Market',
   description: 'Enjoy the convenience of delicious meals delivered right to your doorstep!',
   keywords: 'food, buy food, delicuous food, cheap food',
 };

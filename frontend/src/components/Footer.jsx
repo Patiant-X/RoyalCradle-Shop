@@ -43,7 +43,7 @@ const Footer = () => {
             <Col md='3' lg='4' xl='3' className='mx-auto mb-4'>
               <h6 className='text-uppercase fw-bold mb-4'>
                 <FaGem className='me-3' />
-                RC-Shop
+                5TygaEats
               </h6>
               <p>Affordable eats, local connections..</p>
             </Col>
@@ -123,7 +123,7 @@ const Footer = () => {
         className='text-center p-4'
         style={{ backgroundColor: 'rgba(0, 0, 0, 0.05)' }}
       >
-        © {new Date().getFullYear()} RoyalCradle-Shop{'  '}
+        © {new Date().getFullYear()} 5TygaEats{'  '}
         <a
           className='text-reset fw-bold'
           href='https://grandkids.vercel.app/'

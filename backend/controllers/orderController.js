@@ -111,7 +111,7 @@ const getOrderById = asyncHandler(async (req, res) => {
     const order = await Order.findById(req.params.id).populate(
       'user',
       'name email mobileNumber roles'
-    );
+    ).populate('driver', 'name email mobileNumber');
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -255,11 +255,24 @@ const acceptOrder = asyncHandler(async (req, res) => {
 // @route   GET /api/orders/:id/deliver
 // @access  Private/Admin
 const updateOrderToDelivered = asyncHandler(async (req, res) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.id).populate(
+    'user',
+    'name email mobileNumber'
+  );
 
   if (order) {
     if (order.paymentMethod === 'cash') {
       order.paidAt = Date.now();
+      const state = true;
+      const emailContent = OrderConfirmationContent(order);
+      console.log(order.user.email, emailContent.message, emailContent.subject);
+      SendEmail(
+        res,
+        order.user.email,
+        emailContent.message,
+        emailContent.subject,
+        state
+      );
     }
     order.isDelivered = true;
     order.deliveredAt = Date.now();
@@ -279,7 +292,11 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 const getOrders = asyncHandler(async (req, res) => {
   try {
     if (req.user.roles[0] === 'restaurant') {
-      const orders = await Order.find({});
+      const orders = await Order.find({}).populate({
+        path: 'driver',
+        select: 'name email mobileNumber',
+        match: { driverAccepted: true },
+      });
       const productRestaurantId = await Product.find({
         user: req.user._id,
       }).select('_id');

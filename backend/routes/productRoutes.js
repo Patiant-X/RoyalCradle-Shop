@@ -13,8 +13,11 @@ import {
 import { protect, adminRestaurant } from '../middleware/authMiddleware.js';
 import checkObjectId from '../middleware/checkObjectId.js';
 
-router.route('/').get(getProducts).post(protect, adminRestaurant, createProduct);
-router.get('/restaurant', protect, adminRestaurant, getRestaurantProduct)
+router
+  .route('/')
+  .get(getProducts)
+  .post(protect, adminRestaurant, createProduct);
+router.get('/restaurant', protect, adminRestaurant, getRestaurantProduct);
 router.route('/:id/reviews').post(protect, checkObjectId, createProductReview);
 router.get('/top', getTopProducts);
 router

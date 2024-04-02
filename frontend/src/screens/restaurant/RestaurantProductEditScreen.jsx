@@ -22,6 +22,8 @@ const RestaurantProductEditScreen = () => {
   const [category, setCategory] = useState('');
   const [productIsAvailable, setProductIsAvailable] = useState(true);
   const [description, setDescription] = useState('');
+  const [restaurantName, setRestaurantName] = useState('');
+  const [restaurantArea, setRestaurantArea] = useState('');
   const [address, setAddress] = useState(null);
   const [addressCoordinates, setAddressCoordinates] = useState(null);
 
@@ -62,6 +64,8 @@ const RestaurantProductEditScreen = () => {
         IsFood: isFood,
         category,
         description,
+        restaurantArea,
+        restaurantName,
         productIsAvailable,
         latitude: lat,
         longitude: lng,
@@ -177,6 +181,26 @@ const RestaurantProductEditScreen = () => {
                 placeholder='Enter description'
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+
+            <Form.Group controlId='restaurantName' className='my-4'>
+              <Form.Label>Restaurant Name</Form.Label>
+              <Form.Control
+                type='text'
+                placeholder='Enter Restaurant Name'
+                value={restaurantName}
+                onChange={(e) => setRestaurantName(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+
+            <Form.Group controlId='restaurantArea' className='my-4'>
+              <Form.Label>Restaurant Area</Form.Label>
+              <Form.Control
+                type='text'
+                placeholder='Enter Restaurant Area'
+                value={restaurantArea}
+                onChange={(e) => setRestaurantArea(e.target.value)}
               ></Form.Control>
             </Form.Group>
 

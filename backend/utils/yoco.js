@@ -39,8 +39,8 @@ export async function makeYocoPayment(order) {
         amount: amount,
         currency: 'ZAR',
         successUrl: `https://royalcradle-shop.onrender.com/orders/${order._id}`,
-        cancelUrl: `https://royalcradle-shop.onrender.com/placeorder`,
-        failureUrl: `https://royalcradle-shop.onrender.com/placeorder`,
+        cancelUrl: `https://royalcradle-shop.onrender.com/`,
+        failureUrl: `https://royalcradle-shop.onrender.com/`,
         metadata: {
           orderId: order._id,
           userId: order.user,

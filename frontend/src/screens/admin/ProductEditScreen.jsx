@@ -12,7 +12,6 @@ import {
   useUploadProductImageMutation,
 } from '../../slices/productsApiSlice';
 
-
 const ProductEditScreen = () => {
   const { id: productId } = useParams();
 
@@ -23,6 +22,8 @@ const ProductEditScreen = () => {
   const [category, setCategory] = useState('');
   const [productIsAvailable, setProductIsAvailable] = useState(true);
   const [description, setDescription] = useState('');
+  const [restaurantName, setRestaurantName] = useState('');
+  const [restaurantArea, setRestaurantArea] = useState('');
   const [address, setAddress] = useState(null);
   const [addressCoordinates, setAddressCoordinates] = useState(null);
 
@@ -63,6 +64,8 @@ const ProductEditScreen = () => {
         IsFood: isFood,
         category,
         description,
+        restaurantArea,
+        restaurantName,
         productIsAvailable,
         latitude: lat,
         longitude: lng,
@@ -88,6 +91,8 @@ const ProductEditScreen = () => {
       setImage(product.image);
       setIsFood(product.IsFood);
       setCategory(product.category);
+      setRestaurantArea(product?.restaurantArea);
+      setRestaurantName(product?.restaurantName);
       setProductIsAvailable(product.productIsAvailable);
       setDescription(product.description);
       setAddress(product.location);
@@ -156,7 +161,7 @@ const ProductEditScreen = () => {
               {loadingUpload && <Loader />}
             </Form.Group>
 
-            <label style={{ marginBottom: '5px', marginTop: '20px'}}>
+            <label style={{ marginBottom: '5px', marginTop: '20px' }}>
               Enter address:
             </label>
             <AddressData setAddressCoordinates={setAddressCoordinates} />
@@ -174,10 +179,31 @@ const ProductEditScreen = () => {
             <Form.Group controlId='description'>
               <Form.Label>Description</Form.Label>
               <Form.Control
-                type='text'
+                as='textarea'
                 placeholder='Enter description'
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                style={{ height: '150px', resize: 'both' }}
+              ></Form.Control>
+            </Form.Group>
+
+            <Form.Group controlId='restaurantName' className='my-4'>
+              <Form.Label>Restaurant Name</Form.Label>
+              <Form.Control
+                type='text'
+                placeholder='Enter Restaurant Name'
+                value={restaurantName}
+                onChange={(e) => setRestaurantName(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+
+            <Form.Group controlId='restaurantArea' className='my-4'>
+              <Form.Label>Restaurant Area</Form.Label>
+              <Form.Control
+                type='text'
+                placeholder='Enter Restaurant Area'
+                value={restaurantArea}
+                onChange={(e) => setRestaurantArea(e.target.value)}
               ></Form.Control>
             </Form.Group>
 

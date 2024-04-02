@@ -23,7 +23,9 @@ router
 router.route('/mine').get(protect, getMyOrders);
 router.route('/deleteorder').delete(protect, deleteOrder);
 router.route('/:id').get(protect, getOrderById);
-router.route('/:id/deliver').put(protect, adminDriver, updateOrderToDelivered);
+router
+  .route('/:id/deliver')
+  .put(protect, checkObjectId, adminDriver, updateOrderToDelivered);
 router
   .route('/:id/collect')
   .put(protect, checkObjectId, adminDriver, acceptOrder);

@@ -34,6 +34,12 @@ const productSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    restaurantName: {
+      type: String
+    },
+    restaurantArea: {
+      type: String
+    },
     image: {
       type: String,
       required: true,

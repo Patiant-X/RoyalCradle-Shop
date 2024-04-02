@@ -1,5 +1,6 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import Product from '../models/productModel.js';
+import { calculateUserDistance } from '../utils/calculateDeliveryDistanceFee.js';
 
 // @desc    Fetch all products
 // @route   GET /api/products
@@ -7,12 +8,7 @@ import Product from '../models/productModel.js';
 const getProducts = asyncHandler(async (req, res) => {
   const pageSize = process.env.PAGINATION_LIMIT;
   const page = Number(req.query.pageNumber) || 1;
-
-  // Array of specific product IDs to filter
-  const specificProductIds = [
-    '65eeec9a53b10467dcac780e',
-    '65fdb1dcc20aa1ee82444f28',
-  ];
+  const { latitude, longitude } = req.query;
 
   const keyword = req.query.keyword
     ? {
@@ -23,13 +19,67 @@ const getProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
-  const count = await Product.countDocuments({
-    _id: { $in: specificProductIds },
-  });
-  const products = await Product.find({ _id: { $in: specificProductIds } })
-    .sort({ IsFood: -1 }) // Sort in descending order by the isFood field
+  const count = await Product.countDocuments({ ...keyword });
+  let products = await Product.find({ ...keyword })
+    .sort({ IsFood: -1, rating: -1, numReviews: -1 }) // Sort in descending order by IsFood, rating, and numReviews
     .limit(pageSize)
     .skip(pageSize * (page - 1));
+
+  const productsOutOfRange = products;
+  // If latitude and longitude are provided, filter products based on distance
+  if (
+    latitude !== null &&
+    !isNaN(latitude) &&
+    longitude !== null &&
+    !isNaN(longitude)
+  ) {
+    // Filter products within the desired radius from the user's location
+    products = products.filter((product) => {
+      const productDistance = calculateUserDistance(
+        parseFloat(latitude),
+        parseFloat(longitude),
+        parseFloat(product.location.latitude),
+        parseFloat(product.location.longitude)
+      );
+      return productDistance <= 4; // Adjust the radius as needed
+    });
+
+    if (req.query.keyword) {
+      // Filter out duplicates between products within radius and all products
+      const uniqueProducts = productsOutOfRange.filter(
+        (product) =>
+          !products.some((pr) => pr._id.toString() === product._id.toString())
+      );
+      // Concatenate products within radius and unique products from all products
+      const mergedProducts = [...products, ...uniqueProducts];
+
+      res.json({
+        products: mergedProducts,
+        page,
+        pages: Math.ceil(count / pageSize),
+      });
+      return;
+    }
+
+    if (products.length === 0) {
+      products = productsOutOfRange;
+    }
+
+    // Get the count of IsFood products in the current page
+    // const isFoodCount = products.filter((product) => product.IsFood).length;
+
+    // if (isFoodCount < 5) {
+    //   // If there are fewer than 4 IsFood items, include all products
+    //   const remainingProducts = await Product.find({
+    //     ...keyword,
+    //     IsFood: false,
+    //   })
+    //     .sort({ rating: -1 }) // Sort non-food products by rating in descending order
+    //     .limit(pageSize - isFoodCount);
+
+    //   products.push(...remainingProducts);
+    // }
+  }
 
   res.json({ products, page, pages: Math.ceil(count / pageSize) });
 });
@@ -47,9 +97,6 @@ const getRestaurantProduct = asyncHandler(async (req, res) => {
 // @route   GET /api/products/:id
 // @access  Public
 const getProductById = asyncHandler(async (req, res) => {
-  // NOTE: checking for valid ObjectId to prevent CastError moved to separate
-  // middleware. See README for more info.
-
   const product = await Product.findById(req.params.id);
   if (product) {
     return res.json(product);
@@ -102,12 +149,17 @@ const updateProduct = asyncHandler(async (req, res) => {
     description,
     image,
     category,
+    restaurantName,
+    restaurantArea,
     IsFood,
     productIsAvailable,
     address,
     latitude,
     longitude,
   } = req.body;
+
+  // const restaurantId = req.user._id;
+  // const data = await Product.find({ user: restaurantId });
 
   const product = await Product.findById(req.params.id);
 
@@ -122,6 +174,8 @@ const updateProduct = asyncHandler(async (req, res) => {
     product.location.address = address;
     product.location.latitude = latitude;
     product.location.longitude = longitude;
+    product.restaurantArea = restaurantArea;
+    product.restaurantName = restaurantName;
 
     const updatedProduct = await product.save();
     res.json(updatedProduct);
@@ -191,13 +245,7 @@ const createProductReview = asyncHandler(async (req, res) => {
 // @route   GET /api/products/top
 // @access  Public
 const getTopProducts = asyncHandler(async (req, res) => {
-  // Array of specific product IDs to filter
-  const specificProductIds = [
-    '65eeec9a53b10467dcac780e',
-    '65fdb1dcc20aa1ee82444f28',
-  ];
-
-  const products = await Product.find({ _id: { $in: specificProductIds } })
+  const products = await Product.find()
     .sort({ rating: -1 })
     .limit(3);
 

@@ -18,22 +18,27 @@ const ShippingScreen = () => {
 
   const submitDeliveryHandler = (e) => {
     e.preventDefault();
-
-    if (
-      address?.place != null &&
-      address?.lat != null &&
-      address?.lng != null
-    ) {
-      const location = address.place.address_components
-        .map((component) => component.long_name)
-        .join(' ');
-      const lat = address.lat;
-      const lng = address.lng;
-      const delivery = true;
-      dispatch(saveShippingAddress({ location, lat, lng, delivery }));
-      navigate('/payment');
-    } else {
-      toast.error('Please select address from google suggestions');
+    try {
+      if (
+        address?.place != null &&
+        address?.lat != null &&
+        address?.lng != null
+      ) {
+        const location = address.place.address_components
+          .map((component) => component.long_name)
+          .join(' ');
+        const lat = address.lat;
+        const lng = address.lng;
+        const delivery = true;
+        dispatch(saveShippingAddress({ location, lat, lng, delivery }));
+        navigate('/payment');
+      } else {
+        toast.error('Please select address from google suggestions');
+      }
+    } catch (error) {
+      // Check if error has a specific message property
+      const errorMessage = error.message ? error.message : 'An error occurred';
+      toast.error(errorMessage);
     }
   };
 
@@ -71,12 +76,18 @@ const ShippingScreen = () => {
         <h1>Delivery</h1>
         <Form onSubmit={submitDeliveryHandler}>
           <div style={{ marginBottom: '20px' }}>
-            <label style={{ marginRight: '10px', marginBottom: '5px', padding: '5px' }}>
+            <label
+              style={{
+                marginRight: '10px',
+                marginBottom: '5px',
+                padding: '5px',
+              }}
+            >
               Enter address:
             </label>
             <AddressData setAddressCoordinates={setAddress} />
           </div>
-          {/* <Form.Group className='my-4' controlId='address'>
+          <Form.Group className='my-4' controlId='address'>
             <Form.Label>Confrim Address</Form.Label>
             <Form.Control
               type='text'
@@ -91,7 +102,7 @@ const ShippingScreen = () => {
               required
               readOnly
             ></Form.Control>
-          </Form.Group> */}
+          </Form.Group>
 
           <Button type='submit' variant='primary'>
             Continue with Delivery

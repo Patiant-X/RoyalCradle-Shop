@@ -48,26 +48,51 @@ const OrderScreen = () => {
 
   const handleOrderCollected = async () => {
     await collectOrder(orderId);
-    toast.success('Order Collect; Please Deliver order to Client');
+    toast.success('Order Collected; Please Deliver order to Client');
     refetch();
   };
 
+  const hasFoodProduct = order?.orderItems?.some(
+    (item) => item.IsFood === true
+  );
   // Determine the status message based on the order status
   let statusMessage = {
     time: '',
-    orderMessage: ''
+    orderMessage: '',
   };
-  if (order?.isDelivered) {
-    statusMessage.orderMessage = 'Order delivered';
-  } else if (order?.isPaid && userInfo && order?.driverAccepted) {
-    statusMessage.orderMessage = 'Driver is on his way...';
-    statusMessage.time = '15 minutes'
-  } else if (order?.isPaid && userInfo) {
-    statusMessage.orderMessage = 'Restaurant is preparing order...';
-    statusMessage.time = '45 minutes'
+
+  if (hasFoodProduct) {
+    // There is at least one product with IsFood property set to true
+    if (order?.isDelivered) {
+      statusMessage.orderMessage = 'Order delivered';
+      statusMessage.time = 'N/A';
+    } else if (order?.isPaid && userInfo && order?.driverAccepted) {
+      statusMessage.orderMessage = 'Driver is on his way...';
+      if (order.shippingPrice <= 10) {
+        statusMessage.time = '10 - 15 minutes';
+      } else if (order.shippingPrice > 10 && order.shippingPrice <= 20) {
+        statusMessage.time = '15 - 25 minutes';
+      }
+    } else if (order?.isPaid && userInfo) {
+      statusMessage.orderMessage = 'Restaurant is preparing order...';
+      if (order.shippingPrice <= 10) {
+        statusMessage.time = '25 - 45 minutes';
+      } else if (order.shippingPrice > 10 && order.shippingPrice <= 20) {
+        statusMessage.time = '35 - 55 minutes';
+      }
+    } else {
+      statusMessage.orderMessage = 'Order pending...';
+      statusMessage.time = '...';
+    }
   } else {
-    statusMessage.orderMessage = 'Order pending...';
-    statusMessage.time = '...'
+    // There are no products with IsFood property set to true
+    if (order?.isDelivered) {
+      statusMessage.orderMessage = 'Order delivered';
+      statusMessage.time = 'N/A';
+    } else {
+      statusMessage.orderMessage = 'Driver is on his way...';
+      statusMessage.time = '10 - 15 minutes';
+    }
   }
 
   return isLoading ? (
@@ -79,6 +104,23 @@ const OrderScreen = () => {
       <Alert variant='info'>
         <h2>Order Status: {statusMessage.orderMessage}</h2>
         <h4>Estimated Time: {statusMessage.time}</h4>
+        {!(userInfo.role === 'customer')
+          ? order.driver && (
+              <>
+                <p style={{ margin: '0', paddingBottom: '8px' }}>
+                  Driver Details: {order?.driver?._id}, {order?.driver?.name},{' '}
+                  {order?.driver?.mobileNumber}
+                </p>
+              </>
+            )
+          : order.driver && (
+              <>
+                <p style={{ margin: '0', paddingBottom: '8px' }}>
+                  Driver Details: {order?.driver?.name},{' '}
+                  {order?.driver?.mobileNumber}
+                </p>
+              </>
+            )}
         <p style={{ margin: '0' }}>Order Number:{order?._id}</p>
       </Alert>
       <Row>

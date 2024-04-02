@@ -12,6 +12,7 @@ import {
 import { FaTrash } from 'react-icons/fa';
 import Message from '../components/Message';
 import { addToCart, removeFromCart } from '../slices/cartSlice';
+import { toast } from 'react-toastify';
 
 const CartScreen = () => {
   const navigate = useNavigate();
@@ -23,6 +24,9 @@ const CartScreen = () => {
   // NOTE: no need for an async function here as we are not awaiting the
   // resolution of a Promise
   const addToCartHandler = (product, qty, additionalInfo) => {
+    if (maxItemsInCart(cartItems, product._id ,qty)) {
+      return;
+    }
     dispatch(addToCart({ ...product, qty, additionalInfo }));
   };
 
@@ -134,6 +138,25 @@ const CartScreen = () => {
       </Col>
     </Row>
   );
+};
+
+const maxItemsInCart = (cartItems, productId, qty) => {
+  let totalQty = 0;
+
+  for (let product of cartItems) {
+    if (product._id === productId) {
+      totalQty += qty; // Add the new quantity for the specified product
+    } else {
+      totalQty += product.qty; // Add the existing quantity for other products
+    }
+  }
+
+  if (totalQty > 5) {
+    toast.error(`Maximum of 5 items per order.`);
+    return true;
+  } else {
+    return false;
+  }
 };
 
 export default CartScreen;

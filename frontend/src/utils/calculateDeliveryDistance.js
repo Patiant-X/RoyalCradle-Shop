@@ -20,8 +20,11 @@ function toRadians(degrees) {
 }
 
 function calculateDeliveryfee(distance) {
-  if (distance === 0) {
+  if (distance <= 2) {
     return 10;
+  } 
+  if (distance > 2 && distance <= 4) {
+    return 20;
   }
   const baseFee = 10; //Base Delivery fee
   const feeIncrement = 5;
@@ -32,4 +35,17 @@ function calculateDeliveryfee(distance) {
   return deliveryFee;
 }
 
-
+export function calculateRestaurantDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the Earth in kilometers
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = Math.ceil(R * c); // Distance in kilometers
+  return distance;
+}
