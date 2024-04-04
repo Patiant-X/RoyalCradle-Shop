@@ -47,6 +47,12 @@ export const orderApiSlice = apiSlice.injectEndpoints({
         method: `PUT`,
       }),
     }),
+    driverArrivedOrder: builder.mutation({
+      query: (orderId) => ({
+        url: `${ORDERS_URL}/${orderId}/arrive`,
+        method: `PUT`,
+      }),
+    }),
   }),
 });
 
@@ -58,4 +64,5 @@ export const {
   useDeliverOrderMutation,
   useDeleteOrderMutation,
   useCollectOrderMutation,
+  useDriverArrivedOrderMutation,
 } = orderApiSlice;

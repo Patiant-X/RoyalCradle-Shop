@@ -15,6 +15,7 @@ import Loader from '../components/Loader';
 import {
   useCollectOrderMutation,
   useDeliverOrderMutation,
+  useDriverArrivedOrderMutation,
   useGetOrderDetailsQuery,
 } from '../slices/ordersApiSlice';
 
@@ -33,22 +34,48 @@ const OrderScreen = () => {
     order?.orderItems.find((item) => item.IsFood)?.location?.address ||
     'Find Item at closest shop';
 
-  const [deliverOrder, { isLoading: loadingDeliver }] =
-    useDeliverOrderMutation();
+  const [
+    deliverOrder,
+    { isLoading: loadingDeliver, isError: isErrorDeliverOrder },
+  ] = useDeliverOrderMutation();
 
-  const [collectOrder, { isLoading: loadingCollect }] =
-    useCollectOrderMutation();
+  const [
+    collectOrder,
+    { isLoading: loadingCollect, isError: isErrorCollectOrder },
+  ] = useCollectOrderMutation();
+
+  const [
+    driverArrivedOrder,
+    { isLoading: loadingDriverArrived, isError: isErrordriverArrivedOrder },
+  ] = useDriverArrivedOrderMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
   const deliverHandler = async () => {
     await deliverOrder(orderId);
-    toast.success('Order has been delivered; Thank You!');
+    if (!isErrorDeliverOrder) {
+      toast.success('Order has been delivered; Thank You!');
+    } else {
+      toast.error('Order delivery failed');
+    }
+
+    refetch();
+  };
+
+  const driverArrivedHandler = async () => {
+    await driverArrivedOrder(orderId);
+    if (isErrordriverArrivedOrder) {
+      toast.error('Sending Message failed');
+    }
     refetch();
   };
 
   const handleOrderCollected = async () => {
     await collectOrder(orderId);
-    toast.success('Order Collected; Please Deliver order to Client');
+    if (!isErrorCollectOrder) {
+      toast.success('Order Collected; Please Deliver order to Client');
+    } else {
+      toast.error('Order collection failed');
+    }
     refetch();
   };
 
@@ -267,7 +294,8 @@ const OrderScreen = () => {
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
                 !order.isDelivered &&
-                order?.driverAccepted && (
+                order?.driverAccepted &&
+                order?.driverArrived && (
                   <ListGroup.Item>
                     {loadingDeliver && <Loader />}
                     <Button
@@ -294,6 +322,24 @@ const OrderScreen = () => {
                       onClick={handleOrderCollected}
                     >
                       Collect Order
+                    </Button>
+                  </ListGroup.Item>
+                )}
+              {userInfo &&
+                (userInfo.role === 'admin' || userInfo.role === 'driver') &&
+                order.isPaid &&
+                !order.isDelivered &&
+                order?.driverAccepted &&
+                !order?.driverArrived && (
+                  <ListGroup.Item>
+                    {loadingDriverArrived && <Loader />}
+                    <Button
+                      type='button'
+                      className='btn btn-block btn-order'
+                      style={{ backgroundColor: 'red' }}
+                      onClick={driverArrivedHandler}
+                    >
+                      You have Arrived
                     </Button>
                   </ListGroup.Item>
                 )}

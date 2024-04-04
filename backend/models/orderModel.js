@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import moment from 'moment-timezone'; 
+import moment from 'moment-timezone';
 
 const locationSchema = mongoose.Schema({
   address: { type: String, required: true },
@@ -22,13 +22,16 @@ const orderSchema = mongoose.Schema(
     },
     driver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
     },
-    driverAccepted : {
-      type : Boolean,
+    driverAccepted: {
+      type: Boolean,
       default: false,
-    }
-    ,
+    },
+    driverArrived: {
+      type: Boolean,
+      default: false,
+    },
     checkoutId: {
       type: String,
     },
@@ -38,8 +41,11 @@ const orderSchema = mongoose.Schema(
         qty: { type: Number, required: true },
         image: { type: String, required: true },
         price: { type: Number, required: true },
-        IsFood: {type: Boolean, required: true},
-        additionalInfo: {type: String, default : 'Customer did not provide any.'},
+        IsFood: { type: Boolean, required: true },
+        additionalInfo: {
+          type: String,
+          default: 'Customer did not provide any.',
+        },
         product: {
           type: mongoose.Schema.Types.ObjectId,
           required: true,
@@ -106,7 +112,6 @@ const orderSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-
 
 // Define pre-save hook to update timestamps with South African time
 orderSchema.pre('save', function (next) {

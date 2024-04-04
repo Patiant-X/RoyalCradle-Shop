@@ -8,6 +8,7 @@ import {
   getOrders,
   deleteOrder,
   acceptOrder,
+  driverArrivedOrder,
 } from '../controllers/orderController.js';
 import {
   protect,
@@ -29,5 +30,8 @@ router
 router
   .route('/:id/collect')
   .put(protect, checkObjectId, adminDriver, acceptOrder);
+router
+  .route('/:id/arrive')
+  .put(protect, checkObjectId, adminDriver, driverArrivedOrder);
 
 export default router;

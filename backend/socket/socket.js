@@ -11,12 +11,6 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   },
 });
-
-// This returns the user socketId
-// export const getReceiverSocketId = (receiverId) => {
-//     return userSocketMap[receiverId];
-//   };
-
 const customerSocketMap = {}; //{userId: socketId}
 const restaurantSocketMap = {};
 const driverSocketMap = {};
@@ -64,22 +58,6 @@ const getRestaurantSocketId = (restaurantId) => {
 
 export async function notifyNewOrder(restaurantUsers, paymentMethod) {
   try {
-    // Loop through restaurant users
-    // for (const restUser of restaurantUsers) {
-    //   await io
-    //     .to(getRestaurantSocketId(restUser.user))
-    //     .emit('newOrder', 'new Order');
-    // }
-
-    // Loop through driver socket map
-    // for (const driverId in driverSocketMap) {
-    //   io.to(driverSocketMap[driverId]).emit('newOrder', 'new Order');
-    // }
-
-    // Loop through admin socket map
-    // for (const adminId in adminSocketMap) {
-    //   await io.to(adminSocketMap[adminId]).emit('newOrder', 'new Order');
-    // }
     if (restaurantUsers.length > 0) {
       // adminSocketMap is not empty, proceed with the loop
       for (const restUser of restaurantUsers) {
@@ -121,4 +99,19 @@ export async function notifyNewOrder(restaurantUsers, paymentMethod) {
     console.error('Error notifying new order:', error);
   }
 }
+
+export async function informUserDriverArrived(userId) {
+  try {
+    const userSocketId = customerSocketMap[userId];
+    if (userSocketId) {
+      io.to(userSocketId).emit('driverArrived', 'The driver has arrived for your order');
+    } else {
+      console.log(`Socket not found for user ${userId}`);
+    }
+  } catch (error) {
+    console.error('Error informing user about driver arrival:', error);
+  }
+}
+
+
 export { app, io, server };

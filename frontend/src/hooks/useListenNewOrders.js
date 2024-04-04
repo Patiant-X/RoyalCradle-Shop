@@ -21,6 +21,14 @@ const useListenNewOrders = () => {
       native: true,
     });
   };
+  const notifyUser = () => {
+    addNotification({
+      title: '5TygaEats',
+      message: 'The driver has arrived',
+      duration: 5000,
+      native: true,
+    });
+  };
 
   useEffect(() => {
     // Check if the browser supports notifications
@@ -34,21 +42,19 @@ const useListenNewOrders = () => {
     // Listen for 'newOrder' event from socket
     if (socket) {
       const handleNewOrder = (newOrder) => {
-        if (newOrder) {
-          console.log("Happy memorise");
-        }
         if (newOrder === 'It worked') {
           // Display browser notification
           if (Notification.permission === 'granted') {
             const notification = new Notification('Thabani', {
               body: 'It Worked Please tell Thabani',
             });
+            notification();
             if (newOrder) {
               notifyThabani();
             }
 
             // Automatically close the notification after a few seconds
-            //setTimeout(() => notification.close(), 5000);
+            setTimeout(() => notification.close(), 5000);
           }
         }
         // Display browser notification
@@ -65,9 +71,26 @@ const useListenNewOrders = () => {
         }
       };
 
+      const handleDriverArrived = (arrivedMessage) => {
+        // Display browser notification
+        if (Notification.permission === 'granted') {
+          const notification = new Notification('5TygaEats', {
+            body: 'The driver has Arrived',
+          });
+          if (arrivedMessage) {
+            notifyUser();
+          }
+
+          // Automatically close the notification after a few seconds
+         setTimeout(() => notification.close(), 5000);
+        }
+      };
+
       socket.on('newOrder', handleNewOrder);
+      socket.on('driverArrived', handleDriverArrived);
 
       return () => {
+        socket.off('driverArrived', handleDriverArrived);
         socket.off('newOrder', handleNewOrder);
       };
     }

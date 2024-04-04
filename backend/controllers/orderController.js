@@ -7,7 +7,7 @@ import SendEmail from '../utils/SendEmail.js';
 import { calcPrices } from '../utils/calcPrices.js';
 import { OrderConfirmationContent } from '../utils/emailContents.js';
 import { makeYocoPayment, registerYocoWebHook } from '../utils/yoco.js';
-import { notifyNewOrder } from '../socket/socket.js';
+import { informUserDriverArrived, notifyNewOrder } from '../socket/socket.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -271,6 +271,37 @@ const acceptOrder = asyncHandler(async (req, res) => {
   res.status(200).json({ message: 'Order Picked up successfully' });
 });
 
+// @desc    Driver arrived at delivery location
+// @route   PUT /api/orders/:id/arrived
+// @access  Private/Driver
+const driverArrivedOrder = asyncHandler(async (req, res) => {
+  const orderId = req.params.id;
+  const driverId = req.user._id;
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+
+  if (order.driver && order.driver.toString() !== driverId.toString()) {
+    return res.status(400).json({ error: 'Order assigned to another driver' });
+  }
+
+  if (!order.driverAccepted) {
+    return res.status(400).json({ error: 'Driver has not accepted the order yet' });
+  }
+
+  // Update driverArrived field to true
+  order.driverArrived = true;
+
+  // await order.save();
+
+  informUserDriverArrived(order.user)
+
+  res.status(200).json({ message: 'Driver arrived at delivery location' });
+});
+
 // @desc    Update order to delivered
 // @route   GET /api/orders/:id/deliver
 // @access  Private/Admin
@@ -285,7 +316,6 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
       order.paidAt = Date.now();
       const state = true;
       const emailContent = OrderConfirmationContent(order);
-      console.log(order.user.email, emailContent.message, emailContent.subject);
       SendEmail(
         res,
         order.user.email,
@@ -381,4 +411,5 @@ export {
   registerWebHookYoco,
   deleteOrder,
   acceptOrder,
+  driverArrivedOrder,
 };
