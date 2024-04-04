@@ -295,7 +295,7 @@ const OrderScreen = () => {
                 order.isPaid &&
                 !order.isDelivered &&
                 order?.driverAccepted &&
-                order?.driverArrived && (
+                !order?.driverArrived && (
                   <ListGroup.Item>
                     {loadingDeliver && <Loader />}
                     <Button

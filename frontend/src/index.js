@@ -105,10 +105,10 @@ const router = createBrowserRouter(
           path='/restaurant/restaurantproductlist/:pageNumber'
           element={<RestaurantProductListScreen />}
         />
-        <Route
+        {/* <Route
           path='/restaurant/restaurantproduct/:id/edit'
           element={<RestaurantProductEditScreen />}
-        />
+        /> */}
       </Route>
 
       {/*Driver user */}

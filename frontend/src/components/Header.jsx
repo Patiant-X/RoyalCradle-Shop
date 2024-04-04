@@ -104,15 +104,21 @@ const Header = () => {
 
               {/* Restaurant Links */}
               {userInfo && userInfo.role === 'restaurant' && (
-                <NavDropdown title='Restaurant' id='restaurantmenu'>
-                  <LinkContainer to='/restaurant/restaurantorderlist'>
+                <LinkContainer to='/restaurant/restaurantorderlist'>
+                  <Nav.Link>Orders</Nav.Link>
+                </LinkContainer>
+              )}
+
+              {/* <LinkContainer to='/restaurant/restaurantorderlist'>
                     <NavDropdown.Item>Orders</NavDropdown.Item>
-                  </LinkContainer>
-                  <LinkContainer to='/restaurant/restaurantproductlist'>
+                  </LinkContainer> 
+
+                 <NavDropdown title='Restaurant' id='restaurantmenu'> 
+                  
+                   <LinkContainer to='/restaurant/restaurantproductlist'>
                     <NavDropdown.Item>Product</NavDropdown.Item>
                   </LinkContainer>
-                </NavDropdown>
-              )}
+                 </NavDropdown> */}
 
               {/* Driver Links */}
               {userInfo && userInfo.role === 'driver' && (
