@@ -264,7 +264,9 @@ const maxItemsInCart = (cartItems, newProduct, qty) => {
   let productsQty = 0;
   let notFoodProductQty = 0;
   const countFoodProducts = cartItems?.filter((item) => item.IsFood);
+
   if (countFoodProducts?.length > 0 && newProduct.IsFood) {
+    let sameRestaurant = 0;
     for (let product of countFoodProducts) {
       const restLat = product.location.latitude;
       const restlng = product.location.longitude;
@@ -280,8 +282,15 @@ const maxItemsInCart = (cartItems, newProduct, qty) => {
         toast.error('Restaurants too far apart');
         return true;
       }
+      if (restaurantDistance === 0) {
+        sameRestaurant += 1;
+      }
     }
-    toast.warning("You are ordering from different restaurants. Delivery prices may vary.");
+    if (sameRestaurant === 0) {
+      toast.warning(
+        'You are ordering from different restaurants. Delivery prices may vary.'
+      );
+    }
   }
 
   for (let product of cartItems) {
@@ -293,7 +302,7 @@ const maxItemsInCart = (cartItems, newProduct, qty) => {
     }
   }
   if (productsQty + qty + notFoodProductQty > 5) {
-    toast.error("Maximum of 5 items in the cart");
+    toast.error('Maximum of 5 items in the cart');
     return true;
   } else {
     return false;

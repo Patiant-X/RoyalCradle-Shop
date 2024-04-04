@@ -29,8 +29,8 @@ const HomeScreen = () => {
     }
 
     function Geoerror() {
-      setLatitude(null)
-      setLongitude(null)
+      setLatitude(null);
+      setLongitude(null);
       console.error('Unable to retrieve your location');
     }
   }, []); // Empty dependency array ensures this effect runs only once
@@ -41,6 +41,7 @@ const HomeScreen = () => {
     latitude,
     longitude,
   });
+
   return (
     <>
       {keyword || isLoading || error || data.products.length === 0 ? (

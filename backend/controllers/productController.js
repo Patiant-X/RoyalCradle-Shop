@@ -103,7 +103,7 @@ const getProductById = asyncHandler(async (req, res) => {
   } else {
     // NOTE: this will run if a valid ObjectId but no product was found
     // i.e. product may be null
-    res.status(404);
+    res.status(404).json({error: 'Product not found'});
     throw new Error('Product not found');
   }
 });
@@ -116,7 +116,7 @@ const createProduct = asyncHandler(async (req, res) => {
     const restaurantId = req.user._id;
     const data = await Product.find({ user: restaurantId });
     if (data?.length > 0) {
-      res.status(400);
+      res.status(400).json({error: 'Restaurant can only have one product'});
       throw new Error('Restaurant can only have one product');
     }
   }
@@ -195,7 +195,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
     await Product.deleteOne({ _id: product._id });
     res.json({ message: 'Product removed' });
   } else {
-    res.status(404);
+    res.status(404).json({error: 'Product not found'});
     throw new Error('Product not found');
   }
 });
@@ -214,7 +214,7 @@ const createProductReview = asyncHandler(async (req, res) => {
     );
 
     if (alreadyReviewed) {
-      res.status(400);
+      res.status(400).json({error: 'Product already reviewed'});
       throw new Error('Product already reviewed');
     }
 
@@ -236,7 +236,7 @@ const createProductReview = asyncHandler(async (req, res) => {
     await product.save();
     res.status(201).json({ message: 'Review added' });
   } else {
-    res.status(404);
+    res.status(404).json({error: 'Product not found'});
     throw new Error('Product not found');
   }
 });

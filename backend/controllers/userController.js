@@ -28,7 +28,7 @@ const authUser = asyncHandler(async (req, res) => {
       role: user.roles[0],
     });
   } else {
-    res.status(401);
+    res.status(401).json({error: 'Invalid email or password'});
     throw new Error('Invalid email or password');
   }
 });
@@ -41,7 +41,7 @@ const userForgotPassword = asyncHandler(async (req, res) => {
     const { email } = req.body;
     await User.findOne({ email }).then((user) => {
       if (!user) {
-        res.status(400);
+        res.status(400).json({error: 'Invalid'});
         throw new Error('Invalid Email');
       }
       const token = generateTokenForgotPassword(user._id);
@@ -69,7 +69,7 @@ const registerUser = asyncHandler(async (req, res) => {
   const userExists = await User.findOne({ email, mobileNumber });
 
   if (userExists) {
-    res.status(400);
+    res.status(400).json({error: 'User already exists'});
     throw new Error('User already exists');
   }
 

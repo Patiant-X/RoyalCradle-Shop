@@ -43,6 +43,7 @@ import OrdersScreen from './screens/Orders';
 import PrivacyPolicy from './screens/Legal/PrivacyPolicy';
 import TermsAndConditions from './screens/Legal/TermsAndConditions';
 import Error from './screens/Error';
+import { SocketContextProvider } from './context/SocketContext';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -127,7 +128,9 @@ root.render(
   <React.StrictMode>
     <HelmetProvider>
       <Provider store={store}>
-        <RouterProvider router={router} />
+        <SocketContextProvider>
+          <RouterProvider router={router} />
+        </SocketContextProvider>
       </Provider>
     </HelmetProvider>
   </React.StrictMode>

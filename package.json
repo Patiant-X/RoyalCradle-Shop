@@ -15,8 +15,8 @@
     "generate-toc": "markdown-toc -i readme.md",
     "test": "jest"
   },
-  "jest" : {
-    "testEnvironment" : "node"
+  "jest": {
+    "testEnvironment": "node"
   },
   "author": "Thabani Ngwenya",
   "license": "MIT",
@@ -33,6 +33,7 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.9",
     "raw-body": "^2.5.2",
+    "socket.io": "^4.7.5",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

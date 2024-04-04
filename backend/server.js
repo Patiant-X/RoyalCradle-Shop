@@ -12,12 +12,13 @@ import uploadRoutes from './routes/uploadRoutes.js';
 import yocoWebHookRoutes from './routes/yocoWebHookRoutes.js';
 import yocoVerifyPaymentRoutes from './routes/yocoVerifyPaymentRoutes.js';
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
+import { app, server } from './socket/socket.js';
 
 const port = process.env.PORT || 5000;
 
 connectDB();
 
-const app = express();
+//const app = express();
 
 app.use(parseRawRequestBody);
 app.use(express.json());
@@ -54,6 +55,6 @@ if (process.env.NODE_ENV === 'production') {
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(port, () =>
+server.listen(port, () =>
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`)
 );

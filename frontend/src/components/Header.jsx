@@ -9,8 +9,10 @@ import SearchBox from './SearchBox';
 //import logo from '../assets/logo.png';
 import { resetCart } from '../slices/cartSlice';
 import { toast } from 'react-toastify';
+import useListenNewOrders from '../hooks/useListenNewOrders.js';
 
 const Header = () => {
+  useListenNewOrders();
   const { cartItems } = useSelector((state) => state.cart);
   const { userInfo } = useSelector((state) => state.auth);
 
@@ -112,12 +114,11 @@ const Header = () => {
                 </NavDropdown>
               )}
 
-
               {/* Driver Links */}
               {userInfo && userInfo.role === 'driver' && (
                 <LinkContainer to='/driver/driverorderlist'>
-                    <Nav.Link>Orders</Nav.Link>
-                  </LinkContainer>
+                  <Nav.Link>Orders</Nav.Link>
+                </LinkContainer>
               )}
             </Nav>
           </Navbar.Collapse>

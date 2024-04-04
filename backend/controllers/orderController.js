@@ -2,10 +2,12 @@ import moment from 'moment-timezone';
 import asyncHandler from '../middleware/asyncHandler.js';
 import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
+import User from '../models/userModel.js';
 import SendEmail from '../utils/SendEmail.js';
 import { calcPrices } from '../utils/calcPrices.js';
 import { OrderConfirmationContent } from '../utils/emailContents.js';
 import { makeYocoPayment, registerYocoWebHook } from '../utils/yoco.js';
+import { notifyNewOrder } from '../socket/socket.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -18,7 +20,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
     throw new Error('Invalid payment method');
   }
   if (!orderItems || orderItems.length === 0) {
-    res.status(400);
+    res.status(400).json({ error: 'No order item' });
     throw new Error('No order items');
   }
 
@@ -33,11 +35,14 @@ const addOrderItems = asyncHandler(async (req, res) => {
       _id: { $in: orderItems.map((x) => x._id) },
     });
 
+    const restaurantProductIds = [];
+
     // map over the order items and use the price from our items from database
     const dbOrderItems = orderItems.map((itemFromClient) => {
       const matchingItemFromDB = itemsFromDB.find(
         (itemFromDB) => itemFromDB._id.toString() === itemFromClient._id
       );
+      restaurantProductIds.push(itemFromClient._id);
       return {
         ...itemFromClient,
         product: itemFromClient._id,
@@ -69,6 +74,10 @@ const addOrderItems = asyncHandler(async (req, res) => {
     });
     const createdOrder = await order.save();
 
+    const restaurantUsers = await Product.find({
+      _id: { $in: restaurantProductIds.map((x) => x) },
+    }).select('user');
+
     if (createdOrder.paymentMethod === 'card') {
       const resYoco = await makeYocoPayment(createdOrder);
 
@@ -78,9 +87,13 @@ const addOrderItems = asyncHandler(async (req, res) => {
       // Extracting id and redirectUrl from resYoco
       const { redirectUrl } = resYoco;
 
+      notifyNewOrder(restaurantUsers, createdOrder.paymentMethod);
+
       // Responding with only id and redirectUrl
       return res.status(200).json({ redirectUrl });
     }
+
+    notifyNewOrder(restaurantUsers, createdOrder.paymentMethod);
 
     res.status(201).json(createdOrder);
   } catch (error) {
@@ -108,10 +121,9 @@ const getMyOrders = asyncHandler(async (req, res) => {
 // @access  Private
 const getOrderById = asyncHandler(async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id).populate(
-      'user',
-      'name email mobileNumber roles'
-    ).populate('driver', 'name email mobileNumber');
+    const order = await Order.findById(req.params.id)
+      .populate('user', 'name email mobileNumber roles')
+      .populate('driver', 'name email mobileNumber');
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
@@ -175,6 +187,14 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 
     // Save the updated order to the database
     await order.save();
+
+    // Notify restaurant users about the new order
+    const restaurantUsers = await Product.find({
+      _id: { $in: order.orderItems.map((item) => item.product) },
+    }).select('user');
+
+    notifyNewOrder(restaurantUsers, 'card');
+
     res.send(200);
   } catch (error) {
     res.send(200);
@@ -242,7 +262,7 @@ const acceptOrder = asyncHandler(async (req, res) => {
     order.driver = driverId;
     order.driverAccepted = true;
   } else {
-    res.status(400);
+    res.status(400).json({ error: 'Order is not paid' });
     throw new Error('Order is not paid');
   }
 
@@ -281,7 +301,7 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
 
     res.json(updatedOrder);
   } else {
-    res.status(404);
+    res.status(404).json({ error: 'Order not found' });
     throw new Error('Order not found');
   }
 });
@@ -343,7 +363,7 @@ const deleteOrder = asyncHandler(async (req, res) => {
       await Order.deleteOne({ _id: order._id });
       return res.json({ message: 'Order removed' });
     } else {
-      res.status(404);
+      res.status(404).json({ error: 'Order not found' });
       throw new Error('Order not found');
     }
   } catch (error) {
