@@ -38,12 +38,13 @@ import RestaurantRoute from './components/RestaurantRoute';
 import DriverOrderListScreen from './screens/driver/DriverOrderListScreen';
 import RestaurantOrderListScreen from './screens/restaurant/RestaurantOrderListScreen';
 import RestaurantProductListScreen from './screens/restaurant/RestaurantProductListScreen';
-import RestaurantProductEditScreen from './screens/restaurant/RestaurantProductEditScreen';
 import OrdersScreen from './screens/Orders';
 import PrivacyPolicy from './screens/Legal/PrivacyPolicy';
 import TermsAndConditions from './screens/Legal/TermsAndConditions';
 import Error from './screens/Error';
 import { SocketContextProvider } from './context/SocketContext';
+import RestaurantProductsListScreen from './screens/RestaurantProductsListScreen';
+import RestaurantProductEditScreen from './screens/restaurant/RestaurantProductEditScreen';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -56,9 +57,14 @@ const router = createBrowserRouter(
         path='/search/:keyword/page/:pageNumber'
         element={<HomeScreen />}
       />
+
+      <Route
+        path='/restaurantProductList/:id'
+        element={<RestaurantProductsListScreen />}
+      />
       <Route path='/privacy-policy' element={<PrivacyPolicy />} />
       <Route path='/terms-and-conditions' element={<TermsAndConditions />} />
-      <Route path='/product/:id' element={<ProductScreen />} />
+      <Route path='/product/:id/:image' element={<ProductScreen />} />
       <Route path='/cart' element={<CartScreen />} />
       <Route path='/forgot-password' element={<ForgotPasswordScreen />} />
       <Route path='/login' element={<LoginScreen />} />
@@ -105,10 +111,10 @@ const router = createBrowserRouter(
           path='/restaurant/restaurantproductlist/:pageNumber'
           element={<RestaurantProductListScreen />}
         />
-        {/* <Route
+        <Route
           path='/restaurant/restaurantproduct/:id/edit'
           element={<RestaurantProductEditScreen />}
-        /> */}
+        />
       </Route>
 
       {/*Driver user */}
@@ -128,9 +134,9 @@ root.render(
   <React.StrictMode>
     <HelmetProvider>
       <Provider store={store}>
-        <SocketContextProvider>
+        {/* <SocketContextProvider> */}
           <RouterProvider router={router} />
-        </SocketContextProvider>
+        {/* </SocketContextProvider> */}
       </Provider>
     </HelmetProvider>
   </React.StrictMode>

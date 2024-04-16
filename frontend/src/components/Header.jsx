@@ -12,7 +12,7 @@ import { toast } from 'react-toastify';
 import useListenNewOrders from '../hooks/useListenNewOrders.js';
 
 const Header = () => {
-  useListenNewOrders();
+  // useListenNewOrders();
   const { cartItems } = useSelector((state) => state.cart);
   const { userInfo } = useSelector((state) => state.auth);
 

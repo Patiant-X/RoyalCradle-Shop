@@ -1,6 +1,12 @@
 import { LinkContainer } from 'react-router-bootstrap';
 import { Table, Button, Row, Col } from 'react-bootstrap';
-import { FaEdit, FaPlus, FaTrash, FaCheck, FaMinusCircle } from 'react-icons/fa';
+import {
+  FaEdit,
+  FaPlus,
+  FaTrash,
+  FaCheck,
+  FaMinusCircle,
+} from 'react-icons/fa';
 import { useParams } from 'react-router-dom';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
@@ -9,6 +15,8 @@ import {
   useGetProductsQuery,
   useDeleteProductMutation,
   useCreateProductMutation,
+  useUpdateAllProductsToAvailableMutation,
+  useUpdateAllProductsToNotAvailableMutation,
 } from '../../slices/productsApiSlice';
 import { toast } from 'react-toastify';
 
@@ -36,11 +44,49 @@ const ProductListScreen = () => {
   const [createProduct, { isLoading: loadingCreate }] =
     useCreateProductMutation();
 
+  const [updateAllProductsToAvailable] =
+    useUpdateAllProductsToAvailableMutation();
+
+  const [updateAllProductsToNotAvailable] =
+    useUpdateAllProductsToNotAvailableMutation();
+
   const createProductHandler = async () => {
     if (window.confirm('Are you sure you want to create a new product?')) {
       try {
         await createProduct();
         refetch();
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+      }
+    }
+  };
+
+  const updateAllProductsToAvailabeHandler = async () => {
+    if (
+      window.confirm(
+        'Are you sure you want to update all products to available?'
+      )
+    ) {
+      try {
+        const res = await updateAllProductsToAvailable();
+        refetch()
+        toast.success(res.message);
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+      }
+    }
+  };
+
+  const updateAllProductsToNotAvailabeHandler = async () => {
+    if (
+      window.confirm(
+        'Are you sure you want to update all products to Not available?'
+      )
+    ) {
+      try {
+        const res = await updateAllProductsToNotAvailable();
+        refetch()
+        toast.success(res.message);
       } catch (err) {
         toast.error(err?.data?.message || err.error);
       }
@@ -53,6 +99,12 @@ const ProductListScreen = () => {
         <Col>
           <h1>Products</h1>
         </Col>
+        <Col>
+          <Button onClick={updateAllProductsToAvailabeHandler}>
+            All Products Available
+          </Button>
+        </Col>
+
         <Col className='text-end'>
           <Button className='my-3' onClick={createProductHandler}>
             <FaPlus /> Create Product
@@ -85,9 +137,15 @@ const ProductListScreen = () => {
                   <td>{product._id}</td>
                   <td>{product.name}</td>
                   <td>R{product.price}</td>
-                  <td>{product.productIsAvailable ? <FaCheck /> : < FaMinusCircle/>}</td>
+                  <td>
+                    {product.productIsAvailable ? (
+                      <FaCheck />
+                    ) : (
+                      <FaMinusCircle />
+                    )}
+                  </td>
                   <td>{product.category}</td>
-                  <td>{product.IsFood ? <FaCheck /> : < FaMinusCircle/>}</td>
+                  <td>{product.IsFood ? <FaCheck /> : <FaMinusCircle />}</td>
                   <td>
                     <LinkContainer to={`/admin/product/${product._id}/edit`}>
                       <Button variant='light' className='btn-sm mx-2'>
@@ -109,6 +167,10 @@ const ProductListScreen = () => {
           <Paginate pages={data.pages} page={data.page} isAdmin={true} />
         </>
       )}
+
+      <Button onClick={updateAllProductsToNotAvailabeHandler} className='mt-5'>
+        All Products Not Available
+      </Button>
     </>
   );
 };

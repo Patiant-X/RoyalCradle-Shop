@@ -18,9 +18,21 @@ import {
   useDriverArrivedOrderMutation,
   useGetOrderDetailsQuery,
 } from '../slices/ordersApiSlice';
+import usePushNotifications from '../hooks/usePushNotifications.js';
+import useSendNotification from '../hooks/useSendNotification.js';
+import {
+  driverArrivedNotification,
+  orderCollectedNotification,
+  orderDeliveredNotification,
+} from '../data/notificationData.js';
 
 const OrderScreen = () => {
   const { id: orderId } = useParams();
+
+  const sendNotification = useSendNotification();
+
+  // Hook for subscribing user
+  usePushNotifications();
 
   const {
     data: order,
@@ -53,6 +65,10 @@ const OrderScreen = () => {
   const deliverHandler = async () => {
     await deliverOrder(orderId);
     if (!isErrorDeliverOrder) {
+      sendNotification({
+        notification: orderDeliveredNotification,
+        userId: order?.user?._id,
+      });
       toast.success('Order has been delivered; Thank You!');
     } else {
       toast.error('Order delivery failed');
@@ -65,13 +81,23 @@ const OrderScreen = () => {
     await driverArrivedOrder(orderId);
     if (isErrordriverArrivedOrder) {
       toast.error('Sending Message failed');
+    } else {
+      sendNotification({
+        notification: driverArrivedNotification,
+        userId: order?.user?._id,
+      });
     }
     refetch();
   };
 
   const handleOrderCollected = async () => {
     await collectOrder(orderId);
+
     if (!isErrorCollectOrder) {
+      sendNotification({
+        notification: orderCollectedNotification,
+        userId: order?.user?._id,
+      });
       toast.success('Order Collected; Please Deliver order to Client');
     } else {
       toast.error('Order collection failed');
@@ -128,6 +154,7 @@ const OrderScreen = () => {
     <Message variant='danger'>{error?.data?.message || error.error}</Message>
   ) : (
     <>
+
       <Alert variant='info'>
         <h2>Order Status: {statusMessage.orderMessage}</h2>
         <h4>Estimated Time: {statusMessage.time}</h4>
@@ -149,6 +176,7 @@ const OrderScreen = () => {
               </>
             )}
         <p style={{ margin: '0' }}>Order Number:{order?._id}</p>
+        <p className='m-0 mt-4 fw-bold italics center'>**Please allow notifications to receive updates about order**</p>
       </Alert>
       <Row>
         <Col md={8}>

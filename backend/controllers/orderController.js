@@ -8,6 +8,7 @@ import { calcPrices } from '../utils/calcPrices.js';
 import { OrderConfirmationContent } from '../utils/emailContents.js';
 import { makeYocoPayment, registerYocoWebHook } from '../utils/yoco.js';
 import { informUserDriverArrived, notifyNewOrder } from '../socket/socket.js';
+import { sendDriverNotification, sendRestaurantNotification } from './pushNotificationController.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -88,12 +89,16 @@ const addOrderItems = asyncHandler(async (req, res) => {
       const { redirectUrl } = resYoco;
 
       notifyNewOrder(restaurantUsers, createdOrder.paymentMethod);
+      sendRestaurantNotification(restaurantUsers, req.user.name);
+      sendDriverNotification(createdOrder);
 
       // Responding with only id and redirectUrl
       return res.status(200).json({ redirectUrl });
     }
 
     notifyNewOrder(restaurantUsers, createdOrder.paymentMethod);
+    sendRestaurantNotification(restaurantUsers, req.user.name);
+    sendDriverNotification(createdOrder);
 
     res.status(201).json(createdOrder);
   } catch (error) {
@@ -194,7 +199,8 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
     }).select('user');
 
     notifyNewOrder(restaurantUsers, 'card');
-
+    sendRestaurantNotification(restaurantUsers, order.user.name);
+    sendDriverNotification(order);
     res.send(200);
   } catch (error) {
     res.send(200);
@@ -289,7 +295,9 @@ const driverArrivedOrder = asyncHandler(async (req, res) => {
   }
 
   if (!order.driverAccepted) {
-    return res.status(400).json({ error: 'Driver has not accepted the order yet' });
+    return res
+      .status(400)
+      .json({ error: 'Driver has not accepted the order yet' });
   }
 
   // Update driverArrived field to true
@@ -297,7 +305,7 @@ const driverArrivedOrder = asyncHandler(async (req, res) => {
 
   // await order.save();
 
-  informUserDriverArrived(order.user)
+  informUserDriverArrived(order.user);
 
   res.status(200).json({ message: 'Driver arrived at delivery location' });
 });

@@ -100,13 +100,23 @@ const ProductEditScreen = () => {
   }, [product]);
 
   const uploadFileHandler = async (e) => {
+    if (restaurantName === '') {
+      toast.error('Please provide a restaurant name');
+      return;
+    }
     const formData = new FormData();
+    // Convert restaurant name to all uppercase and remove spaces
+    const formattedRestaurantName = restaurantName
+      .toUpperCase()
+      .replace(/\s+/g, '');
     formData.append('image', e.target.files[0]);
+    formData.append('restaurantName', formattedRestaurantName); // Append restaurant name to the form data
     try {
       const res = await uploadProductImage(formData).unwrap();
       toast.success(res.message);
       setImage(res.image);
     } catch (err) {
+      console.error(err)
       toast.error(err?.data?.message || err.error);
     }
   };
@@ -126,12 +136,22 @@ const ProductEditScreen = () => {
         ) : (
           <Form onSubmit={submitHandler}>
             <Form.Group controlId='name'>
-              <Form.Label>Name</Form.Label>
+              <Form.Label>Product Name</Form.Label>
               <Form.Control
                 type='name'
                 placeholder='Enter name'
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+              ></Form.Control>
+            </Form.Group>
+
+            <Form.Group controlId='restaurantName' className='my-4'>
+              <Form.Label>Restaurant Name</Form.Label>
+              <Form.Control
+                type='text'
+                placeholder='Enter Restaurant Name'
+                value={restaurantName}
+                onChange={(e) => setRestaurantName(e.target.value)}
               ></Form.Control>
             </Form.Group>
 
@@ -184,16 +204,6 @@ const ProductEditScreen = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 style={{ height: '150px', resize: 'both' }}
-              ></Form.Control>
-            </Form.Group>
-
-            <Form.Group controlId='restaurantName' className='my-4'>
-              <Form.Label>Restaurant Name</Form.Label>
-              <Form.Control
-                type='text'
-                placeholder='Enter Restaurant Name'
-                value={restaurantName}
-                onChange={(e) => setRestaurantName(e.target.value)}
               ></Form.Control>
             </Form.Group>
 

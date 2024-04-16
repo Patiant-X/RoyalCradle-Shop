@@ -43,45 +43,46 @@ const RestaurantProductEditScreen = () => {
   const navigate = useNavigate();
 
   const submitHandler = async (e) => {
+    console.log("Hello");
     e.preventDefault();
 
-    if (
-      addressCoordinates?.place != null &&
-      addressCoordinates?.lat != null &&
-      addressCoordinates?.lng != null
-    ) {
-      const location = addressCoordinates.place.address_components
-        .map((component) => component.long_name)
-        .join(' ');
-      const lat = addressCoordinates.lat;
-      const lng = addressCoordinates.lng;
+    // if (
+    //   addressCoordinates?.place != null &&
+    //   addressCoordinates?.lat != null &&
+    //   addressCoordinates?.lng != null
+    // ) {
+    //   const location = addressCoordinates.place.address_components
+    //     .map((component) => component.long_name)
+    //     .join(' ');
+    //   const lat = addressCoordinates.lat;
+    //   const lng = addressCoordinates.lng;
 
-      const updatedProduct = {
-        productId,
-        name,
-        price,
-        image,
-        IsFood: isFood,
-        category,
-        description,
-        restaurantArea,
-        restaurantName,
-        productIsAvailable,
-        latitude: lat,
-        longitude: lng,
-        address: location,
-      };
-      try {
-        await updateProduct(updatedProduct).unwrap(); // NOTE: here we need to unwrap the Promise to catch any rejection in our catch block
-        toast.success('Product updated');
-        refetch();
-        navigate('/admin/productlist');
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-      }
-    } else {
-      toast.error('Please select address from google suggestions');
-    }
+    //   const updatedProduct = {
+    //     productId,
+    //     name,
+    //     price,
+    //     image,
+    //     IsFood: isFood,
+    //     category,
+    //     description,
+    //     restaurantArea,
+    //     restaurantName,
+    //     productIsAvailable,
+    //     latitude: lat,
+    //     longitude: lng,
+    //     address: location,
+    //   };
+    //   try {
+    //     await updateProduct(updatedProduct).unwrap(); // NOTE: here we need to unwrap the Promise to catch any rejection in our catch block
+    //     toast.success('Product updated');
+    //     refetch();
+    //     navigate('/admin/productlist');
+    //   } catch (err) {
+    //     toast.error(err?.data?.message || err.error);
+    //   }
+    // } else {
+    //   toast.error('Please select address from google suggestions');
+    // }
   };
 
   useEffect(() => {

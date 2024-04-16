@@ -70,7 +70,8 @@ const adminDriver = (req, res, next) => {
     throw new Error('Not authorized');
   }
 };
-// User must be an admin / Driver
+
+// User must be an admin / Restaurant
 const adminRestaurant = (req, res, next) => {
   if (
     req.user &&

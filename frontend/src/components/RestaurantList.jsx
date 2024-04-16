@@ -3,7 +3,10 @@ import { Link } from 'react-router-dom';
 import Rating from './Rating';
 import { calculateDistance } from '../utils/calculateDeliveryDistance';
 
-const Product = ({ product, latitude, longitude, image }) => {
+const RestaurantList = ({ productAndUser, latitude, longitude }) => {
+  const product = productAndUser.product;
+  const userId = productAndUser.user._id
+
   let deliveryPrice;
   let deliveryTime;
   if (latitude !== null && longitude !== null) {
@@ -32,28 +35,20 @@ const Product = ({ product, latitude, longitude, image }) => {
     }
   }
 
-  const encodedImage = encodeURIComponent(JSON.stringify(image));
-  const encodedImage2 = encodeURIComponent(JSON.stringify(product.image));
-
-  const toPath =
-    product.image === '/images/sample.jpg'
-      ? `/product/${product._id}/${encodedImage}`
-      : `/product/${product._id}/${encodedImage2}`;
-
   return (
     <Card className='my-3 p-3 rounded'>
-      <Link to={toPath}>
-        <Card.Img src={`${product.image}` === '/images/sample.jpg'? `${image}` : `${product.image}` } variant='top' />
+      <Link to={`/restaurantProductList/${userId}`}>
+        <Card.Img src={product.image ? product.image : '/images/sample.jpg'} variant='top' />
       </Link>
 
       <Card.Body>
-        <Link to={toPath}>
+        <Link to={`/restaurantProductList/${userId}`}>
           <Card.Title as='div' className='product-title'>
-            <strong>{product.name}</strong>
+            <strong>
+              {product?.restaurantName ? `${product?.restaurantName}` : 'Food'}
+            </strong>
           </Card.Title>
         </Link>
-
-        <Card.Text as='p'>{product.description}</Card.Text>
 
         <Card.Text as='div'>
           <Rating
@@ -61,8 +56,6 @@ const Product = ({ product, latitude, longitude, image }) => {
             text={`${product.numReviews} reviews`}
           />
         </Card.Text>
-
-        <Card.Text as='h3'>R{product.price}</Card.Text>
       </Card.Body>
       {deliveryTime && (
         <Card.Footer>
@@ -85,4 +78,4 @@ const Product = ({ product, latitude, longitude, image }) => {
   );
 };
 
-export default Product;
+export default RestaurantList;

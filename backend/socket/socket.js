@@ -104,7 +104,10 @@ export async function informUserDriverArrived(userId) {
   try {
     const userSocketId = customerSocketMap[userId];
     if (userSocketId) {
-      io.to(userSocketId).emit('driverArrived', 'The driver has arrived for your order');
+      io.to(userSocketId).emit(
+        'driverArrived',
+        'The driver has arrived for your order'
+      );
     } else {
       console.log(`Socket not found for user ${userId}`);
     }
@@ -112,6 +115,5 @@ export async function informUserDriverArrived(userId) {
     console.error('Error informing user about driver arrival:', error);
   }
 }
-
 
 export { app, io, server };

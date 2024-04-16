@@ -4,12 +4,19 @@ import { apiSlice } from './apiSlice';
 export const productsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getProducts: builder.query({
-      query: ({ keyword, pageNumber , latitude, longitude }) => ({
+      query: ({ keyword, pageNumber, latitude, longitude, restaurant, category }) => ({
         url: PRODUCTS_URL,
-        params: { keyword, pageNumber, latitude, longitude },
+        params: { keyword, pageNumber, latitude, longitude, restaurant, category },
       }),
       keepUnusedDataFor: 5,
       providesTags: ['Products'],
+    }),
+    getRestaurants: builder.query({
+      query: () => ({
+        url: `${PRODUCTS_URL}/restaurants`,
+      }),
+      keepUnusedDataFor: 5,
+      providesTags: ['Product'],
     }),
     getRestaurantProduct: builder.query({
       query: () => ({
@@ -38,6 +45,18 @@ export const productsApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
       invalidatesTags: ['Products'],
+    }),
+    updateAllProductsToAvailable: builder.mutation({
+      query: () => ({
+        url: PRODUCTS_URL,
+        method: 'PATCH',
+      }),
+    }),
+    updateAllProductsToNotAvailable: builder.mutation({
+      query: () => ({
+        url: `${PRODUCTS_URL}/notavailable`,
+        method: 'PATCH',
+      }),
     }),
     uploadProductImage: builder.mutation({
       query: (data) => ({
@@ -78,4 +97,6 @@ export const {
   useUploadProductImageMutation,
   useDeleteProductMutation,
   useCreateReviewMutation,
+  useUpdateAllProductsToAvailableMutation,
+  useUpdateAllProductsToNotAvailableMutation
 } = productsApiSlice;

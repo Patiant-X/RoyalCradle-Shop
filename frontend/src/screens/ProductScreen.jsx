@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,7 +24,7 @@ import { addToCart } from '../slices/cartSlice';
 import { calculateRestaurantDistance } from '../utils/calculateDeliveryDistance';
 
 const ProductScreen = () => {
-  const { id: productId } = useParams();
+  const { id: productId, image : encodedImage } = useParams();
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
 
@@ -35,6 +35,14 @@ const ProductScreen = () => {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
   const [additionalInfo, setAdditionalInfo] = useState('');
+  const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    if (encodedImage) {
+      const decodedImage = JSON.parse(decodeURIComponent(encodedImage));
+      setImage(decodedImage);
+    }
+  }, [encodedImage]);
 
   const addToCartHandler = () => {
     const existingItem = cartItems.find((item) => item._id === productId);
@@ -77,10 +85,9 @@ const ProductScreen = () => {
       toast.error(err?.data?.message || err.error);
     }
   };
-
   return (
     <>
-      <Link className='btn btn-light my-3' to='/'>
+      <Link className='btn btn-light my-3' to={`/restaurantProductList/${product?.user}`}>
         Go Back
       </Link>
       {isLoading ? (
@@ -94,7 +101,7 @@ const ProductScreen = () => {
           <Meta title={product.name} description={product.description} />
           <Row>
             <Col md={6}>
-              <Image src={product.image} alt={product.name} fluid />
+              <Image src={image} alt={product.name} fluid />
             </Col>
             <Col md={3}>
               <ListGroup variant='flush'>
@@ -131,7 +138,7 @@ const ProductScreen = () => {
                         {product.productIsAvailable ? (
                           <span style={{ color: 'green' }}>Available</span>
                         ) : (
-                          <span style={{ color: 'red' }}>Not Availabe</span>
+                          <span style={{ color: 'red' }}>Not Available</span>
                         )}
                       </Col>
                     </Row>
@@ -279,7 +286,7 @@ const maxItemsInCart = (cartItems, newProduct, qty) => {
         newRestLng
       );
       if (restaurantDistance > 1) {
-        toast.error('Restaurants too far apart');
+        toast.error('Restaurants too far apart, please remove items in cart');
         return true;
       }
       if (restaurantDistance === 0) {

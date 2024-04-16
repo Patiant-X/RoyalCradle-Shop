@@ -1,6 +1,7 @@
 import path from 'path';
 import express from 'express';
 import multer from 'multer';
+import cloudinary from '../utils/cloudinary.js';
 
 const router = express.Router();
 
@@ -34,15 +35,35 @@ const upload = multer({ storage, fileFilter });
 const uploadSingleImage = upload.single('image');
 
 router.post('/', (req, res) => {
-  uploadSingleImage(req, res, function (err) {
+  uploadSingleImage(req, res, async function (err) {
     if (err) {
       return res.status(400).send({ message: err.message });
     }
 
-    res.status(200).send({
-      message: 'Image uploaded successfully',
-      image: `/${req.file.path}`,
-    });
+    if (req.file) {
+      //Save image to cloudinary
+      let uploadedFile;
+      try {
+        uploadedFile = await cloudinary.uploader.upload(req.file.path, {
+          folder: req.body.restaurantName,
+          resource_type: 'image',
+          quality: 'auto:good',
+          width: 640,
+          height: 510,
+        });
+        console.log('image uploaded proper');
+      } catch (error) {
+        res.status(500).json(error);
+        return;
+      }
+      res.status(200).send({
+        message: 'Image uploaded successfully',
+        image: `${uploadedFile.secure_url}`,
+      });
+      return;
+    }else {
+      res.status(400).json({error : "Failed to upload Image"})
+    }
   });
 });
 

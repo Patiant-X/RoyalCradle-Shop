@@ -220,6 +220,7 @@ const getUserById = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 });
+
 // @desc    Update user
 // @route   PUT /api/users/:id
 // @access  Private/Admin

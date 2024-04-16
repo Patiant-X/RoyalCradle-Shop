@@ -9,7 +9,6 @@ const getProducts = asyncHandler(async (req, res) => {
   const pageSize = process.env.PAGINATION_LIMIT;
   const page = Number(req.query.pageNumber) || 1;
   const { latitude, longitude } = req.query;
-
   const keyword = req.query.keyword
     ? {
         name: {
@@ -19,8 +18,23 @@ const getProducts = asyncHandler(async (req, res) => {
       }
     : {};
 
-  const count = await Product.countDocuments({ ...keyword });
-  let products = await Product.find({ ...keyword })
+  //Check if category is supplied in the request
+  const category = req.query.category
+    ? {
+        category: {
+          $regex: req.query.category,
+          $options: 'i',
+        },
+      }
+    : {};
+
+  // Merge keyword and category filters
+  const filters = { ...category, ...keyword };
+
+  const count = await Product.countDocuments(filters);
+
+  let products = await Product.find(filters)
+    .populate('user', '-password')
     .sort({ IsFood: -1, rating: -1, numReviews: -1 }) // Sort in descending order by IsFood, rating, and numReviews
     .limit(pageSize)
     .skip(pageSize * (page - 1));
@@ -64,33 +78,124 @@ const getProducts = asyncHandler(async (req, res) => {
     if (products.length === 0) {
       products = productsOutOfRange;
     }
-
-    // Get the count of IsFood products in the current page
-    // const isFoodCount = products.filter((product) => product.IsFood).length;
-
-    // if (isFoodCount < 5) {
-    //   // If there are fewer than 4 IsFood items, include all products
-    //   const remainingProducts = await Product.find({
-    //     ...keyword,
-    //     IsFood: false,
-    //   })
-    //     .sort({ rating: -1 }) // Sort non-food products by rating in descending order
-    //     .limit(pageSize - isFoodCount);
-
-    //   products.push(...remainingProducts);
-    // }
   }
+
+  if (req.query.restaurant === 'restaurantList') {
+    // Define and initialize productsWithUsers
+    let productsWithUsers = [];
+    let userWithPriority = null;
+
+    // Iterate over each product
+    products.forEach((product) => {
+      // Check if the current product belongs to the user with the specified ID
+      if (product.user._id.toString() === '6619ce401336f81b75d91686') {
+        // Set the user with priority
+        if (
+          !userWithPriority ||
+          product.rating > userWithPriority.product.rating
+        ) {
+          userWithPriority = {
+            product: product,
+            user: product.user,
+          };
+        }
+      } else {
+        // Find the index of the user in productsWithUsers array
+        const existingUserIndex = productsWithUsers.findIndex(
+          (p) => p.user._id.toString() === product.user._id.toString()
+        );
+
+        // If the user already exists in productsWithUsers
+        if (existingUserIndex !== -1) {
+          // Check if the current product has a higher rating
+          if (
+            productsWithUsers[existingUserIndex].product.rating < product.rating
+          ) {
+            // Update the product with the higher rating
+            productsWithUsers[existingUserIndex].product = product;
+          }
+        } else {
+          // If the user doesn't exist in productsWithUsers, add the product
+          productsWithUsers.push({
+            product: product,
+            user: product.user,
+          });
+        }
+      }
+    });
+
+    // Add the user with priority to the beginning of the productsWithUsers array
+    if (userWithPriority) {
+      productsWithUsers.unshift(userWithPriority);
+    }
+
+    // Calculate the total count of products
+    const count = productsWithUsers.length;
+
+    // Send the response with productsWithUsers, userCategories, and pagination information
+    res.json({
+      product: productsWithUsers,
+      page,
+      pages: Math.ceil(count / pageSize),
+    });
+    return;
+  } else if (
+    req.query.restaurant !== 'restaurant' &&
+    req.query.restaurant != null
+  ) {
+    // Filter products associated with the user
+    products = products.filter(
+      (product) =>
+        product.user._id.toString() === req.query.restaurant.toString()
+    );
+    // Sort products by rating and product availability (IsFood)
+    products.sort((a, b) => {
+      // Sort by rating in descending order
+      if (a.rating !== b.rating) {
+        return b.rating - a.rating;
+      }
+      // Sort by product availability (IsFood) - food products first
+      return b.IsFood - a.IsFood;
+    });
+    const count = products.length;
+    res.json({
+      products,
+      page,
+      pages: Math.ceil(count / pageSize),
+    });
+    return;
+  }
+
+  // Get the count of IsFood products in the current page
+  // const isFoodCount = products.filter((product) => product.IsFood).length;
+
+  // if (isFoodCount < 5) {
+  //   // If there are fewer than 4 IsFood items, include all products
+  //   const remainingProducts = await Product.find({
+  //     ...keyword,
+  //     IsFood: false,
+  //   })
+  //     .sort({ rating: -1 }) // Sort non-food products by rating in descending order
+  //     .limit(pageSize - isFoodCount);
+
+  //   products.push(...remainingProducts);
+  // }
 
   res.json({ products, page, pages: Math.ceil(count / pageSize) });
 });
 
 // @desc    Fetch restaurant product
 // @route   GET /api/products/restaurant
-// @access  Public
+// @access  Restaurants
 const getRestaurantProduct = asyncHandler(async (req, res) => {
   const restaurantId = req.user._id;
   const product = await Product.find({ user: restaurantId });
-  res.json({ product });
+  if (product) {
+    res.json({ product });
+  } else {
+    res.status(400).json({ error: 'Users with restaurant not found' });
+    throw new Error('Users with restaurants not found');
+  }
 });
 
 // @desc    Fetch single product
@@ -103,7 +208,7 @@ const getProductById = asyncHandler(async (req, res) => {
   } else {
     // NOTE: this will run if a valid ObjectId but no product was found
     // i.e. product may be null
-    res.status(404).json({error: 'Product not found'});
+    res.status(404).json({ error: 'Product not found' });
     throw new Error('Product not found');
   }
 });
@@ -112,14 +217,14 @@ const getProductById = asyncHandler(async (req, res) => {
 // @route   POST /api/products
 // @access  Private/Admin
 const createProduct = asyncHandler(async (req, res) => {
-  if (req.user.roles[0] === 'restaurant') {
-    const restaurantId = req.user._id;
-    const data = await Product.find({ user: restaurantId });
-    if (data?.length > 0) {
-      res.status(400).json({error: 'Restaurant can only have one product'});
-      throw new Error('Restaurant can only have one product');
-    }
-  }
+  // if (req.user.roles[0] === 'restaurant') {
+  //   const restaurantId = req.user._id;
+  //   const data = await Product.find({ user: restaurantId });
+  //   if (data?.length > 0) {
+  //     res.status(400).json({ error: 'Restaurant can only have one product' });
+  //     throw new Error('Restaurant can only have one product');
+  //   }
+  // }
   const product = new Product({
     name: 'Sample name',
     price: 0,
@@ -195,7 +300,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
     await Product.deleteOne({ _id: product._id });
     res.json({ message: 'Product removed' });
   } else {
-    res.status(404).json({error: 'Product not found'});
+    res.status(404).json({ error: 'Product not found' });
     throw new Error('Product not found');
   }
 });
@@ -214,7 +319,7 @@ const createProductReview = asyncHandler(async (req, res) => {
     );
 
     if (alreadyReviewed) {
-      res.status(400).json({error: 'Product already reviewed'});
+      res.status(400).json({ error: 'Product already reviewed' });
       throw new Error('Product already reviewed');
     }
 
@@ -236,7 +341,7 @@ const createProductReview = asyncHandler(async (req, res) => {
     await product.save();
     res.status(201).json({ message: 'Review added' });
   } else {
-    res.status(404).json({error: 'Product not found'});
+    res.status(404).json({ error: 'Product not found' });
     throw new Error('Product not found');
   }
 });
@@ -245,11 +350,39 @@ const createProductReview = asyncHandler(async (req, res) => {
 // @route   GET /api/products/top
 // @access  Public
 const getTopProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find()
-    .sort({ rating: -1 })
-    .limit(3);
+  const choosenProducts = [
+    '661c34fb8ae90d53e82be3ac',
+    '65e1b3fb385cdbbf8af7cfd5',
+    '661c34f28ae90d53e82be39a',
+  ];
+
+  // Find the three chosen products by their IDs
+  const products = await Product.find({ _id: { $in: choosenProducts } });
 
   res.json(products);
+});
+
+// @desc    Update all products to available
+// @route   PATCH /api/products
+// @access  Admin
+const updateAllProductsToAvailable = asyncHandler(async (req, res) => {
+  // Update all products to available
+  await Product.updateMany({}, { productIsAvailable: true });
+
+  res.status(200).json({
+    message: 'All products updated to available state',
+  });
+});
+// @desc    Update all products to available
+// @route   PATCH /api/products/notavailable
+// @access  Admin
+const updateAllProductsToNotAvailable = asyncHandler(async (req, res) => {
+  // Update all products to available
+  await Product.updateMany({}, { productIsAvailable: false });
+
+  res.status(200).json({
+    message: 'All products updated to not available state',
+  });
 });
 
 export {
@@ -261,4 +394,6 @@ export {
   createProductReview,
   getTopProducts,
   getRestaurantProduct,
+  updateAllProductsToAvailable,
+  updateAllProductsToNotAvailable,
 };
