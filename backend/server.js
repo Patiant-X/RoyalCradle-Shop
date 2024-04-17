@@ -4,7 +4,8 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { parseRawRequestBody } from './middleware/webhookCheckoutId.js';
 dotenv.config();
-const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, EMAIL_USER } = process.env;
+const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY,  EMAIL_USER } =
+  process.env;
 import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -24,8 +25,10 @@ connectDB();
 //const app = express();
 
 const vapidKeys = {
-  publicKey: VAPID_PUBLIC_KEY,
-  privateKey: VAPID_PRIVATE_KEY,
+  publicKey:
+    'BG0BzgeISwE7My_Sue8MTDdtSYdEPCemUYpmbbmcSFtquayfifnmzx-OlsUBwh6cvOuBh62xYFbXUdgLyVoUQvA',
+
+  privateKey: '6tefQq9C66-tYKLIoRrQECA-bo-Cwx8tbE68eYjg84s',
 };
 
 // Set up VAPID keys
@@ -45,7 +48,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use('/api/notification', pushNotificationRoute);
+app.use('/api/notification', pushNotificationRoute)
+
 
 // Execute once to get secret and store secret in env file
 // Commented out for security reasons
