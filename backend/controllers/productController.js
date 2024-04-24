@@ -1,12 +1,15 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import Product from '../models/productModel.js';
+import dotenv from 'dotenv';
+dotenv.config();
+const { PAGINATION_LIMIT } = process.env;
 import { calculateUserDistance } from '../utils/calculateDeliveryDistanceFee.js';
 
 // @desc    Fetch all products
 // @route   GET /api/products
 // @access  Public
 const getProducts = asyncHandler(async (req, res) => {
-  const pageSize = process.env.PAGINATION_LIMIT;
+  const pageSize = null;
   const page = Number(req.query.pageNumber) || 1;
   const { latitude, longitude } = req.query;
   const keyword = req.query.keyword
@@ -31,14 +34,12 @@ const getProducts = asyncHandler(async (req, res) => {
   // Merge keyword and category filters
   const filters = { ...category, ...keyword };
 
-  const count = await Product.countDocuments(filters);
-
+  let count = await Product.countDocuments(filters);
   let products = await Product.find(filters)
     .populate('user', '-password')
     .sort({ IsFood: -1, rating: -1, numReviews: -1 }) // Sort in descending order by IsFood, rating, and numReviews
     .limit(pageSize)
     .skip(pageSize * (page - 1));
-
   const productsOutOfRange = products;
   // If latitude and longitude are provided, filter products based on distance
   if (
@@ -65,8 +66,14 @@ const getProducts = asyncHandler(async (req, res) => {
           !products.some((pr) => pr._id.toString() === product._id.toString())
       );
       // Concatenate products within radius and unique products from all products
-      const mergedProducts = [...products, ...uniqueProducts];
+      let mergedProducts = [...products, ...uniqueProducts];
 
+      if (req.query.restaurant) {
+        mergedProducts = mergedProducts.filter(
+          (product) => product.user._id.toString() === req.query.restaurant
+        );
+      }
+      count = mergedProducts.length;
       res.json({
         products: mergedProducts,
         page,
@@ -87,8 +94,8 @@ const getProducts = asyncHandler(async (req, res) => {
 
     // Iterate over each product
     products.forEach((product) => {
-      let shimicas = '6619ce401336f81b75d91686'
-      let theFoodiee = '65fdb14cc20aa1ee82444ef2'
+      let shimicas = '6619ce401336f81b75d91686';
+      let theFoodiee = '65fdb14cc20aa1ee82444ef2';
       // Check if the current product belongs to the user with the specified ID
       if (product.user._id.toString() === theFoodiee) {
         // Set the user with priority
@@ -186,17 +193,32 @@ const getProducts = asyncHandler(async (req, res) => {
   res.json({ products, page, pages: Math.ceil(count / pageSize) });
 });
 
-// @desc    Fetch restaurant product
-// @route   GET /api/products/restaurant
+/// @desc    Fetch restaurant product
+// @route   GET /api/products/restaurant/:id
 // @access  Restaurants
 const getRestaurantProduct = asyncHandler(async (req, res) => {
-  const restaurantId = req.user._id;
-  const product = await Product.find({ user: restaurantId });
-  if (product) {
-    res.json({ product });
+  let restaurantId;
+  // Check if an ID is provided in the request parameters
+  if (req.query.id) {
+    restaurantId = req.query.id;
   } else {
-    res.status(400).json({ error: 'Users with restaurant not found' });
-    throw new Error('Users with restaurants not found');
+    // If no ID is provided, use the authenticated user's ID
+    restaurantId = req.user._id;
+  }
+
+  try {
+    const products = await Product.find({ user: restaurantId });
+
+    if (products.length > 0) {
+      res.json({ products });
+    } else {
+      res
+        .status(404)
+        .json({ error: 'Products not found for this restaurant ID' });
+    }
+  } catch (error) {
+    console.error('Error fetching restaurant products:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -217,20 +239,12 @@ const getProductById = asyncHandler(async (req, res) => {
 
 // @desc    Create a product
 // @route   POST /api/products
-// @access  Private/Admin
+// @access  Admin
 const createProduct = asyncHandler(async (req, res) => {
-  // if (req.user.roles[0] === 'restaurant') {
-  //   const restaurantId = req.user._id;
-  //   const data = await Product.find({ user: restaurantId });
-  //   if (data?.length > 0) {
-  //     res.status(400).json({ error: 'Restaurant can only have one product' });
-  //     throw new Error('Restaurant can only have one product');
-  //   }
-  // }
   const product = new Product({
     name: 'Sample name',
     price: 0,
-    user: req.user._id,
+    user: req.params.id,
     image: '/images/sample.jpg',
     category: 'Sample category',
     countInStock: 0,
@@ -246,9 +260,6 @@ const createProduct = asyncHandler(async (req, res) => {
   res.status(201).json(createdProduct);
 });
 
-// @desc    Update a product
-// @route   PUT /api/products/:id
-// @access  Private/Admin
 const updateProduct = asyncHandler(async (req, res) => {
   const {
     name,
@@ -265,19 +276,28 @@ const updateProduct = asyncHandler(async (req, res) => {
     longitude,
   } = req.body;
 
-  // const restaurantId = req.user._id;
-  // const data = await Product.find({ user: restaurantId });
-
   const product = await Product.findById(req.params.id);
 
-  if (product) {
+  if (!product) {
+    res.status(404).json({ message: 'Product not found' });
+    throw new Error('Product not found');
+  }
+
+  // Check if the user is a restaurant
+  if (req.user.roles[0] === 'restaurant') {
+    // Update only the productIsAvailable field
+    product.productIsAvailable = productIsAvailable;
+
+    const updatedProduct = await product.save();
+    res.json(updatedProduct);
+  } else {
+    // Update other fields if user is admin
     product.name = name;
     product.price = price;
     product.description = description;
     product.image = image;
     product.IsFood = IsFood;
     product.category = category;
-    product.productIsAvailable = productIsAvailable;
     product.location.address = address;
     product.location.latitude = latitude;
     product.location.longitude = longitude;
@@ -286,9 +306,6 @@ const updateProduct = asyncHandler(async (req, res) => {
 
     const updatedProduct = await product.save();
     res.json(updatedProduct);
-  } else {
-    res.status(404).json(req.body);
-    throw new Error('Product not found');
   }
 });
 
@@ -368,8 +385,16 @@ const getTopProducts = asyncHandler(async (req, res) => {
 // @route   PATCH /api/products
 // @access  Admin
 const updateAllProductsToAvailable = asyncHandler(async (req, res) => {
-  // Update all products to available
-  await Product.updateMany({}, { productIsAvailable: true });
+  if (req.body.userId) {
+    // If userId is provided, update only the products associated with that userId
+    await Product.updateMany(
+      { user: req.body.userId },
+      { productIsAvailable: true }
+    );
+  } else {
+    // Update all products to available
+    await Product.updateMany({}, { productIsAvailable: true });
+  }
 
   res.status(200).json({
     message: 'All products updated to available state',
@@ -379,8 +404,16 @@ const updateAllProductsToAvailable = asyncHandler(async (req, res) => {
 // @route   PATCH /api/products/notavailable
 // @access  Admin
 const updateAllProductsToNotAvailable = asyncHandler(async (req, res) => {
-  // Update all products to available
-  await Product.updateMany({}, { productIsAvailable: false });
+  if (req.body.userId) {
+    // If userId is provided, update only the products associated with that userId
+    await Product.updateMany(
+      { user: req.body.userId },
+      { productIsAvailable: false }
+    );
+  } else {
+    // Update all products to not available
+    await Product.updateMany({}, { productIsAvailable: false });
+  }
 
   res.status(200).json({
     message: 'All products updated to not available state',

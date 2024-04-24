@@ -1,7 +1,6 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import Subscription from '../models/subscriptionModel.js';
 import webpush from 'web-push';
-import { sendPushNotification } from '../utils/pushNotification.js';
 import User from '../models/userModel.js';
 
 // @desc    Send a Notification to user
@@ -11,7 +10,6 @@ export const sendNotification = asyncHandler(async (req, res) => {
   try {
     // this is the user Id we a sending the notifcation to
     const { userId, notification } = req.body;
-    console.log('hell', notification);
     // Retrieve the subscription object associated with the user from the database
     const userSubscription = await Subscription.findOne({ userId });
     if (!userSubscription) {

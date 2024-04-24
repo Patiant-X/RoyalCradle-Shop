@@ -12,20 +12,61 @@ import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import Paginate from '../../components/Paginate';
 import {
-  useGetProductsQuery,
   useDeleteProductMutation,
   useCreateProductMutation,
+  useGetRestaurantProductQuery,
   useUpdateAllProductsToAvailableMutation,
   useUpdateAllProductsToNotAvailableMutation,
 } from '../../slices/productsApiSlice';
 import { toast } from 'react-toastify';
+import { useEffect } from 'react';
 
-const ProductListScreen = () => {
-  const { pageNumber } = useParams();
+const RestaurantItemsListScreen = () => {
+  const { pageNumber, id } = useParams();
 
-  const { data, isLoading, error, refetch } = useGetProductsQuery({
-    pageNumber,
+  const { data, isLoading, error, refetch } = useGetRestaurantProductQuery({
+    id,
   });
+
+  // Initialize mutation hooks
+  const [updateAllProductsToAvailable, { isLoading: loadingAvailable }] =
+    useUpdateAllProductsToAvailableMutation();
+  // Handler for updating all products to available
+  const updateAllProductsToAvailableHandler = async () => {
+    if (
+      window.confirm(
+        'Are you sure you want to update all products to available?'
+      )
+    ) {
+      try {
+        await updateAllProductsToAvailable({ userId: id });
+        refetch();
+        toast.success('All products updated to available');
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+      }
+    }
+  };
+
+  const [updateAllProductsToNotAvailable, { isLoading: loadingNotAvailable }] =
+    useUpdateAllProductsToNotAvailableMutation();
+
+  // Handler for updating all products to not available
+  const updateAllProductsToNotAvailableHandler = async () => {
+    if (
+      window.confirm(
+        'Are you sure you want to update all products to not available?'
+      )
+    ) {
+      try {
+        await updateAllProductsToNotAvailable({ userId: id });
+        refetch();
+        toast.success('All products updated to not available');
+      } catch (err) {
+        toast.error(err?.data?.message || err.error);
+      }
+    }
+  };
 
   const [deleteProduct, { isLoading: loadingDelete }] =
     useDeleteProductMutation();
@@ -33,7 +74,7 @@ const ProductListScreen = () => {
   const deleteHandler = async (id) => {
     if (window.confirm('Are you sure')) {
       try {
-        await deleteProduct(id);
+        await deleteProduct(id).unwrap();
         refetch();
       } catch (err) {
         toast.error(err?.data?.message || err.error);
@@ -44,54 +85,20 @@ const ProductListScreen = () => {
   const [createProduct, { isLoading: loadingCreate }] =
     useCreateProductMutation();
 
-  const [updateAllProductsToAvailable] =
-    useUpdateAllProductsToAvailableMutation();
-
-  const [updateAllProductsToNotAvailable] =
-    useUpdateAllProductsToNotAvailableMutation();
-
   const createProductHandler = async () => {
     if (window.confirm('Are you sure you want to create a new product?')) {
       try {
-        await createProduct();
+        await createProduct(id).unwrap();
         refetch();
       } catch (err) {
-        toast.error(err?.data?.message || err.error);
+        toast.error(err?.data?.message || err.err);
       }
     }
   };
 
-  const updateAllProductsToAvailabeHandler = async () => {
-    if (
-      window.confirm(
-        'Are you sure you want to update all products to available?'
-      )
-    ) {
-      try {
-        const res = await updateAllProductsToAvailable({userId: null});
-        refetch()
-        toast.success(res.message);
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-      }
-    }
-  };
-
-  const updateAllProductsToNotAvailabeHandler = async () => {
-    if (
-      window.confirm(
-        'Are you sure you want to update all products to Not available?'
-      )
-    ) {
-      try {
-        const res = await updateAllProductsToNotAvailable({userId: null});
-        refetch()
-        toast.success(res.message);
-      } catch (err) {
-        toast.error(err?.data?.message || err.error);
-      }
-    }
-  };
+  useEffect(() => {
+    refetch();
+  }, []);
 
   return (
     <>
@@ -99,19 +106,17 @@ const ProductListScreen = () => {
         <Col>
           <h1>Products</h1>
         </Col>
-        <Col>
-          <Button onClick={updateAllProductsToAvailabeHandler}>
-            All Products Available
-          </Button>
-        </Col>
-
         <Col className='text-end'>
+          <Button onClick={updateAllProductsToAvailableHandler} className='m-2'>
+            Update All Products to Available
+          </Button>
           <Button className='my-3' onClick={createProductHandler}>
             <FaPlus /> Create Product
           </Button>
         </Col>
       </Row>
-
+      {loadingAvailable && <Loader />}
+      {loadingNotAvailable && <Loader />}
       {loadingCreate && <Loader />}
       {loadingDelete && <Loader />}
       {isLoading ? (
@@ -123,7 +128,6 @@ const ProductListScreen = () => {
           <Table striped bordered hover responsive className='table-sm'>
             <thead>
               <tr>
-                <th>ID</th>
                 <th>NAME</th>
                 <th>PRICE</th>
                 <th>Available</th>
@@ -132,9 +136,8 @@ const ProductListScreen = () => {
               </tr>
             </thead>
             <tbody>
-              {data.products.map((product) => (
+              {data?.products?.map((product) => (
                 <tr key={product._id}>
-                  <td>{product._id}</td>
                   <td>{product.name}</td>
                   <td>R{product.price}</td>
                   <td>
@@ -147,8 +150,10 @@ const ProductListScreen = () => {
                   <td>{product.category}</td>
                   <td>{product.IsFood ? <FaCheck /> : <FaMinusCircle />}</td>
                   <td>
-                    <LinkContainer to={`/admin/product/${product._id}/edit`}>
-                      <Button variant='light' className='btn-sm mx-2'>
+                    <LinkContainer
+                      to={`/admin/restaurantitems/${product._id}/edit`}
+                    >
+                      <Button variant='light' className='btn-sm mx-2 py-4'>
                         <FaEdit />
                       </Button>
                     </LinkContainer>
@@ -167,12 +172,11 @@ const ProductListScreen = () => {
           <Paginate pages={data.pages} page={data.page} isAdmin={true} />
         </>
       )}
-
-      <Button onClick={updateAllProductsToNotAvailabeHandler} className='mt-5'>
-        All Products Not Available
+      <Button onClick={updateAllProductsToNotAvailableHandler}>
+        Update All Products to Not Available
       </Button>
     </>
   );
 };
 
-export default ProductListScreen;
+export default RestaurantItemsListScreen;

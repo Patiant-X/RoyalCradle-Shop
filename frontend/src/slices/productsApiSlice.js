@@ -4,9 +4,23 @@ import { apiSlice } from './apiSlice';
 export const productsApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getProducts: builder.query({
-      query: ({ keyword, pageNumber, latitude, longitude, restaurant, category }) => ({
+      query: ({
+        keyword,
+        pageNumber,
+        latitude,
+        longitude,
+        restaurant,
+        category,
+      }) => ({
         url: PRODUCTS_URL,
-        params: { keyword, pageNumber, latitude, longitude, restaurant, category },
+        params: {
+          keyword,
+          pageNumber,
+          latitude,
+          longitude,
+          restaurant,
+          category,
+        },
       }),
       keepUnusedDataFor: 5,
       providesTags: ['Products'],
@@ -19,8 +33,9 @@ export const productsApiSlice = apiSlice.injectEndpoints({
       providesTags: ['Product'],
     }),
     getRestaurantProduct: builder.query({
-      query: () => ({
+      query: ({ id }) => ({
         url: `${PRODUCTS_URL}/restaurant`,
+        params: { id },
       }),
       keepUnusedDataFor: 5,
       providesTags: ['Product'],
@@ -32,8 +47,8 @@ export const productsApiSlice = apiSlice.injectEndpoints({
       keepUnusedDataFor: 5,
     }),
     createProduct: builder.mutation({
-      query: () => ({
-        url: `${PRODUCTS_URL}`,
+      query: (id) => ({
+        url: `${PRODUCTS_URL}/${id}`,
         method: 'POST',
       }),
       invalidatesTags: ['Product'],
@@ -47,15 +62,17 @@ export const productsApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ['Products'],
     }),
     updateAllProductsToAvailable: builder.mutation({
-      query: () => ({
+      query: (userId) => ({
         url: PRODUCTS_URL,
         method: 'PATCH',
+        body: userId,
       }),
     }),
     updateAllProductsToNotAvailable: builder.mutation({
-      query: () => ({
+      query: (userId) => ({
         url: `${PRODUCTS_URL}/notavailable`,
         method: 'PATCH',
+        body: userId,
       }),
     }),
     uploadProductImage: builder.mutation({
@@ -98,5 +115,5 @@ export const {
   useDeleteProductMutation,
   useCreateReviewMutation,
   useUpdateAllProductsToAvailableMutation,
-  useUpdateAllProductsToNotAvailableMutation
+  useUpdateAllProductsToNotAvailableMutation,
 } = productsApiSlice;

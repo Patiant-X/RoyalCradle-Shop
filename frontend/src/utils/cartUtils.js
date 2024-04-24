@@ -18,12 +18,17 @@ export const updateCart = (state) => {
       0
     );
     state.itemsPrice = addDecimals(itemsPrice);
-
-    // Calculate the shipping price
-    const deliveryPrice = ComputeDeliveryAddress(state);
+    let deliveryPrice;
+    if (state.shippingAddress.delivery) {
+      // Calculate the shipping price
+    deliveryPrice = ComputeDeliveryAddress(state);
 
     // Calculate the shipping price based on total distance
     state.shippingPrice = addDecimals(deliveryPrice);
+    }else {
+      state.shippingPrice = addDecimals(0);
+      deliveryPrice = 0;
+    }
 
     // Calculate the service fee
     const YocoFee = (4 / 100) * (itemsPrice + deliveryPrice + 6); // This is because Capitec charges R2 for payments

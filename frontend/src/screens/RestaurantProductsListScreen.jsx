@@ -93,7 +93,7 @@ const RestaurantProductsListScreen = () => {
         normalizedStr2.split(',').some((part2) => part1.includes(part2))
       );
   };
-
+  console.log(data ? data : "nothing ");
   return (
     <>
       {keyword || isLoading || error || !data || data.products.length === 0 ? (

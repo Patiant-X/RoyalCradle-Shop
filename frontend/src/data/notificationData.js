@@ -30,3 +30,13 @@ export const orderCollectedNotification = {
     timestamp: Date.now(),
   },
 };
+export const userCollectsOrderNotification = {
+  title: '5TygaEats',
+  body: 'You have a new message',
+  // icon: '/path/to/icon.png',
+  data: {
+    title: 'Order Ready',
+    message: 'Your order is ready please come and collect.',
+    timestamp: Date.now(),
+  },
+};

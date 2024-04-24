@@ -51,6 +51,10 @@ const userSchema = mongoose.Schema(
       required: true,
       default: ['customer'], // Default role set to customer
     },
+    restaurant: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Restaurant',
+    },
   },
   {
     timestamps: true,

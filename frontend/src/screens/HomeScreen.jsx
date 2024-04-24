@@ -1,6 +1,5 @@
 import { Row, Col, Alert } from 'react-bootstrap';
 import { useParams } from 'react-router-dom';
-import { useGetProductsQuery } from '../slices/productsApiSlice';
 import { Link } from 'react-router-dom';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
@@ -9,14 +8,14 @@ import ProductCarousel from '../components/ProductCarousel';
 import Meta from '../components/Meta';
 
 import { useEffect, useState } from 'react';
-import RestaurantList from '../components/RestaurantList';
-import Product from '../components/Product';
+
+import { useGetAllRestaurantsQuery } from '../slices/restaurantApiSlice';
+import Restaurant from '../components/Restaurant';
 
 const HomeScreen = () => {
   const { pageNumber, keyword } = useParams();
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
-  const restaurant = 'restaurantList';
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -36,25 +35,35 @@ const HomeScreen = () => {
       console.error('Unable to retrieve your location');
     }
   }, []);
-
-  const { data, isLoading, error } = useGetProductsQuery({
+  const {
+    data: restaurantData,
+    isLoading: restaurantIsLoading,
+    error: restaurantError,
+  } = useGetAllRestaurantsQuery({
     keyword,
     pageNumber,
     latitude,
     longitude,
-    restaurant,
+    state: true,
   });
   return (
     <>
-      {keyword || isLoading || error || data?.product?.length === 0 ? (
+      {keyword ||
+      restaurantIsLoading ||
+      restaurantError ||
+      restaurantData?.restaurants?.length === 0 ? (
         <Link to='/' className='btn btn-light mb-4'>
           Go Back
         </Link>
       ) : (
-        <ProductCarousel />
+        <>
+          <ProductCarousel />
+          <h1 className='my-2'>Shops near You</h1>
+        </>
       )}
-      {!isLoading &&  // Check if data is not loading
-      !keyword && (error || data?.products?.length === 0) && ( // Check if there's an error or data array is empty
+      {!restaurantIsLoading && // Check if data is not loading
+        !keyword &&
+        (restaurantError || restaurantData?.restaurants?.length === 0) && ( // Check if there's an error or data array is empty
           <Alert variant='warning'>
             <h4>No Products Found!</h4>
             <p>
@@ -64,54 +73,47 @@ const HomeScreen = () => {
             </p>
           </Alert>
         )}
-      {keyword && !isLoading && data?.products?.length === 0 && (
-        <Alert variant='info'>
-          {' '}
-          {/* Use variant='info' for a positive message */}
-          <h4>No Products Found!</h4>
-          <p>
-            We are expanding and reaching more restaurants. Please check back
-            soon for more products.
-          </p>
-        </Alert>
-      )}
+      {keyword &&
+        !restaurantIsLoading &&
+        restaurantData?.restaurants?.length === 0 && (
+          <Alert variant='info'>
+            {' '}
+            {/* Use variant='info' for a positive message */}
+            <h4>No Store/Kitchen/Restaurant Found!</h4>
+            <p>
+              We are expanding and reaching more businesses. Please check back
+              soon for more products.
+            </p>
+          </Alert>
+        )}
 
-      {isLoading ? (
+      {restaurantIsLoading ? (
         <Loader />
-      ) : error ? (
+      ) : restaurantError ? (
         <Message variant='danger'>
-          {error?.data?.message || error.error}
+          {restaurantError?.data?.message || restaurantError.error}
+          <span>Please try again</span>
         </Message>
       ) : (
-        data &&
-        (data?.product?.length > 0 || data?.products?.length > 0) && (
+        restaurantData &&
+        restaurantData?.restaurants?.length > 0 && (
           <>
             {' '}
             <Meta />
             <Row>
-              {keyword ? '' :  data?.product?.map((product) => (
-                <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
-                  <RestaurantList
-                    productAndUser={product}
+              {restaurantData?.restaurants?.map((restaurant) => (
+                <Col key={restaurant._id} sm={12} md={6} lg={4} xl={3}>
+                  <Restaurant
+                    restaurant={restaurant}
                     latitude={latitude}
                     longitude={longitude}
-                  />
-                </Col>
-              ))}
-              {keyword && data?.products?.map((product) => (
-                <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
-                  <Product
-                    product={product}
-                    latitude={latitude}
-                    longitude={longitude}
-                    image='/images/sample.jpg'
                   />
                 </Col>
               ))}
             </Row>
             <Paginate
-              pages={data.pages}
-              page={data.page}
+              pages={restaurantData?.pages}
+              page={restaurantData?.page}
               keyword={keyword ? keyword : ''}
             />{' '}
           </>

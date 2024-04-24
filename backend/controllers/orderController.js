@@ -62,8 +62,8 @@ const addOrderItems = asyncHandler(async (req, res) => {
       user: req.user._id,
       shippingAddress: {
         address: shippingAddress.location,
-        latitude: shippingAddress.lat,
-        longitude: shippingAddress.lng,
+        latitude: shippingAddress.lat ? shippingAddress.lat : '',
+        longitude: shippingAddress?.lng ? shippingAddress?.lng : '',
         delivery: shippingAddress.delivery,
       },
       paymentMethod,

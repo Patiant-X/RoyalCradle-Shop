@@ -99,14 +99,22 @@ const Header = () => {
                   <LinkContainer to='/admin/userlist'>
                     <NavDropdown.Item>Users</NavDropdown.Item>
                   </LinkContainer>
+                  <LinkContainer to='/admin/restaurant'>
+                    <NavDropdown.Item>Restaurants</NavDropdown.Item>
+                  </LinkContainer>
                 </NavDropdown>
               )}
 
               {/* Restaurant Links */}
               {userInfo && userInfo.role === 'restaurant' && (
-                <LinkContainer to='/restaurant/restaurantorderlist'>
-                  <Nav.Link>Orders</Nav.Link>
-                </LinkContainer>
+                <NavDropdown title='Store' id='storemenu'>
+                  <LinkContainer to='/restaurant/restaurantorderlist'>
+                    <NavDropdown.Item>Orders</NavDropdown.Item>
+                  </LinkContainer>
+                  <LinkContainer to='/restaurant/restaurantproductlist'>
+                    <NavDropdown.Item>Products</NavDropdown.Item>
+                  </LinkContainer>
+                </NavDropdown>
               )}
 
               {/* <LinkContainer to='/restaurant/restaurantorderlist'>

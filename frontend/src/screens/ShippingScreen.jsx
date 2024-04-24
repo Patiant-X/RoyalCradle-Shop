@@ -44,27 +44,36 @@ const ShippingScreen = () => {
 
   const submitPickUpHandler = (e) => {
     e.preventDefault();
-    toast.error('Sorry, this product is not available for collection');
-    return;
-    // eslint-disable-next-line no-unreachable
-    const product = cartItems?.find((item) => item.IsFood === true);
-    const notFoodProduct = cartItems?.find((item) => item.IsFood === false);
-    if (notFoodProduct) {
-      toast.error(
-        'Sorry, only food items can be collected not drinks. Please remove drink from cart'
-      );
-      return;
-    }
-    if (product) {
-      const location = product.location?.address;
-      const lat = product.location?.latitude;
-      const lng = product.location?.longitude;
+
+    const locationsSet = new Set(); // Using a Set to store unique addresses
+    cartItems.forEach((item) => {
+      const address = item.location?.address; // Get the address
+      if (address) {
+        locationsSet.add(address); // Add address to the Set
+      }
+    });
+
+    // Convert Set back to array if needed
+    const uniqueLocations = Array.from(locationsSet);
+
+    // Convert array of unique addresses to a single string separated by spaces
+    const location = uniqueLocations.join(' ');
+    // Extract latitude and longitude from the first item in the cart
+    const firstItem = cartItems[0];
+    if (firstItem) {
       const delivery = false;
-      dispatch(saveShippingAddress({ location, lat, lng, delivery }));
+      dispatch(
+        saveShippingAddress({
+          location,
+          lat: firstItem.location.latitude,
+          lng: firstItem.location.longitude,
+          delivery,
+        })
+      );
       // Navigate to the payment page or any other necessary action
       navigate('/payment');
     } else {
-      toast.error('Sorry, only Food items can be collected');
+      toast.error('Sorry, no items found in the cart.');
       return;
     }
   };
@@ -107,14 +116,14 @@ const ShippingScreen = () => {
           <Button type='submit' variant='primary'>
             Continue with Delivery
           </Button>
-          {/* <Button
+          <Button
             type='button'
             variant='secondary'
             className='mx-0 mx-sm-2 mt-2 mt-sm-0'
             onClick={submitPickUpHandler}
           >
             Continue with Pick-up
-          </Button> */}
+          </Button>
         </Form>
       </FormContainer>
     </>

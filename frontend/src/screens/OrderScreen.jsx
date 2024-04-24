@@ -24,6 +24,7 @@ import {
   driverArrivedNotification,
   orderCollectedNotification,
   orderDeliveredNotification,
+  userCollectsOrderNotification,
 } from '../data/notificationData.js';
 
 const OrderScreen = () => {
@@ -62,6 +63,16 @@ const OrderScreen = () => {
   ] = useDriverArrivedOrderMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
+
+  const userCollectsOrderHandler = async () => {
+    // Send notification to the user
+    sendNotification({
+      notification: userCollectsOrderNotification, // Use the notification data imported
+      userId: order?.user?._id,
+    });
+    toast.success('Notification sent to the user');
+  };
+
   const deliverHandler = async () => {
     await deliverOrder(orderId);
     if (!isErrorDeliverOrder) {
@@ -108,6 +119,7 @@ const OrderScreen = () => {
   const hasFoodProduct = order?.orderItems?.some(
     (item) => item.IsFood === true
   );
+
   // Determine the status message based on the order status
   let statusMessage = {
     time: '',
@@ -116,37 +128,53 @@ const OrderScreen = () => {
 
   if (hasFoodProduct) {
     // There is at least one product with IsFood property set to true
-    if (order?.isDelivered) {
-      statusMessage.orderMessage = 'Order delivered';
-      statusMessage.time = 'N/A';
-    } else if (order?.isPaid && userInfo && order?.driverAccepted) {
-      statusMessage.orderMessage = 'Driver is on his way...';
-      if (order.shippingPrice <= 10) {
-        statusMessage.time = '10 - 15 minutes';
-      } else if (order.shippingPrice > 10 && order.shippingPrice <= 20) {
-        statusMessage.time = '15 - 25 minutes';
-      }
-    } else if (order?.isPaid && userInfo) {
-      statusMessage.orderMessage = 'Restaurant is preparing order...';
-      if (order.shippingPrice <= 10) {
-        statusMessage.time = '25 - 45 minutes';
-      } else if (order.shippingPrice > 10 && order.shippingPrice <= 20) {
-        statusMessage.time = '35 - 55 minutes';
+    if (!order?.shippingAddress?.delivery) {
+      // For pick-up orders
+      if (order?.isDelivered) {
+        statusMessage.orderMessage = 'Order collected';
+        statusMessage.time = 'N/A';
+      } else {
+        statusMessage.orderMessage = 'Restaurant is preparing order...';
+        statusMessage.time = '25-35 min* depends on item type';
       }
     } else {
-      statusMessage.orderMessage = 'Order pending...';
-      statusMessage.time = '...';
+      // For delivery orders
+      if (order?.isDelivered) {
+        statusMessage.orderMessage = 'Order delivered';
+        statusMessage.time = 'N/A';
+      } else if (order?.isPaid && userInfo && order?.driverAccepted) {
+        statusMessage.orderMessage = 'Driver is on his way...';
+        if (order?.shippingPrice <= 10) {
+          statusMessage.time = '10 - 15 minutes';
+        } else if (order?.shippingPrice > 10 && order?.shippingPrice <= 20) {
+          statusMessage.time = '15 - 25 minutes';
+        }
+      } else if (order?.isPaid && userInfo) {
+        statusMessage.orderMessage = 'Restaurant is preparing order...';
+        if (order?.shippingPrice <= 10) {
+          statusMessage.time = '25 - 45 minutes';
+        } else if (order?.shippingPrice > 10 && order?.shippingPrice <= 20) {
+          statusMessage.time = '35 - 55 minutes';
+        }
+      } else {
+        statusMessage.orderMessage = 'Order pending...';
+        statusMessage.time = '...';
+      }
     }
   } else {
     // There are no products with IsFood property set to true
     if (order?.isDelivered) {
       statusMessage.orderMessage = 'Order delivered';
       statusMessage.time = 'N/A';
-    } else {
+    } else if (order?.shippingAddress?.delivery) {
       statusMessage.orderMessage = 'Driver is on his way...';
       statusMessage.time = '10 - 15 minutes';
+    } else {
+      statusMessage.orderMessage = 'Please come collect';
+      statusMessage.time = '15min';
     }
   }
+
 
   return isLoading ? (
     <Loader />
@@ -154,7 +182,6 @@ const OrderScreen = () => {
     <Message variant='danger'>{error?.data?.message || error.error}</Message>
   ) : (
     <>
-
       <Alert variant='info'>
         <h2>Order Status: {statusMessage.orderMessage}</h2>
         <h4>Estimated Time: {statusMessage.time}</h4>
@@ -176,7 +203,9 @@ const OrderScreen = () => {
               </>
             )}
         <p style={{ margin: '0' }}>Order Number:{order?._id}</p>
-        <p className='m-0 mt-4 fw-bold italics center'>**Please allow notifications to receive updates about order**</p>
+        <p className='m-0 mt-4 fw-bold italics center'>
+          **Please allow notifications to receive updates about order**
+        </p>
       </Alert>
       <Row>
         <Col md={8}>
@@ -337,10 +366,28 @@ const OrderScreen = () => {
                   </ListGroup.Item>
                 )}
               {userInfo &&
+                (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
+                order.isPaid &&
+                !order.isDelivered &&
+                 (
+                  <ListGroup.Item>
+                    {loadingDeliver && <Loader />}
+                    <Button
+                      type='button'
+                      className='btn btn-block danger'
+                      style={{ backgroundColor: 'red' }}
+                      onClick={deliverHandler}
+                    >
+                      Order Collected
+                    </Button>
+                  </ListGroup.Item>
+                )}
+              {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
                 !order.isDelivered &&
-                !order?.driverAccepted && (
+                !order?.driverAccepted &&
+                order.shippingAddress?.delivery && (
                   <ListGroup.Item>
                     {loadingCollect && <Loader />}
                     <Button
@@ -353,7 +400,22 @@ const OrderScreen = () => {
                     </Button>
                   </ListGroup.Item>
                 )}
+              {userInfo && !order.isDelivered &&
+                (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
+                !order.shippingAddress?.delivery && (
+                  <ListGroup.Item>
+                  <Button
+                    type='button'
+                    className='btn btn-block btn-order'
+                    style={{ backgroundColor: 'green' }}
+                    onClick={userCollectsOrderHandler}
+                  >
+                    Order is Ready
+                  </Button>
+                  </ListGroup.Item>
+                )}
               {userInfo &&
+                order.shippingAddress?.delivery &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
                 !order.isDelivered &&

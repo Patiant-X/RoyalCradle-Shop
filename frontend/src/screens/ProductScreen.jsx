@@ -47,15 +47,16 @@ const ProductScreen = () => {
   const addToCartHandler = () => {
     const existingItem = cartItems.find((item) => item._id === productId);
     if (existingItem) {
-      toast(' Item already in Cart');
-      navigate('/cart');
+      toast('Please check Cart');
+      navigate(`/restaurantProductList/${product?.user}`);
       return;
     }
     if (maxItemsInCart(cartItems, product, qty)) {
       return;
     }
     dispatch(addToCart({ ...product, qty, additionalInfo }));
-    navigate('/cart');
+    toast('Item added Please check cart')
+    navigate(`/restaurantProductList/${product?.user}`);
   };
 
   const {
@@ -87,7 +88,7 @@ const ProductScreen = () => {
   };
   return (
     <>
-      <Link className='btn btn-light my-3' to={`/restaurantProductList/${product?.user}`}>
+      <Link className='btn btn-light my-3' style={{ backgroundColor: 'yellow' }} to={`/restaurantProductList/${product?.user}`}>
         Go Back
       </Link>
       {isLoading ? (

@@ -22,16 +22,16 @@ import checkObjectId from '../middleware/checkObjectId.js';
 router
   .route('/')
   .get(getProducts)
-  .post(protect, adminRestaurant, createProduct)
   .patch(protect, admin, updateAllProductsToAvailable);
-router.patch('/notavailable', protect, admin, updateAllProductsToNotAvailable)
+router.patch('/notavailable', protect, admin, updateAllProductsToNotAvailable);
 router.get('/restaurant', protect, adminRestaurant, getRestaurantProduct);
 router.route('/:id/reviews').post(protect, checkObjectId, createProductReview);
 router.get('/top', getTopProducts);
 router
   .route('/:id')
   .get(checkObjectId, getProductById)
-  .put(protect, admin, checkObjectId, updateProduct)
-  .delete(protect, adminRestaurant, checkObjectId, deleteProduct);
+  .put(protect, adminRestaurant, checkObjectId, updateProduct)
+  .delete(protect, admin, checkObjectId, deleteProduct)
+  .post(protect, admin, createProduct);
 
 export default router;

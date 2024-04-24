@@ -20,7 +20,9 @@ export function calcPrices(orderItems, shippingAddress) {
   // Calculate the shipping price
   let shippingPrice = 0;
 
-  shippingPrice = ComputeDeliveyPrice(orderItems, shippingAddress);
+  if (shippingAddress.delivery) {
+    shippingPrice = ComputeDeliveyPrice(orderItems, shippingAddress);
+  }
 
   // Calculate the tax price
   // Calculate the service fee

@@ -24,7 +24,7 @@ const CartScreen = () => {
   // NOTE: no need for an async function here as we are not awaiting the
   // resolution of a Promise
   const addToCartHandler = (product, qty, additionalInfo) => {
-    if (maxItemsInCart(cartItems, product._id ,qty)) {
+    if (maxItemsInCart(cartItems, product._id, qty)) {
       return;
     }
     dispatch(addToCart({ ...product, qty, additionalInfo }));
@@ -40,73 +40,76 @@ const CartScreen = () => {
   return (
     <Row>
       <Col md={8}>
-        <h1 style={{ marginBottom: '20px' }}>Shopping Cart</h1>
+        <h1 className='mb-3'>Shopping Cart</h1>
         {cartItems.length === 0 ? (
           <Message>
             Your cart is empty <Link to='/'>Go Back</Link>
           </Message>
         ) : (
-          <ListGroup variant='flush'>
-            {cartItems.map((item) => (
-              <ListGroup.Item key={item._id}>
-                <Row>
-                  <Col md={2}>
-                    <Image src={item.image} alt={item.name} fluid rounded />
-                  </Col>
-                  <Col md={3} className='mt-2 mt-md-0'>
-                    <Link to={`/product/${item._id}`}>{item.name}</Link>
-                  </Col>
-                  <Col md={2} className='mt-2 mt-md-0'>
-                    R{item.price}
-                  </Col>
-                  <Col md={2} className='mt-2 mt-md-0'>
-                    <Form.Control
-                      as='select'
-                      value={item.qty}
-                      onChange={(e) =>
-                        addToCartHandler(
-                          item,
-                          Number(e.target.value),
-                          item.additionalInfo
-                        )
-                      }
-                    >
-                      {[...Array(5).keys()].map((x) => (
-                        <option key={x + 1} value={x + 1}>
-                          {x + 1}
-                        </option>
-                      ))}
-                    </Form.Control>
-                  </Col>
-                  <Col md={2} className='mt-2 mt-md-0'>
-                    <Button
-                      type='button'
-                      variant='light'
-                      onClick={() => removeFromCartHandler(item._id)}
-                    >
-                      <FaTrash />
-                    </Button>
-                  </Col>
-                </Row>
-                <Row className='my-3 mb-md-0'>
-                  <Col>
-                    <Form.Group controlId='customerNote'>
+          <>
+            {' '}
+            <ListGroup variant='flush'>
+              {cartItems.map((item) => (
+                <ListGroup.Item key={item._id}>
+                  <Row>
+                    <Col md={2}>
+                      <Image src={item.image} alt={item.name} fluid rounded />
+                    </Col>
+                    <Col md={3} className='mt-2 mt-md-0'>
+                      <Link to={`/product/${item._id}`}>{item.name}</Link>
+                    </Col>
+                    <Col md={2} className='mt-2 mt-md-0'>
+                      R{item.price}
+                    </Col>
+                    <Col md={2} className='mt-2 mt-md-0'>
                       <Form.Control
-                        as='textarea'
-                        rows={1}
-                        defaultValue={
-                          item.additionalInfo || 'Add a note (optional)'
-                        }
+                        as='select'
+                        value={item.qty}
                         onChange={(e) =>
-                          addToCartHandler(item, item.qty, e.target.value)
+                          addToCartHandler(
+                            item,
+                            Number(e.target.value),
+                            item.additionalInfo
+                          )
                         }
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
+                      >
+                        {[...Array(5).keys()].map((x) => (
+                          <option key={x + 1} value={x + 1}>
+                            {x + 1}
+                          </option>
+                        ))}
+                      </Form.Control>
+                    </Col>
+                    <Col md={2} className='mt-2 mt-md-0'>
+                      <Button
+                        type='button'
+                        variant='light'
+                        onClick={() => removeFromCartHandler(item._id)}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </Col>
+                  </Row>
+                  <Row className='my-3 mb-md-0'>
+                    <Col>
+                      <Form.Group controlId='customerNote'>
+                        <Form.Control
+                          as='textarea'
+                          rows={1}
+                          defaultValue={
+                            item.additionalInfo || 'Add a note (optional)'
+                          }
+                          onChange={(e) =>
+                            addToCartHandler(item, item.qty, e.target.value)
+                          }
+                        />
+                      </Form.Group>
+                    </Col>
+                  </Row>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          </>
         )}
       </Col>
 

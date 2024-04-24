@@ -8,6 +8,7 @@ const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY,  EMAIL_USER } =
   process.env;
 import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
+import restaurantRoutes from './routes/restaurantRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
@@ -49,6 +50,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/notification', pushNotificationRoute)
+app.use('/api/restaurant', restaurantRoutes)
 
 
 // Execute once to get secret and store secret in env file

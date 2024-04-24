@@ -45,6 +45,10 @@ import Error from './screens/Error';
 import { SocketContextProvider } from './context/SocketContext';
 import RestaurantProductsListScreen from './screens/RestaurantProductsListScreen';
 import RestaurantProductEditScreen from './screens/restaurant/RestaurantProductEditScreen';
+import CreateRestaurantScreen from './screens/admin/RestaurantEditScreen';
+import RestaurantListScreen from './screens/admin/RestaurantListScreen';
+import RestaurantItemsListScreen from './screens/admin/RestaurantItemsListScreen';
+import RestaurantItemEditScreen from './screens/admin/RestaurantItemEditScreen';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -55,7 +59,15 @@ const router = createBrowserRouter(
       <Route path='/page/:pageNumber' element={<HomeScreen />} />
       <Route
         path='/search/:keyword/page/:pageNumber'
-        element={<HomeScreen />}
+        element={<HomeScreen />} />
+      <Route
+        path='/search/:keyword/page/:pageNumber/restaurantProductList/:id'
+        element={<RestaurantProductsListScreen />}
+      />
+      <Route path='/page/:pageNumber/restaurantProductList/:id' element={<RestaurantProductListScreen />} />
+      <Route
+        path='/search/:keyword/restaurantProductList/:id'
+        element={<RestaurantProductsListScreen />}
       />
 
       <Route
@@ -95,6 +107,19 @@ const router = createBrowserRouter(
         <Route path='/admin/userlist' element={<UserListScreen />} />
         <Route path='/admin/product/:id/edit' element={<ProductEditScreen />} />
         <Route path='/admin/user/:id/edit' element={<UserEditScreen />} />
+        <Route
+          path='/admin/restaurant/:id/edit'
+          element={<CreateRestaurantScreen />}
+        />
+        <Route path='/admin/restaurant' element={<RestaurantListScreen />} />
+        <Route
+          path='/admin/restaurantitemslist/:id'
+          element={<RestaurantItemsListScreen />}
+        />
+        <Route
+          path='/admin/restaurantitems/:id/edit'
+          element={<RestaurantItemEditScreen />}
+        />
       </Route>
 
       {/*restaurant user */}
@@ -135,7 +160,7 @@ root.render(
     <HelmetProvider>
       <Provider store={store}>
         {/* <SocketContextProvider> */}
-          <RouterProvider router={router} />
+        <RouterProvider router={router} />
         {/* </SocketContextProvider> */}
       </Provider>
     </HelmetProvider>

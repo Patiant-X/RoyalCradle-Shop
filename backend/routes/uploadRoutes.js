@@ -45,7 +45,7 @@ router.post('/', (req, res) => {
       let uploadedFile;
       try {
         uploadedFile = await cloudinary.uploader.upload(req.file.path, {
-          folder: req.body.restaurantName,
+          folder: req.body.restaurantName.toUpperCase().replace(/\s+/g, ''),
           resource_type: 'image',
           quality: 'auto:good',
           width: 640,
