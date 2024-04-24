@@ -37,7 +37,7 @@ const getProducts = asyncHandler(async (req, res) => {
   let count = await Product.countDocuments(filters);
   let products = await Product.find(filters)
     .populate('user', '-password')
-    .sort({ IsFood: -1, rating: -1, numReviews: -1, productIsAvailable: true }) // Sort in descending order by IsFood, rating, and numReviews
+    .sort({ productIsAvailable: -1, IsFood: -1, rating: -1, numReviews: -1}) // Sort in descending order by IsFood, rating, and numReviews
     .limit(pageSize)
     .skip(pageSize * (page - 1));
   const productsOutOfRange = products;
