@@ -370,9 +370,9 @@ const createProductReview = asyncHandler(async (req, res) => {
 // @access  Public
 const getTopProducts = asyncHandler(async (req, res) => {
   const choosenProducts = [
-    '661c34fb8ae90d53e82be3ac',
+    '660d9f9cb9a714703a9a7836',
     '65e1b3fb385cdbbf8af7cfd5',
-    '661c34f28ae90d53e82be39a',
+    '65fdb1dcc20aa1ee82444f28',
   ];
 
   // Find the three chosen products by their IDs
