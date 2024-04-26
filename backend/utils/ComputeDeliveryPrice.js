@@ -33,15 +33,6 @@
 //       notFoodProducts.push(product);
 //     }
 //   }
-//   // if (productsQty > 5) {
-//   //   throw new Error(`Only 5 food items allowed, you have ${productsQty}`);
-//   // }
-//   // if (notFoodProductQty > 5) {
-//   //   throw new Error(
-//   //     `Only 5 non-food items allowed, you have ${notFoodProductQty}`
-//   //   );
-//   // }
-
 //   if (notFoodProducts.length > 0 && foodProducts.length > 0) {
 //     totalDistance += 5;
 //   }
@@ -72,7 +63,6 @@
 
 //   return totalDistance;
 // };
-
 import { calculateDistance } from "./calculateDeliveryDistanceFee.js";
 
 // Function to check if two locations are equal
@@ -84,33 +74,35 @@ function areLocationsEqual(location1, location2) {
 }
 
 export const ComputeDeliveyPrice = (orderItems, shippingAddress) => {
+  // let shippingPrice = 0;
   let totalDistance = 0;
   let prevLat, prevLng, nextLat, nextLng;
 
-  const numItems = orderItems.length;
+  const numOrderItems = orderItems.length
 
-  if (numItems === 0) {
+  if (numOrderItems === 0){
     return totalDistance;
   }
 
-  // Start calculating distance from user to the first product
-  prevLat = shippingAddress.latitude;
-  prevLng = shippingAddress.longitude;
-  nextLat = orderItems[0]?.location.latitude;
-  nextLng = orderItems[0]?.location.longitude;
-  totalDistance += calculateDistance(prevLat, prevLng, nextLat, nextLng);
+    // Start calculating distance from user to the first product
+    prevLat = shippingAddress?.lat;
+    prevLng = shippingAddress?.lng;
+    nextLat = orderItems[0]?.location.latitude;
+    nextLng = orderItems[0]?.location.longitude;
+    totalDistance += calculateDistance(prevLat, prevLng, nextLat, nextLng);
 
-  // If there are more than one items, compute distance between consecutive items
-  if (numItems > 1) {
-    for (let i = 1; i < numItems; i++) {
+  if(numOrderItems){
+    for(let i = 1; i < numOrderItems; i++){
       prevLat = orderItems[i - 1]?.location.latitude;
       prevLng = orderItems[i - 1]?.location.longitude;
       nextLat = orderItems[i]?.location.latitude;
       nextLng = orderItems[i]?.location.longitude;
       totalDistance += calculateDistance(prevLat, prevLng, nextLat, nextLng);
     }
-  }
+  } 
 
   return totalDistance;
 };
+
+
 
