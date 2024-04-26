@@ -82,7 +82,7 @@ const Restaurant = ({ restaurant, latitude, longitude }) => {
         <Card.Text as='div' className={'text-success mt-2'}>
           {isOpen
             ? 'Open'
-            : `Available at ${restaurant.operatingHours.openingTime}`}
+            : `Closed`}
         </Card.Text>
       </Card.Body>
       {deliveryTime && (
