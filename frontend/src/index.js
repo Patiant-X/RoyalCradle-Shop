@@ -49,6 +49,7 @@ import CreateRestaurantScreen from './screens/admin/RestaurantEditScreen';
 import RestaurantListScreen from './screens/admin/RestaurantListScreen';
 import RestaurantItemsListScreen from './screens/admin/RestaurantItemsListScreen';
 import RestaurantItemEditScreen from './screens/admin/RestaurantItemEditScreen';
+import RestaurantOnboardingScreen from './screens/Legal/RestaurantOnboardingScreen';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -76,6 +77,7 @@ const router = createBrowserRouter(
       />
       <Route path='/privacy-policy' element={<PrivacyPolicy />} />
       <Route path='/terms-and-conditions' element={<TermsAndConditions />} />
+      <Route path='/restaurant-onboarding' element={<RestaurantOnboardingScreen />} />
       <Route path='/product/:id/:image' element={<ProductScreen />} />
       <Route path='/cart' element={<CartScreen />} />
       <Route path='/forgot-password' element={<ForgotPasswordScreen />} />

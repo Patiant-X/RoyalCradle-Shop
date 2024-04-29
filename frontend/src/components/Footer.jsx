@@ -63,6 +63,12 @@ const Footer = () => {
                 |
               </p>
               <p>
+                <a href='/restaurant-onboarding' className='text-reset'>
+                  Restaurant Onboarding
+                </a>{' '}
+                |
+              </p>
+              <p>
                 <a
                   href='https://www.yoco.com/za/'
                   className='text-reset'
