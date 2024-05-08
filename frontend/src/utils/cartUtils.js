@@ -31,13 +31,13 @@ export const updateCart = (state) => {
     }
 
     // Calculate the service fee
-    const YocoFee = (4 / 100) * (itemsPrice + deliveryPrice + 6); // This is because Capitec charges R2 for payments
+    const YocoFee = (4 / 100) * (itemsPrice + deliveryPrice); // This is because Capitec charges R2 for payments
 
     const YocoVat = (15 / 100) * YocoFee;
 
     const YocoTotalFee = YocoFee + YocoVat;
 
-    const serviceFee = YocoTotalFee + 6;
+    const serviceFee = YocoTotalFee;
     state.taxPrice = addDecimals(serviceFee);
     const totalPrice = itemsPrice + deliveryPrice + serviceFee;
     // Calculate the total price
