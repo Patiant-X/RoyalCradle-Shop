@@ -20,8 +20,8 @@ const io = new Server(server, {
     origin: [
       'http://localhost:5000',
       'https://royalcradle-shop.onrender.com',
-      'https://www.5tygaeats.co.za/',
-      'https://5tygaeats.co.za/'
+      'https://www.5tygaeats.co.za',
+      'https://5tygaeats.co.za'
     ],
     methods: ['GET', 'POST'],
   },
