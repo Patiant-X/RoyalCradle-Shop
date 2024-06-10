@@ -24,7 +24,7 @@ import { addToCart } from '../slices/cartSlice';
 import { calculateRestaurantDistance } from '../utils/calculateDeliveryDistance';
 
 const ProductScreen = () => {
-  const { id: productId, image : encodedImage } = useParams();
+  const { id: productId, image : encodedImage, restaurantId } = useParams();
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
 
@@ -48,7 +48,7 @@ const ProductScreen = () => {
     const existingItem = cartItems.find((item) => item._id === productId);
     if (existingItem) {
       toast('Please check Cart');
-      navigate(`/restaurantProductList/${product?.user}`);
+      navigate(`/restaurantProductList/${product?.user}/${restaurantId}`);
       return;
     }
     if (maxItemsInCart(cartItems, product, qty)) {
@@ -56,7 +56,7 @@ const ProductScreen = () => {
     }
     dispatch(addToCart({ ...product, qty, additionalInfo }));
     toast('Item added Please check cart')
-    navigate(`/restaurantProductList/${product?.user}`);
+    navigate(`/restaurantProductList/${product?.user}/${restaurantId}`);
   };
 
   const {
@@ -88,7 +88,7 @@ const ProductScreen = () => {
   };
   return (
     <>
-      <Link className='btn btn-light my-3' style={{ backgroundColor: 'yellow' }} to={`/restaurantProductList/${product?.user}`}>
+      <Link className='btn btn-light my-3' style={{ backgroundColor: 'yellow' }} to={`/restaurantProductList/${product?.user}/${restaurantId}`}>
         Go Back
       </Link>
       {isLoading ? (

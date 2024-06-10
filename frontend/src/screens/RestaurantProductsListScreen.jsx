@@ -12,9 +12,13 @@ import { useEffect, useRef, useState } from 'react';
 import CategoryList from '../components/CategoryList';
 import { restaurantCategoryList } from '../data/restaurantCategoryList';
 import RestaurantProductCarousal from '../components/RestaurantProductCarousal';
+import { useGetRestaurantByIdQuery } from '../slices/restaurantApiSlice';
+import MenuCategoryDisplay from '../components/MenuCategoryDisplay';
+import { useSelector } from 'react-redux';
 
 const RestaurantProductsListScreen = () => {
-  const { pageNumber, keyword, id } = useParams();
+  const { userInfo } = useSelector((state) => state.auth);
+  const { pageNumber, keyword, id, restaurantId } = useParams();
   const categoriesFromProductsRef = useRef([]);
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
@@ -39,7 +43,7 @@ const RestaurantProductsListScreen = () => {
     }
   }, []);
 
-  const { data, isLoading, error, refetch } = useGetProductsQuery({
+  const { data, isLoading, isError, refetch } = useGetProductsQuery({
     keyword,
     pageNumber,
     latitude,
@@ -48,6 +52,11 @@ const RestaurantProductsListScreen = () => {
     category: selectedCategory.trim(),
   });
 
+  const {
+    data: restaurantData,
+    isLoading: isLoadingRestaurantData,
+    isError: isErrorRestaurantData,
+  } = useGetRestaurantByIdQuery(restaurantId);
   const image = data?.products[0]?.image;
 
   // Fetch data and update categoriesFromProducts only on component mount
@@ -95,7 +104,11 @@ const RestaurantProductsListScreen = () => {
   };
   return (
     <>
-      {keyword || isLoading || error || !data || data.products.length === 0 ? (
+      {keyword ||
+      isLoading ||
+      isError ||
+      !data ||
+      data.products.length === 0 ? (
         <Link to='/' className='btn btn-light mb-4'>
           Go Back
         </Link>
@@ -104,11 +117,29 @@ const RestaurantProductsListScreen = () => {
           <Link to='/' className='btn btn-light mb-4'>
             Go Back
           </Link>
-          <RestaurantProductCarousal products={data.products} image={image}/>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              fontFamily: 'serif',
+              letterSpacing: '2px',
+            }}
+            className='mb-2'
+          >
+            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin') && (
+              <h1>#{restaurantData?.data?.name?.toUpperCase()}</h1>
+            )}
+          </div>
+          <RestaurantProductCarousal
+            products={data.products}
+            image={image}
+            restaurantData={restaurantData?.data}
+            restauarantId = {restaurantId}
+          />
         </>
       )}
       {!isLoading && // Check if data is not loading
-        (error || !data || data.products.length === 0) && ( // Check if there's an error or data array is empty
+        (isError || !data || data.products.length === 0) && ( // Check if there's an error or data array is empty
           <Alert variant='warning'>
             <h4>No Products Found!</h4>
             <p>
@@ -118,11 +149,15 @@ const RestaurantProductsListScreen = () => {
             </p>
           </Alert>
         )}
-      {isLoading ? (
+
+      {isLoading || isLoadingRestaurantData ? (
         <Loader />
-      ) : error ? (
+      ) : isError ? (
         <Message variant='danger'>
-          {error?.data?.message || error.error}
+          {isError?.data?.message ||
+            isError.error ||
+            isErrorRestaurantData?.data?.message ||
+            isErrorRestaurantData.error}
         </Message>
       ) : (
         data &&
@@ -130,6 +165,31 @@ const RestaurantProductsListScreen = () => {
           <>
             {' '}
             <Meta />
+            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin') && (
+              <MenuCategoryDisplay
+                menuPictures={restaurantData?.data?.menuPictures}
+                restauarantId={restaurantData?.data?.user}
+              />
+            )}
+            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin') &&
+              restaurantData?.data?.aboutPodcast?.podcast && ( // Update this condition with your audio field name
+                <div
+                  className='my-2'
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                  }}
+                >
+                  <h2>Our Podcast...</h2>
+                  <audio
+                    className='my-2'
+                    src={restaurantData?.data?.aboutPodcast?.podcast} // Update this with your audio field name
+                    controls
+                    width='100%'
+                  ></audio>
+                </div>
+              )}
             <CategoryList
               categories={filteredCategoryList}
               onSelectCategory={handleSelectedCategory}
@@ -143,6 +203,7 @@ const RestaurantProductsListScreen = () => {
                     latitude={latitude}
                     longitude={longitude}
                     image={image}
+                    restauarantId = {restaurantId}
                   />
                 </Col>
               ))}

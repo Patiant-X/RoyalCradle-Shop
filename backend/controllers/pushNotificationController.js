@@ -1,7 +1,9 @@
 import asyncHandler from '../middleware/asyncHandler.js';
 import Subscription from '../models/subscriptionModel.js';
+import Joi from 'joi';
 import webpush from 'web-push';
 import User from '../models/userModel.js';
+import Order from '../models/orderModel.js';
 
 // @desc    Send a Notification to user
 // @route   POST /api/notification/send-push-notification
@@ -16,9 +18,6 @@ export const sendNotification = asyncHandler(async (req, res) => {
       res.status(400).json({ error: 'Subscription not found for the user' });
       throw new Error('Subscription not found');
     }
-
-    // Send the push notification using web-push
-    console.log(notification);
     await webpush
       .sendNotification(
         userSubscription.subscription,
@@ -34,7 +33,6 @@ export const sendNotification = asyncHandler(async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 // @desc    User subscribes to notifications
 // @route   POST /api/notification
 // @access  Private
@@ -43,29 +41,46 @@ export const subscribeNotification = asyncHandler(async (req, res) => {
     const { subscription } = req.body;
     const userId = req.user._id;
 
-    // Check if the user already has this subscription
-    const existingSubscription = await Subscription.findOne({
-      userId,
-      subscription,
-    });
+    // Validate the subscription object
+    const { error } = validateSubscription(subscription);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
+    // Find existing subscription for the user
+    let existingSubscription = await Subscription.findOne({ userId });
 
     if (existingSubscription) {
-      res.status(400).json('Subscription already exists');
-      throw new Error('Subscription already exists');
+      // If subscription already exists, update it with the new subscription
+      existingSubscription.subscription = subscription;
+      await existingSubscription.save();
+      return res
+        .status(200)
+        .json({ message: 'Subscription updated successfully' });
     }
 
     // Save the new subscription to the database
-    await Subscription.create({
-      userId,
-      subscription,
-    });
+    await Subscription.create({ userId, subscription });
 
     res.status(201).json({ message: 'Subscription saved successfully' });
   } catch (error) {
-    console.error('Error saving subscription:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Utility function to validate the subscription object
+export const validateSubscription = (subscription) => {
+  const schema = Joi.object({
+    endpoint: Joi.string().uri().required(),
+    expirationTime: Joi.any(),
+    keys: Joi.object({
+      p256dh: Joi.string().required(),
+      auth: Joi.string().required(),
+    }).required(),
+  }).unknown(true);
+
+  return schema.validate(subscription);
+};
 
 export const deleteSubscriptionIfNoOrders = asyncHandler(async (req, res) => {
   try {
@@ -92,13 +107,12 @@ export const deleteSubscriptionIfNoOrders = asyncHandler(async (req, res) => {
     // If shouldDeleteSubscription is true, delete the subscription
     if (shouldDeleteSubscription) {
       await Subscription.findOneAndDelete({ userId });
-      res.status(200).json({ message: 'Subscription deleted successfully' });
+      return true;
     } else {
-      res.status(400).json({ message: 'Subscription not deleted' });
+      return true;
     }
   } catch (error) {
-    console.error('Error deleting subscription:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    return true;
   }
 });
 
@@ -127,8 +141,6 @@ export const sendRestaurantNotification = asyncHandler(
           );
         }
       }
-
-      console.log('Restaurant notifications sent successfully');
     } catch (error) {
       console.error('Error sending restaurant notifications:', error);
     }

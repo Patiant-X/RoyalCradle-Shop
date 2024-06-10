@@ -16,7 +16,7 @@ const LoginScreen = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [login, { isLoading }] = useLoginMutation();
+  const [login, { isLoading, isError }] = useLoginMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
 
@@ -37,10 +37,10 @@ const LoginScreen = () => {
       dispatch(setCredentials({ ...res }));
       navigate(redirect);
     } catch (err) {
-      toast.error(err?.data?.message || err.error);
+
+      toast.error(err?.data?.message || err.error || err);
     }
   };
-
   return (
     <FormContainer>
       <h1>Sign In</h1>

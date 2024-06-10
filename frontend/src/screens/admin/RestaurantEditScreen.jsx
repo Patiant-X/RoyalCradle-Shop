@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Button, Badge } from 'react-bootstrap';
+import { Form, Button, Badge, Image, Carousel } from 'react-bootstrap';
 import Loader from '../../components/Loader';
 import Message from '../../components/Message';
 import AddressData from '../../components/AddressData';
@@ -9,6 +9,8 @@ import {
   useCreateRestaurantMutation,
   useGetRestaurantByIdQuery,
   useUpdateRestaurantByIdMutation,
+  useUploadRestaurantAudioMutation,
+  useUploadRestaurantVideoMutation,
 } from '../../slices/restaurantApiSlice';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
@@ -28,12 +30,24 @@ const CreateRestaurantScreen = () => {
   const [restaurantImage, setRestaurantImage] = useState('/images/sample.jpg');
   const [openingTime, setOpeningTime] = useState('');
   const [closingTime, setClosingTime] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [addressCoordinates, setAddressCoordinates] = useState(null);
+  const [teamImage, setTeamImage] = useState('');
+  const [quoteImage, setQuoteImage] = useState('');
+  const [restaurantMedia, setRestaurantMedia] = useState({
+    team: '',
+    quote: '',
+    video: '',
+  });
+  const [restaurantPodcast, setRestaurantPodcast] = useState();
+  const [menuPictures, setMenuPictures] = useState({});
+  const [menuPictureCategory, setMenuPictureCategory] = useState('');
 
   useEffect(() => {
     if (restaurantData) {
+      console.log(restaurantData);
       // Set form fields with data fetched from the database
       setName(restaurantData.data.name);
       setChosenCuisines(restaurantData.data.cuisine);
@@ -42,6 +56,9 @@ const CreateRestaurantScreen = () => {
       setClosingTime(restaurantData.data.operatingHours.closingTime);
       setPaymentMethods(restaurantData.data.paymentMethods);
       setDeliveryOptions(restaurantData.data.deliveryOptions);
+      setRestaurantMedia(restaurantData.data.restaurantMedia || {});
+      setMenuPictures(restaurantData.data.menuPictures || {});
+      setRestaurantPodcast(restaurantData.data.aboutPodcast || {});
     }
   }, [restaurantData, refetch]);
 
@@ -53,9 +70,24 @@ const CreateRestaurantScreen = () => {
   const [uploadRestaurantImage, { isLoading: loadingUpload }] =
     useUploadProductImageMutation();
 
-  const uploadFileHandler = async (e) => {
+  const [
+    uploadRestaurantVideo,
+    {
+      isLoading: isLoadinguploadRestaurantVideo,
+      isError: isErroruploadRestaurantVideo,
+    },
+  ] = useUploadRestaurantVideoMutation();
+
+  const [uploadRestaurantAudio, { isLoading: isLoadinguploadRestaurantAudio }] =
+    useUploadRestaurantAudioMutation();
+
+  const uploadFileHandler = async (e, type) => {
     if (name === '') {
       toast.error('Please provide a restaurant name');
+      return;
+    }
+    if (menuPictureCategory === '' && type === 'menu') {
+      toast.error('Please provide a category for the menu picture');
       return;
     }
     const formData = new FormData();
@@ -64,10 +96,76 @@ const CreateRestaurantScreen = () => {
     try {
       const res = await uploadRestaurantImage(formData).unwrap();
       toast.success(res.message);
-      setRestaurantImage(res.image);
+      switch (type) {
+        case 'team':
+          setTeamImage(res.image);
+          setRestaurantMedia((prevMedia) => ({
+            ...prevMedia,
+            [type]: res.image,
+          }));
+          break;
+        case 'quote':
+          setQuoteImage(res.image);
+          setRestaurantMedia((prevMedia) => ({
+            ...prevMedia,
+            [type]: res.image,
+          }));
+          break;
+        case 'menu':
+          setMenuPictures((prevPictures) => ({
+            ...prevPictures,
+            [menuPictureCategory]: res.image,
+          }));
+          break;
+        default:
+          setRestaurantImage(res.image);
+      }
     } catch (err) {
       console.error(err);
       toast.error(err?.data?.message || err.error);
+    }
+  };
+
+  const handleUploadVideo = async (e) => {
+    if (name === '') {
+      toast.error('Please provide a restaurant name');
+      return;
+    }
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('video', file);
+    formData.append('restaurantName', name);
+    try {
+      const res = await uploadRestaurantVideo(formData).unwrap();
+      toast(res.message);
+      setVideoUrl(res.video);
+      setRestaurantMedia((prevMedia) => ({ ...prevMedia, video: res.video }));
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      toast.error(error.message);
+    }
+  };
+
+  const handleUploadAudio = async (e) => {
+    // New function
+    if (name === '') {
+      toast.error('Please provide a restaurant name');
+      return;
+    }
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append('audio', file);
+    formData.append('restaurantName', name);
+    try {
+      const res = await uploadRestaurantAudio(formData).unwrap();
+      toast(res.message);
+      // Update the aboutPodcast field with the audio URL
+      setRestaurantPodcast({
+        podcast: res.audio,
+      });
+    } catch (error) {
+      console.error('Error uploading audio:', error);
+      toast.error(error.message);
     }
   };
 
@@ -110,6 +208,7 @@ const CreateRestaurantScreen = () => {
         .join(' ');
       const lat = addressCoordinates.lat;
       const lng = addressCoordinates.lng;
+
       const restaurantData = {
         name,
         location: {
@@ -122,7 +221,11 @@ const CreateRestaurantScreen = () => {
         operatingHours: { openingTime, closingTime },
         paymentMethods,
         deliveryOptions,
+        restaurantMedia,
+        menuPictures,
+        aboutPodcast: restaurantPodcast,
       };
+      setMenuPictureCategory('');
       restaurantInfo = restaurantData;
     } else {
       toast.error('Please select address from google suggestions');
@@ -130,7 +233,7 @@ const CreateRestaurantScreen = () => {
     }
 
     try {
-      if (restaurantData) {
+      if (restaurantData && id) {
         //If restaurant data exists, update the restaurant
         await updateRestaurantById({ id, updates: restaurantInfo });
         refetch();
@@ -149,11 +252,6 @@ const CreateRestaurantScreen = () => {
   if (isLoadingRestaurant) {
     return <Loader />;
   }
-
-  // if (isErrorRestaurant) {
-  //   return <Message variant='danger'>{error.message}</Message>;
-  // }
-
   return (
     <>
       {isErrorRestaurant ? (
@@ -161,6 +259,7 @@ const CreateRestaurantScreen = () => {
       ) : (
         <h1>Update Restaurant Profile</h1>
       )}
+
       {isLoading && <Loader />}
       {isError && <Message variant='danger'>{error.message}</Message>}
       <Form onSubmit={submitHandler}>
@@ -184,6 +283,126 @@ const CreateRestaurantScreen = () => {
             type='file'
           ></Form.Control>
           {loadingUpload && <Loader />}
+        </Form.Group>
+        <Image
+          className='my-2 mt-3'
+          src={restaurantImage}
+          alt='RestaurantImage'
+          style={{ width: '100px', height: '100px' }}
+        />
+
+        <Form.Group controlId='teamImage'>
+          <Form.Label>Team Image</Form.Label>
+          <Form.Control
+            type='file'
+            label='Choose file'
+            onChange={(e) => uploadFileHandler(e, 'team')}
+          ></Form.Control>
+          {loadingUpload && <Loader />}
+          <Image
+            className='my-2'
+            src={teamImage || restaurantMedia?.team}
+            alt='Team'
+            style={{ width: '100px', height: '100px' }}
+          />
+        </Form.Group>
+        <Form.Group controlId='quoteImage'>
+          <Form.Label>Quote Image</Form.Label>
+          <Form.Control
+            type='file'
+            label='Choose file'
+            onChange={(e) => uploadFileHandler(e, 'quote')}
+          ></Form.Control>
+          {loadingUpload && <Loader />}
+          <Image
+            className='my-2'
+            src={quoteImage || restaurantMedia?.quote}
+            alt='Quote'
+            style={{ width: '100px', height: '100px' }}
+          />
+        </Form.Group>
+
+        <Form.Group controlId='menuPictureCategory' className='mt-2'>
+          <Form.Label>Menu Picture Category</Form.Label>
+          <Form.Control
+            type='text'
+            placeholder='Enter category'
+            value={menuPictureCategory}
+            onChange={(e) =>
+              setMenuPictureCategory(e.target.value.toUpperCase())
+            }
+          />
+        </Form.Group>
+        <Form.Group controlId='menuPicture' className='mt-2'>
+          <Form.Label>Menu Picture</Form.Label>
+          <Form.Control
+            type='file'
+            label='Choose file'
+            onChange={(e) => uploadFileHandler(e, 'menu')}
+          ></Form.Control>
+          {loadingUpload && <Loader />}
+        </Form.Group>
+
+        {/* Display menu pictures in carousel */}
+        <Carousel className='my-4'>
+          {Object.entries(menuPictures)?.map(([category, url]) => (
+            <Carousel.Item key={category}>
+              <div className='text-center'>
+                <h3>{category}</h3>
+                <Image
+                  src={url}
+                  alt={`${category} image`}
+                  style={{ width: '100px', height: '100px' }}
+                  fluid
+                />
+              </div>
+            </Carousel.Item>
+          ))}
+        </Carousel>
+
+        <Form.Group controlId='restaurantVideo' className='mt-2'>
+          <Form.Label>Restaurant Video</Form.Label>
+          <Form.Control
+            label='Choose File'
+            onChange={handleUploadVideo}
+            type='file'
+          ></Form.Control>
+          {isLoadinguploadRestaurantVideo && <Loader />}
+
+          {(videoUrl || restaurantMedia?.video) && (
+            <div className='my-2'>
+              <h2>Uploaded Video</h2>
+              <video
+                className='my-2'
+                src={videoUrl || restaurantMedia?.video}
+                controls
+                width='100%'
+                height='250'
+              ></video>
+            </div>
+          )}
+        </Form.Group>
+
+        <Form.Group controlId='restaurantAudio' className='mt-2'>
+          <Form.Label>Restaurant Audio (Podcast)</Form.Label>
+          <Form.Control
+            label='Choose File'
+            onChange={handleUploadAudio}
+            type='file'
+          ></Form.Control>
+          {isLoadinguploadRestaurantAudio && <Loader />}
+
+          {restaurantPodcast?.podcast && ( // Update this condition with your audio field name
+            <div className='my-2'>
+              <h2>Uploaded Audio</h2>
+              <audio
+                className='my-2'
+                src={restaurantPodcast?.podcast} // Update this with your audio field name
+                controls
+                width='100%'
+              ></audio>
+            </div>
+          )}
         </Form.Group>
 
         <Form.Group controlId='cuisines' className='mt-2'>
@@ -218,9 +437,9 @@ const CreateRestaurantScreen = () => {
         </Form.Group>
 
         <label style={{ marginBottom: '5px', marginTop: '20px' }}>
-              Enter address:
-            </label>
-            <AddressData setAddressCoordinates={setAddressCoordinates} />
+          Enter address:
+        </label>
+        <AddressData setAddressCoordinates={setAddressCoordinates} />
 
         <Form.Group controlId='openingTime' className='mt-2'>
           <Form.Label>Opening Time</Form.Label>

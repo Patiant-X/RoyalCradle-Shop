@@ -17,12 +17,6 @@ const restaurantSchema = mongoose.Schema({
       required: true,
     },
   ],
-  // foods: [
-  //   {
-  //     type: String,
-  //     required: true,
-  //   },
-  // ],
   image: {
     type: String,
     required: true,
@@ -58,6 +52,22 @@ const restaurantSchema = mongoose.Schema({
   },
   location: {
     type: locationSchema,
+    required: true,
+  },
+  restaurantMedia: {
+    type: {
+      team: { type: String, required: false },
+      quote: { type: String, required: false },
+      video: { type: String, required: false },
+    },
+    required: true,
+  },
+  menuPictures: {
+    type: Object,
+    required: true,
+  },
+  aboutPodcast: {
+    type: Object,
     required: true,
   },
   // You can add more fields specific to restaurants here

@@ -30,13 +30,28 @@ export const restaurantSlice = apiSlice.injectEndpoints({
       }),
     }),
     getAllRestaurants: builder.query({
-      query: ({ keyword, pageNumber, latitude, longitude, state}) => ({
-        url : RESTAURANTS_URL,
-        params: { keyword, pageNumber, latitude, longitude, state},
+      query: ({ keyword, pageNumber, latitude, longitude, state }) => ({
+        url: RESTAURANTS_URL,
+        params: { keyword, pageNumber, latitude, longitude, state },
       }),
       keepUnusedDataFor: 5,
       providesTags: ['Restaurant'],
     }),
+    uploadRestaurantVideo: builder.mutation({
+      query: (videoData) => ({
+        url: `/api/upload/video`,
+        method: 'POST',
+        body: videoData,
+      }),
+    }),
+    uploadRestaurantAudio: builder.mutation({
+      query: (audioData) => ({
+        url: `/api/upload/audio`,
+        method: 'POST',
+        body: audioData,
+      }),
+    }),
+    
   }),
 });
 
@@ -45,5 +60,7 @@ export const {
   useGetRestaurantByIdQuery,
   useUpdateRestaurantByIdMutation,
   useDeleteRestaurantByIdMutation,
+  useUploadRestaurantAudioMutation,
   useGetAllRestaurantsQuery,
+  useUploadRestaurantVideoMutation,
 } = apiSlice;

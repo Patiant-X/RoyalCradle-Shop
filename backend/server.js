@@ -19,7 +19,7 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 import { app, server } from './socket/socket.js';
 import webpush from 'web-push';
 
-const port = process.env.PORT || 5000;
+const port =   8000 || process.env.PORT;
 
 connectDB();
 

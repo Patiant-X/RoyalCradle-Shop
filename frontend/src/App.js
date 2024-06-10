@@ -5,9 +5,10 @@ import { Outlet } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import { logout } from './slices/authSlice';
-
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
+import { ToastProvider } from './context/ToastContext';
 
 const App = () => {
   const dispatch = useDispatch();
@@ -25,14 +26,16 @@ const App = () => {
 
   return (
     <>
-      <ToastContainer />
-      <Header />
-      <main className='py-3'>
-        <Container>
-          <Outlet />
-        </Container>
-      </main>
-      <Footer />
+      <ToastProvider>
+        <ToastContainer />
+        <Header />
+        <main className='py-3' style={{ marginTop: '70px' }}>
+          <Container>
+            <Outlet />
+          </Container>
+        </main>
+        <Footer />
+      </ToastProvider>
     </>
   );
 };

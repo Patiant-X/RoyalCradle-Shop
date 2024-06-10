@@ -17,7 +17,6 @@ const RestaurantProductListScreen = () => {
   const { data, isLoading, error, refetch } = useGetRestaurantProductQuery({
     id: userInfo._id,
   });
-
   useEffect(() => {
     refetch();
   }, []);
@@ -32,7 +31,7 @@ const RestaurantProductListScreen = () => {
       {isLoading ? (
         <Loader />
       ) : error ? (
-        <Message variant='danger'>{error?.data?.message}</Message>
+        <Message variant='danger'>{error?.data?.error}</Message>
       ) : (
         <>
           <Table striped bordered hover responsive className='table-sm'>

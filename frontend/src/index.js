@@ -12,7 +12,9 @@ import {
   RouterProvider,
 } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
-import PrivateRoute from './components/PrivateRoute';
+import PrivateRoute, {
+  PremiumUserPrivateRoute,
+} from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
 import HomeScreen from './screens/HomeScreen';
 import ProductScreen from './screens/ProductScreen';
@@ -50,6 +52,9 @@ import RestaurantListScreen from './screens/admin/RestaurantListScreen';
 import RestaurantItemsListScreen from './screens/admin/RestaurantItemsListScreen';
 import RestaurantItemEditScreen from './screens/admin/RestaurantItemEditScreen';
 import RestaurantOnboardingScreen from './screens/Legal/RestaurantOnboardingScreen';
+import EveryWhereServiceScreen from './screens/premiumUser/EveryWhereServiceScreen';
+import AdminEveryWhereService from './screens/admin/AdminEveryWhereService';
+import RestaurantChatScreen from './screens/restaurant/RestaurantChatScreen';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -60,25 +65,32 @@ const router = createBrowserRouter(
       <Route path='/page/:pageNumber' element={<HomeScreen />} />
       <Route
         path='/search/:keyword/page/:pageNumber'
-        element={<HomeScreen />} />
+        element={<HomeScreen />}
+      />
       <Route
-        path='/search/:keyword/page/:pageNumber/restaurantProductList/:id'
+        path='/search/:keyword/page/:pageNumber/restaurantProductList/:id/:restaurantId'
         element={<RestaurantProductsListScreen />}
       />
-      <Route path='/page/:pageNumber/restaurantProductList/:id' element={<RestaurantProductListScreen />} />
       <Route
-        path='/search/:keyword/restaurantProductList/:id'
+        path='/page/:pageNumber/restaurantProductList/:id/:restaurantId'
+        element={<RestaurantProductListScreen />}
+      />
+      <Route
+        path='/search/:keyword/restaurantProductList/:id/:restaurantId'
         element={<RestaurantProductsListScreen />}
       />
 
       <Route
-        path='/restaurantProductList/:id'
+        path='/restaurantProductList/:id/:restaurantId'
         element={<RestaurantProductsListScreen />}
       />
       <Route path='/privacy-policy' element={<PrivacyPolicy />} />
       <Route path='/terms-and-conditions' element={<TermsAndConditions />} />
-      <Route path='/restaurant-onboarding' element={<RestaurantOnboardingScreen />} />
-      <Route path='/product/:id/:image' element={<ProductScreen />} />
+      <Route
+        path='/restaurant-onboarding'
+        element={<RestaurantOnboardingScreen />}
+      />
+      <Route path='/product/:id/:image/:restaurantId' element={<ProductScreen />} />
       <Route path='/cart' element={<CartScreen />} />
       <Route path='/forgot-password' element={<ForgotPasswordScreen />} />
       <Route path='/login' element={<LoginScreen />} />
@@ -98,8 +110,14 @@ const router = createBrowserRouter(
         <Route path='/orders' element={<OrdersScreen />} />
       </Route>
 
+      {/* Premium Users */}
+      <Route path='' element={<PremiumUserPrivateRoute />}>
+        <Route path='/everywhere' element={<EveryWhereServiceScreen />} />
+      </Route>
+
       {/* Admin users */}
       <Route path='' element={<AdminRoute />}>
+      <Route path='/admineverywhereservice' element={<AdminEveryWhereService />} />
         <Route path='/admin/orderlist' element={<OrderListScreen />} />
         <Route path='/admin/productlist' element={<ProductListScreen />} />
         <Route
@@ -129,6 +147,10 @@ const router = createBrowserRouter(
         <Route
           path='/restaurant/restaurantorderlist'
           element={<RestaurantOrderListScreen />}
+        />
+        <Route
+          path='/restaurantchat'
+          element={<RestaurantChatScreen />}
         />
         <Route
           path='/restaurant/restaurantproductlist'
@@ -161,9 +183,9 @@ root.render(
   <React.StrictMode>
     <HelmetProvider>
       <Provider store={store}>
-        {/* <SocketContextProvider> */}
-        <RouterProvider router={router} />
-        {/* </SocketContextProvider> */}
+        <SocketContextProvider>
+          <RouterProvider router={router} />
+        </SocketContextProvider>
       </Provider>
     </HelmetProvider>
   </React.StrictMode>

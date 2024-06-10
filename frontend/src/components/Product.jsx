@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Rating from './Rating';
 import { calculateDistance } from '../utils/calculateDeliveryDistance';
 
-const Product = ({ product, latitude, longitude, image }) => {
+const Product = ({ product, latitude, longitude, image , restaurantId}) => {
   let deliveryPrice;
   let deliveryTime;
   if (latitude !== null && longitude !== null) {
@@ -37,8 +37,8 @@ const Product = ({ product, latitude, longitude, image }) => {
 
   const toPath =
     product.image === '/images/sample.jpg'
-      ? `/product/${product._id}/${encodedImage}`
-      : `/product/${product._id}/${encodedImage2}`;
+      ? `/product/${product._id}/${encodedImage}/${restaurantId}`
+      : `/product/${product._id}/${encodedImage2}/${restaurantId}`;
 
   return (
     <Card className='my-3 p-3 rounded'>

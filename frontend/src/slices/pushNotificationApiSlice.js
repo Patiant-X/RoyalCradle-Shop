@@ -9,7 +9,7 @@ export const pushNotificationApiSlice = apiSlice.injectEndpoints({
       query: (subscription) => ({
         url: NOTIFICATIONS_URL,
         method: 'POST',
-        body: subscription,
+        body: JSON.stringify(subscription),
         headers: {
           'Content-Type': 'application/json',
         },

@@ -85,7 +85,7 @@ const MapComponent = ({ setAddressCoordinates }) => {
           marginBottom: '10px',
           height: '50px'
         }}
-        placeholder='Enter address'
+        placeholder='Enter street address'
       />
     </>
   );

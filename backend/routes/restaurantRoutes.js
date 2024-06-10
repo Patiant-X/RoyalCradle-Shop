@@ -17,7 +17,7 @@ router.route('/')
   .get(getAllRestaurants);
 
 router.route('/:id')
-  .get(protect, admin, checkObjectId, getRestaurantById)
+  .get(protect, checkObjectId, getRestaurantById)
   .put(protect, adminRestaurant, checkObjectId, updateRestaurantById)
   .delete(protect, adminRestaurant, checkObjectId, deleteRestaurantById);
 

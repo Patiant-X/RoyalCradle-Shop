@@ -4,11 +4,9 @@ import { FaTimes } from 'react-icons/fa';
 import Message from '../../components/Message';
 import Loader from '../../components/Loader';
 import { useGetOrdersQuery } from '../../slices/ordersApiSlice';
-import { useSelector } from 'react-redux';
 
 const RestaurantOrderListScreen = () => {
   const { data: orders, isLoading, error } = useGetOrdersQuery();
-  const { userInfo } = useSelector((state) => state.auth);
   var paidOrders = orders
     ?.filter((order) => order.isPaid)
     ?.sort((a, b) => {

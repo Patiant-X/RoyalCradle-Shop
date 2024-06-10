@@ -37,12 +37,12 @@ const RestaurantList = ({ productAndUser, latitude, longitude }) => {
 
   return (
     <Card className='my-3 p-3 rounded'>
-      <Link to={`/restaurantProductList/${userId}`}>
+      <Link to={userId ? `/restaurantProductList/${userId}` : '/'}>
         <Card.Img src={product.image ? product.image : '/images/sample.jpg'} variant='top' />
       </Link>
 
       <Card.Body>
-        <Link to={`/restaurantProductList/${userId}`}>
+        <Link to={userId ? `/restaurantProductList/${userId}` : '/'}>
           <Card.Title as='div' className='product-title'>
             <strong>
               {product?.restaurantName ? `${product?.restaurantName}` : 'Food'}

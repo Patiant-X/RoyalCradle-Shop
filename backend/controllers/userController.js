@@ -8,6 +8,7 @@ import {
   OrderConfirmationContent,
   UserResetPasswordContent,
 } from '../utils/emailContents.js';
+import { deleteSubscriptionIfNoOrders } from './pushNotificationController.js';
 
 // @desc    Auth user & get token
 // @route   POST /api/users/auth
@@ -15,21 +16,21 @@ import {
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email.toLowerCase() });
 
   if (user && (await user.matchPassword(password))) {
     generateToken(res, user._id);
 
-    res.json({
+    res.status(200).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       mobileNumber: user.mobileNumber,
       role: user.roles[0],
+      isPremiumCustomer: user.isPremiumCustomer,
     });
   } else {
-    res.status(401).json({error: 'Invalid email or password'});
-    throw new Error('Invalid email or password');
+    res.status(400).json({ message: 'Invalid email or password' });
   }
 });
 
@@ -39,9 +40,9 @@ const authUser = asyncHandler(async (req, res) => {
 const userForgotPassword = asyncHandler(async (req, res) => {
   try {
     const { email } = req.body;
-    await User.findOne({ email }).then((user) => {
+    await User.findOne({ email: email.toLowerCase() }).then((user) => {
       if (!user) {
-        res.status(400).json({error: 'Invalid'});
+        res.status(400).json({ error: 'Invalid' });
         throw new Error('Invalid Email');
       }
       const token = generateTokenForgotPassword(user._id);
@@ -65,17 +66,17 @@ const userForgotPassword = asyncHandler(async (req, res) => {
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password, mobileNumber } = req.body;
-
+  const emailLowerCase = email.toLowerCase();
   const userExists = await User.findOne({ email, mobileNumber });
 
   if (userExists) {
-    res.status(400).json({error: 'User already exists'});
+    res.status(400).json({ error: 'User already exists' });
     throw new Error('User already exists');
   }
 
   const user = await User.create({
     name,
-    email,
+    email: emailLowerCase,
     password,
     mobileNumber,
   });
@@ -89,6 +90,7 @@ const registerUser = asyncHandler(async (req, res) => {
       email: user.email,
       mobileNumber: user.mobileNumber,
       roles: user.roles,
+      isPremiumCustomer: user.isPremiumCustomer,
       role: user.roles[0],
     });
   } else {
@@ -99,14 +101,18 @@ const registerUser = asyncHandler(async (req, res) => {
 
 // @desc    Logout user / clear cookie
 // @route   POST /api/users/logout
-// @access  Public
+// @access  Private
 const logoutUser = (req, res) => {
-  res.cookie('jwt', '', {
-    httpOnly: true,
-    expires: new Date(0),
-  });
-  res.clearCookie('jwt');
-  res.status(200).json({ message: 'Logged out successfully' });
+  if (deleteSubscriptionIfNoOrders(req, res)) {
+    res.cookie('jwt', '', {
+      httpOnly: true,
+      expires: new Date(0),
+    });
+    res.clearCookie('jwt');
+    res.status(200).json({ message: 'Logged out successfully' });
+  } else {
+    res.status(400).json({ message: 'Paid Order in progress' });
+  }
 };
 
 // @desc    Get user profile
@@ -158,7 +164,7 @@ const updateUserProfile = asyncHandler(async (req, res) => {
 
   if (user) {
     user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
+    user.email = (req.body.email || user.email).toLowerCase();
     user.mobileNumber = req.body.mobileNumber || user.mobileNumber;
 
     if (req.body.password) {
@@ -230,7 +236,7 @@ const updateUser = asyncHandler(async (req, res) => {
 
     if (user) {
       user.name = req.body.name || user.name;
-      user.email = req.body.email || user.email;
+      user.email = (req.body.email || user.email).toLowerCase();
       user.mobileNumber = req.body.mobileNumber || user.mobileNumber;
       user.roles = req.body.roles || user.roles;
 

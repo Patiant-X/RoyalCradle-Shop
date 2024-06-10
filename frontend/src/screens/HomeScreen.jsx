@@ -1,21 +1,21 @@
-import { Row, Col, Alert } from 'react-bootstrap';
-import { useParams } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { Row, Col, Alert, Container, Button } from 'react-bootstrap';
+import { useParams, Link } from 'react-router-dom';
 import Loader from '../components/Loader';
 import Message from '../components/Message';
 import Paginate from '../components/Paginate';
-import ProductCarousel from '../components/ProductCarousel';
 import Meta from '../components/Meta';
-
+import SearchBox from '../components/SearchBox';
 import { useEffect, useState } from 'react';
-
 import { useGetAllRestaurantsQuery } from '../slices/restaurantApiSlice';
 import Restaurant from '../components/Restaurant';
+import { useSelector } from 'react-redux';
 
 const HomeScreen = () => {
+  const { userInfo } = useSelector((state) => state.auth);
   const { pageNumber, keyword } = useParams();
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
+  const [showSearch, setShowSearch] = useState(true); // State to toggle search bar
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -35,6 +35,7 @@ const HomeScreen = () => {
       console.error('Unable to retrieve your location');
     }
   }, []);
+
   const {
     data: restaurantData,
     isLoading: restaurantIsLoading,
@@ -46,24 +47,63 @@ const HomeScreen = () => {
     longitude,
     state: true,
   });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollableHeight =
+        document.documentElement.scrollHeight - window.innerHeight;
+      const scrolled = window.scrollY;
+
+      const searchBar = document.querySelector('.fixed-bottom-search');
+      if (searchBar) {
+        if (scrolled >= scrollableHeight) {
+          searchBar.style.display = 'none';
+        } else {
+          searchBar.style.display = 'block';
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
     <>
+      {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin') && (
+        <Alert variant='info'>
+          <h4
+            style={{ letterSpacing: '4px', fontFamily: 'serif' }}
+            className='fw-bold'
+          >
+            5TYGA EVERYWHERE
+          </h4>
+          <p style={{ fontSize: '12px' }} className='fw-semi'>
+            A premium service for premium people.
+          </p>
+          <Button variant='primary' size='sm' as={Link} to='/everywhere'>
+            Explore More
+          </Button>
+        </Alert>
+      )}
+
       {keyword ||
       restaurantIsLoading ||
       restaurantError ||
       restaurantData?.restaurants?.length === 0 ? (
-        <Link to='/' className='btn btn-light mb-4'>
-          Go Back
-        </Link>
+        <>
+          <Link to='/' className='btn btn-light mb-4'>
+            Go Back
+          </Link>
+        </>
       ) : (
         <>
-          <ProductCarousel />
           <h1 className='my-2'>Shops near You</h1>
         </>
       )}
-      {!restaurantIsLoading && // Check if data is not loading
+      {!restaurantIsLoading &&
         !keyword &&
-        (restaurantError || restaurantData?.restaurants?.length === 0) && ( // Check if there's an error or data array is empty
+        (restaurantError || restaurantData?.restaurants?.length === 0) && (
           <Alert variant='warning'>
             <h4>No Products Found!</h4>
             <p>
@@ -77,8 +117,6 @@ const HomeScreen = () => {
         !restaurantIsLoading &&
         restaurantData?.restaurants?.length === 0 && (
           <Alert variant='info'>
-            {' '}
-            {/* Use variant='info' for a positive message */}
             <h4>No Store/Kitchen/Restaurant Found!</h4>
             <p>
               We are expanding and reaching more businesses. Please check back
@@ -98,26 +136,35 @@ const HomeScreen = () => {
         restaurantData &&
         restaurantData?.restaurants?.length > 0 && (
           <>
-            {' '}
             <Meta />
-            <Row>
-              {restaurantData?.restaurants?.map((restaurant) => (
-                <Col key={restaurant._id} sm={12} md={6} lg={4} xl={3}>
-                  <Restaurant
-                    restaurant={restaurant}
-                    latitude={latitude}
-                    longitude={longitude}
-                  />
-                </Col>
-              ))}
-            </Row>
+            <Container fluid style={{ maxWidth: '100%' }}>
+              <Row>
+                {restaurantData?.restaurants?.map((restaurant, index) => (
+                  <Col key={restaurant._id} sm={12} md={6} lg={4} xl={3}>
+                    <Restaurant
+                      restaurant={restaurant}
+                      latitude={latitude}
+                      longitude={longitude}
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </Container>
             <Paginate
               pages={restaurantData?.pages}
               page={restaurantData?.page}
               keyword={keyword ? keyword : ''}
-            />{' '}
+            />
           </>
         )
+      )}
+      {/* Search box */}
+      {showSearch && (
+        <>
+          <div className='fixed-bottom-search'>
+            <SearchBox />
+          </div>
+        </>
       )}
     </>
   );

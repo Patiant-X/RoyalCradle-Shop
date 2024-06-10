@@ -57,7 +57,7 @@ const Restaurant = ({ restaurant, latitude, longitude }) => {
   };
 
   isOpen = isRestaurantOpen();
-  const toPath = `restaurantProductList/${restaurant?.user?._id}`;
+  const toPath = `restaurantProductList/${restaurant?.user?._id}/${restaurant?._id}`;
 
   return (
     <Card className='my-3 p-3 rounded'>

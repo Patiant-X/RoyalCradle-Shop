@@ -27,6 +27,15 @@ yarn-error.log*
 frontend/build
 uploads/*png
 uploads/*jpg
+uploads
 
 # API tests
 http
+
+ca.crt
+ca.key
+cert.crt
+cert.key
+uploads/video-1716592964709.mp4
+uploads/video-1716566735657.mp4
+uploads/video-1716566470584.mp4

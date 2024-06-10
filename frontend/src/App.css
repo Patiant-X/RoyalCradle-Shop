@@ -1,0 +1,261 @@
+/*HomeScreen Styles*/
+.search-icon {
+  position: fixed;
+  bottom: 50%;
+  z-index: 1001; /* Ensure it's above the search bar */
+  cursor: pointer;
+}
+
+.fixed-bottom-search {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding-left: 5px;
+  padding-right: 5px;
+  padding-bottom: 10px;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.fixed-bottom-search > :global(*) {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* Message Component Styles*/
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-name {
+  font-weight: bold;
+  font-size: 16px;
+  margin: 0;
+}
+
+.online-status {
+  font-size: 12px;
+  margin: 0;
+  color: #888;
+}
+
+.online {
+  color: #0a8d00;
+}
+
+.offline {
+  color: #888;
+}
+
+.message-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.message-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.message-card {
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  max-width: 80%;
+}
+
+.own-message {
+  align-self: flex-end;
+  background-color: #dff8c2;
+}
+
+.other-message {
+  align-self: flex-start;
+  background-color: #fff;
+}
+
+.media {
+  position: relative;
+  max-width: 200px;
+}
+
+.media-image,
+.media-video {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.message-text {
+  margin: 5px 0;
+}
+
+.message-timestamp {
+  font-size: 12px;
+  color: #888;
+}
+
+.no-messages {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  color: #888;
+}
+
+.loading-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.input-section {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background-color: #fff;
+  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.attach-button,
+.send-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+}
+
+.attach-button:hover,
+.send-button:hover {
+  background-color: #f0f0f0;
+  border-radius: 50%;
+}
+
+.message-form {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.message-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #007bff;
+  border-radius: 4px;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.3s;
+}
+
+.message-input:focus {
+  border-color: #0056b3;
+}
+
+.message-input::placeholder {
+  color: #999;
+}
+
+.sticky {
+  position: sticky;
+  top: 0;
+  height: 4rem; /* 16px */
+  background-color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 1rem; /* 4px */
+  padding-right: 1rem; /* 4px */
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+}
+
+.user-info .ml-4 {
+  margin-left: 1rem; /* Adjust as needed */
+}
+
+.user-info .user-name {
+  margin: 0;
+}
+
+.user-info .online-status {
+  margin: 0;
+}
+
+.call-button {
+  padding-left: 2.5rem; /* Adjust as needed for spacing */
+}
+
+/* Online/Offline Status Styles */
+.online {
+  color: green;
+}
+
+.offline {
+  color: red;
+}
+
+
+/* UseWebRTC  */
+
+.icon {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.accept {
+  animation: pulse-green 1s infinite;
+}
+
+.reject {
+  animation: pulse-red 1s infinite;
+}
+
+@keyframes pulse-green {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-red {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

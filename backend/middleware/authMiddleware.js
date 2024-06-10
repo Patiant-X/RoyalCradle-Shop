@@ -49,6 +49,16 @@ const protectResetPassword = asyncHandler(async (req, res, next) => {
 });
 
 // User must be an admin
+const premiumUser = (req, res, next) => {
+  if (req.user && req.user.isPremiumCustomer) {
+    next();
+  } else {
+    res.status(401).json("not authorized");
+    throw new Error('Not authorized');
+  }
+};
+
+// User must be an admin
 const admin = (req, res, next) => {
   if (req.user && req.user.roles[0] === 'admin') {
     next();

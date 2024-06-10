@@ -11,6 +11,7 @@ const userSchema = mongoose.Schema(
     email: {
       type: String,
       required: [true, 'Please enter an email'],
+      lowercase: true,
       trim: true,
       unique: true,
       validate: {
@@ -50,6 +51,16 @@ const userSchema = mongoose.Schema(
       ],
       required: true,
       default: ['customer'], // Default role set to customer
+    },
+    isPremiumCustomer: {
+      type: Boolean,
+      default: false,
+    },
+    premiumStartDate: {
+      type: Date,
+    },
+    premiumEndDate: {
+      type: Date,
     },
     restaurant: {
       type: mongoose.Schema.Types.ObjectId,
