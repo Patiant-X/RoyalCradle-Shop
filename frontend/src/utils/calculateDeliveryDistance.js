@@ -21,13 +21,16 @@ function toRadians(degrees) {
 
 function calculateDeliveryfee(distance) {
   if (distance <= 2) {
-    return 10;
-  } 
-  if (distance > 2 && distance <= 4) {
     return 20;
+  } 
+  if (distance > 2 && distance <= 3) {
+    return 25;
   }
-  const baseFee = 10; //Base Delivery fee
-  const feeIncrement = 5;
+  if (distance > 3 && distance <= 4) {
+    return 30;
+  }
+  const baseFee = 20; //Base Delivery fee
+  const feeIncrement = 6;
 
   // Calculate delivery fee based on distance
   const deliveryFee = baseFee + Math.max(distance - 1, 0) * feeIncrement;
