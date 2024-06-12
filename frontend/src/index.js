@@ -55,6 +55,7 @@ import RestaurantOnboardingScreen from './screens/Legal/RestaurantOnboardingScre
 import EveryWhereServiceScreen from './screens/premiumUser/EveryWhereServiceScreen';
 import AdminEveryWhereService from './screens/admin/AdminEveryWhereService';
 import RestaurantChatScreen from './screens/restaurant/RestaurantChatScreen';
+import RoyalCradleBlogScreen from './screens/premiumUser/royalCradleBlog/RoyalCradleBlogScreen';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -98,6 +99,10 @@ const router = createBrowserRouter(
       <Route
         path='/reset-password/:id/:token'
         element={<ResetPasswordScreen />}
+      />
+      <Route
+        path='/premium-member/royal-cradle/blog'
+        element={<RoyalCradleBlogScreen />}
       />
 
       {/* Registered users */}
