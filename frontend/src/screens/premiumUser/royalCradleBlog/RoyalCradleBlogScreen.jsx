@@ -9,7 +9,7 @@ const RoyalCradleBlogScreen = () => {
   };
 
   return (
-    <Container>
+    <Container className='lets'>
       <Row>
         <Col md={8} className="blog-content">
           <Image src={pic} fluid className="header-image" />

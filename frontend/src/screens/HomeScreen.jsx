@@ -5,7 +5,7 @@ import Message from '../components/Message';
 import Paginate from '../components/Paginate';
 import Meta from '../components/Meta';
 import SearchBox from '../components/SearchBox';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGetAllRestaurantsQuery } from '../slices/restaurantApiSlice';
 import Restaurant from '../components/Restaurant';
 import { useSelector } from 'react-redux';
@@ -16,6 +16,7 @@ const HomeScreen = () => {
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [showSearch, setShowSearch] = useState(true); // State to toggle search bar
+  const searchBoxRef = useRef(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -33,6 +34,12 @@ const HomeScreen = () => {
       setLatitude(null);
       setLongitude(null);
       console.error('Unable to retrieve your location');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (searchBoxRef.current) {
+      searchBoxRef.current.focus();
     }
   }, []);
 
@@ -67,28 +74,28 @@ const HomeScreen = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
+  console.log(keyword);
   return (
     <>
-      {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin') && (
-        <Alert variant='info'>
-          <h4
-            style={{ letterSpacing: '4px', fontFamily: 'serif' }}
-            className='fw-bold'
-          >
-            5TYGA EVERYWHERE
-          </h4>
-          <p style={{ fontSize: '12px' }} className='fw-semi'>
-            A premium service for premium people.
-          </p>
-          <Button variant='primary' size='sm' as={Link} to='/everywhere'>
-            Explore More
-          </Button>
-        </Alert>
-      )}
-
-      {keyword ||
-      restaurantIsLoading ||
+      {!keyword &&
+        (userInfo?.isPremiumCustomer || userInfo?.role === 'admin') && (
+          <Alert variant='info'>
+            <h4
+              style={{ letterSpacing: '4px', fontFamily: 'serif' }}
+              className='fw-bold'
+            >
+              5TYGA EVERYWHERE
+            </h4>
+            <p style={{ fontSize: '12px' }} className='fw-semi'>
+              A premium service for premium people.
+            </p>
+            <Button variant='primary' size='sm' as={Link} to='/everywhere'>
+              Explore More
+            </Button>
+          </Alert>
+        )}
+      {restaurantIsLoading && <Loader />}
+      {restaurantIsLoading ||
       restaurantError ||
       restaurantData?.restaurants?.length === 0 ? (
         <>
@@ -98,7 +105,11 @@ const HomeScreen = () => {
         </>
       ) : (
         <>
-          <h1 className='my-2'>Shops near You</h1>
+          <h2 className='my-2'>
+            {keyword
+              ? `Restaurants shown based on "${keyword}" search`
+              : 'Shops near You'}
+          </h2>
         </>
       )}
       {!restaurantIsLoading &&
@@ -162,7 +173,7 @@ const HomeScreen = () => {
       {showSearch && (
         <>
           <div className='fixed-bottom-search'>
-            <SearchBox />
+            <SearchBox ref={searchBoxRef} />
           </div>
         </>
       )}
