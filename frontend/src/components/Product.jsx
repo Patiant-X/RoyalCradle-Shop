@@ -39,7 +39,6 @@ const Product = ({ product, latitude, longitude, image , restaurantId}) => {
     product.image === '/images/sample.jpg'
       ? `/product/${product._id}/${encodedImage}/${restaurantId}`
       : `/product/${product._id}/${encodedImage2}/${restaurantId}`;
-
   return (
     <Card className='my-3 p-3 rounded'>
       <Link to={toPath}>

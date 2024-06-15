@@ -24,10 +24,12 @@ import { addToCart } from '../slices/cartSlice';
 import { calculateRestaurantDistance } from '../utils/calculateDeliveryDistance';
 
 const ProductScreen = () => {
-  const { id: productId, image : encodedImage, restaurantId } = useParams();
+  const restaurantList = useSelector(
+    (state) => state.restaurant.restaurantList
+  );
+  const { id: productId, image: encodedImage } = useParams();
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -38,7 +40,7 @@ const ProductScreen = () => {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    if (encodedImage) {
+    if (encodedImage && encodedImage !== "image") {
       const decodedImage = JSON.parse(decodeURIComponent(encodedImage));
       setImage(decodedImage);
     }
@@ -54,8 +56,9 @@ const ProductScreen = () => {
     if (maxItemsInCart(cartItems, product, qty)) {
       return;
     }
+
     dispatch(addToCart({ ...product, qty, additionalInfo }));
-    toast('Item added Please check cart')
+    toast('Item added Please check cart');
     navigate(`/restaurantProductList/${product?.user}/${restaurantId}`);
   };
 
@@ -86,9 +89,27 @@ const ProductScreen = () => {
       toast.error(err?.data?.message || err.error);
     }
   };
+  // Find the restaurant ID
+  const restaurantItemWithProduct = restaurantList.find(
+    (restaurant) => product?.user === restaurant.user._id
+  );
+  const restaurantId = restaurantItemWithProduct?._id;
+  if (isLoading) {
+    return <Loader />;
+  }
+  if (!restaurantList.length || !restaurantItemWithProduct) {
+    toast.error('Restaurant information not found. Please try again.');
+    navigate('/');
+    return null;
+  }
+  
   return (
     <>
-      <Link className='btn btn-light my-3' style={{ backgroundColor: 'yellow' }} to={`/restaurantProductList/${product?.user}/${restaurantId}`}>
+      <Link
+        className='btn btn-light my-3'
+        style={{ backgroundColor: 'yellow' }}
+        to={`/restaurantProductList/${product?.user}/${restaurantId}`}
+      >
         Go Back
       </Link>
       {isLoading ? (

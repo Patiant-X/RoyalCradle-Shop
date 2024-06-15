@@ -24,6 +24,7 @@ const RestaurantProductsListScreen = () => {
   const [longitude, setLongitude] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('');
 
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(success, Geoerror);

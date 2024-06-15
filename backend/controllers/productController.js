@@ -94,7 +94,6 @@ const getProducts = asyncHandler(async (req, res) => {
 
     // Iterate over each product
     products.forEach((product) => {
-      let shimicas = '6619ce401336f81b75d91686';
       let theFoodiee = '65fdb14cc20aa1ee82444ef2';
       // Check if the current product belongs to the user with the specified ID
       if (product.user._id.toString() === theFoodiee) {

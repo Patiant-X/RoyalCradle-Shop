@@ -6,6 +6,12 @@ const locationSchema = mongoose.Schema({
   longitude: { type: Number, required: true },
 });
 
+const operatingHoursSchema = new mongoose.Schema({
+  openingTime: { type: String, required: true },
+  closingTime: { type: String, required: true },
+  daysOpen: { type: [String], required: true }, // Add this line
+});
+
 const restaurantSchema = mongoose.Schema({
   name: {
     type: String,
@@ -21,13 +27,7 @@ const restaurantSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  operatingHours: {
-    type: {
-      openingTime: String,
-      closingTime: String,
-    },
-    required: true,
-  },
+  operatingHours: { type: operatingHoursSchema, required: true },
   paymentMethods: {
     type: [
       {
@@ -49,6 +49,7 @@ const restaurantSchema = mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    required: true,
   },
   location: {
     type: locationSchema,
@@ -68,6 +69,12 @@ const restaurantSchema = mongoose.Schema({
   },
   aboutPodcast: {
     type: Object,
+    required: true,
+  },
+  status: {
+    type: String,
+    enum: ['open', 'closed', 'suspended'],
+    default: 'closed',
     required: true,
   },
   // You can add more fields specific to restaurants here

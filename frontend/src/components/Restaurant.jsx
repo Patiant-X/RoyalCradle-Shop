@@ -1,7 +1,12 @@
 import React from 'react';
 import { Card } from 'react-bootstrap';
 import { calculateDistance } from '../utils/calculateDeliveryDistance'; // Assuming calculateDistance function is available
-import { FaClock } from 'react-icons/fa';
+import {
+  MdDirectionsBike,
+  MdPayment,
+  MdStore,
+} from 'react-icons/md';
+import { IoCash } from 'react-icons/io5';
 import { Link } from 'react-router-dom';
 
 const Restaurant = ({ restaurant, latitude, longitude }) => {
@@ -19,9 +24,9 @@ const Restaurant = ({ restaurant, latitude, longitude }) => {
     );
 
     // Set delivery time based on delivery price
-    if (deliveryPrice === 10) {
+    if (deliveryPrice === 20) {
       deliveryTime = '25 - 45 minutes';
-    } else if (deliveryPrice === 20) {
+    } else if (deliveryPrice > 20) {
       deliveryTime = '35 - 55 minutes';
     } else {
       deliveryTime = null;
@@ -52,7 +57,8 @@ const Restaurant = ({ restaurant, latitude, longitude }) => {
     // Check if current time is within operating hours
     return (
       currentTimeInMinutes >= openingTimeInMinutes &&
-      currentTimeInMinutes <= closingTimeInMinutes
+      currentTimeInMinutes <= closingTimeInMinutes &&
+      restaurant.status === 'open'
     );
   };
 
@@ -88,8 +94,76 @@ const Restaurant = ({ restaurant, latitude, longitude }) => {
       </Card.Body>
       {deliveryTime && (
         <Card.Footer>
-          <Card.Text as='div' className='delivery-time'>
-            <FaClock /> Delivery Time: {deliveryTime}
+          <Card.Text
+            as='div'
+            className='delivery-options my-2 d-flex justify-content-between'
+          >
+            {restaurant.deliveryOptions.includes('collection') && (
+              <div className='d-flex align-items-center'>
+                <MdStore
+                  size={25}
+                  style={{ color: 'green' }}
+                  className='delivery-icon'
+                />
+                <p
+                  className='ml-2 mb-0'
+                  style={{ marginLeft: '3px', fontWeight: 'lighter' }}
+                >
+                  Collect
+                </p>
+              </div>
+            )}
+            {restaurant.deliveryOptions.includes('delivery') && (
+              <div className='d-flex align-items-center'>
+                <MdDirectionsBike
+                  size={25}
+                  style={{ color: 'green' }}
+                  className='delivery-icon'
+                />
+                <p
+                  className='ml-2 mb-0 fw-semi'
+                  style={{ marginLeft: '3px', fontWeight: 'lighter' }}
+                >
+                  Delivery
+                </p>
+              </div>
+            )}
+          </Card.Text>
+          <Card.Text
+            as='div'
+            className='delivery-options d-flex'
+            style={{ paddingLeft: '20%'  }}
+          >
+            {restaurant.paymentMethods.includes('card') && (
+              <div className='d-flex align-items-center' style={{ paddingRight: '20px' }}>
+                <MdPayment
+                  size={25}
+                  style={{ color: '#4f4e4e' }}
+                  className='delivery-icon'
+                />
+                <p
+                  className='ml-2 mb-0'
+                  style={{ marginLeft: '3px', fontWeight: 'lighter' }}
+                >
+                  Card
+                </p>
+              </div>
+            )}
+            {restaurant.paymentMethods.includes('cash') && (
+              <div className='d-flex align-items-center'>
+                <IoCash
+                  size={25}
+                  style={{ color: '#4f4e4e' }}
+                  className='delivery-icon'
+                />
+                <p
+                  className='ml-2 mb-0 fw-semi'
+                  style={{ marginLeft: '3px', fontWeight: 'lighter' }}
+                >
+                  Cash
+                </p>
+              </div>
+            )}
           </Card.Text>
           <Card.Text
             as='div'

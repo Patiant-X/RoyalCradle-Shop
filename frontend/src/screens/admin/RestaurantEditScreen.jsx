@@ -28,8 +28,21 @@ const CreateRestaurantScreen = () => {
   const [name, setName] = useState('');
   const [chosenCuisines, setChosenCuisines] = useState([]);
   const [restaurantImage, setRestaurantImage] = useState('/images/sample.jpg');
-  const [openingTime, setOpeningTime] = useState('');
-  const [closingTime, setClosingTime] = useState('');
+  const [status, setStatus] = useState('open');
+  const [generalOperatingHours, setGeneralOperatingHours] = useState({
+    openingTime: '',
+    closingTime: '',
+    daysOpen: [],
+  });
+  const daysOfWeek = [
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday',
+  ];
   const [videoUrl, setVideoUrl] = useState('');
   const [paymentMethods, setPaymentMethods] = useState([]);
   const [deliveryOptions, setDeliveryOptions] = useState([]);
@@ -47,17 +60,16 @@ const CreateRestaurantScreen = () => {
 
   useEffect(() => {
     if (restaurantData) {
-      console.log(restaurantData);
       // Set form fields with data fetched from the database
       setName(restaurantData.data.name);
       setChosenCuisines(restaurantData.data.cuisine);
       setRestaurantImage(restaurantData.data.image);
-      setOpeningTime(restaurantData.data.operatingHours.openingTime);
-      setClosingTime(restaurantData.data.operatingHours.closingTime);
       setPaymentMethods(restaurantData.data.paymentMethods);
       setDeliveryOptions(restaurantData.data.deliveryOptions);
       setRestaurantMedia(restaurantData.data.restaurantMedia || {});
       setMenuPictures(restaurantData.data.menuPictures || {});
+      setStatus(restaurantData.data.status || 'open');
+      setGeneralOperatingHours(restaurantData.data.operatingHours);
       setRestaurantPodcast(restaurantData.data.aboutPodcast || {});
     }
   }, [restaurantData, refetch]);
@@ -121,7 +133,6 @@ const CreateRestaurantScreen = () => {
           setRestaurantImage(res.image);
       }
     } catch (err) {
-      console.error(err);
       toast.error(err?.data?.message || err.error);
     }
   };
@@ -218,12 +229,16 @@ const CreateRestaurantScreen = () => {
         },
         cuisine: chosenCuisines,
         image: restaurantImage,
-        operatingHours: { openingTime, closingTime },
         paymentMethods,
         deliveryOptions,
         restaurantMedia,
         menuPictures,
         aboutPodcast: restaurantPodcast,
+        operatingHours: {
+          openingTime: generalOperatingHours.openingTime,
+          closingTime: generalOperatingHours.closingTime,
+          daysOpen: generalOperatingHours.daysOpen,
+        },
       };
       setMenuPictureCategory('');
       restaurantInfo = restaurantData;
@@ -252,6 +267,7 @@ const CreateRestaurantScreen = () => {
   if (isLoadingRestaurant) {
     return <Loader />;
   }
+
   return (
     <>
       {isErrorRestaurant ? (
@@ -263,8 +279,6 @@ const CreateRestaurantScreen = () => {
       {isLoading && <Loader />}
       {isError && <Message variant='danger'>{error.message}</Message>}
       <Form onSubmit={submitHandler}>
-        {/* Other form fields */}
-
         <Form.Group controlId='name'>
           <Form.Label>Name</Form.Label>
           <Form.Control
@@ -273,6 +287,19 @@ const CreateRestaurantScreen = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
+        </Form.Group>
+
+        <Form.Group controlId='status'>
+          <Form.Label>Status</Form.Label>
+          <Form.Control
+            as='select'
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value='open'>open</option>
+            <option value='closed'>closed</option>
+            <option value='suspended'>suspended</option>
+          </Form.Control>
         </Form.Group>
 
         <Form.Group controlId='restaurantImage' className='mt-2'>
@@ -441,40 +468,58 @@ const CreateRestaurantScreen = () => {
         </label>
         <AddressData setAddressCoordinates={setAddressCoordinates} />
 
-        <Form.Group controlId='openingTime' className='mt-2'>
-          <Form.Label>Opening Time</Form.Label>
-          <Form.Control
-            as='select'
-            value={openingTime}
-            onChange={(e) => setOpeningTime(e.target.value)}
-          >
-            <option value=''>Select opening time</option>
-            {/* Populate options with 24-hour format times */}
-            {Array.from({ length: 24 }, (_, i) => {
-              const hour = i < 10 ? `0${i}` : `${i}`;
-              return (
-                <option key={i} value={`${hour}:00`}>{`${hour}:00`}</option>
-              );
-            })}
-          </Form.Control>
-        </Form.Group>
+        <Form.Group controlId='generalOperatingHours' className='mt-2'>
+          <Form.Label>Operating Hours</Form.Label>
+          <div className='d-flex mb-2 align-items-center mt-2'>
+            <Form.Label className='mr-2' style={{ width: '100px' }}>
+              Opening Time
+            </Form.Label>
+            <Form.Control
+              type='time'
+              value={generalOperatingHours.openingTime}
+              onChange={(e) =>
+                setGeneralOperatingHours((prev) => ({
+                  ...prev,
+                  openingTime: e.target.value,
+                }))
+              }
+              className='mr-2'
+            />
+            <Form.Label className='mr-2' style={{ width: '100px' }}>
+              Closing Time
+            </Form.Label>
+            <Form.Control
+              type='time'
+              value={generalOperatingHours.closingTime}
+              onChange={(e) =>
+                setGeneralOperatingHours((prev) => ({
+                  ...prev,
+                  closingTime: e.target.value,
+                }))
+              }
+            />
+          </div>
 
-        <Form.Group controlId='closingTime' className='mt-2'>
-          <Form.Label>Closing Time</Form.Label>
-          <Form.Control
-            as='select'
-            value={closingTime}
-            onChange={(e) => setClosingTime(e.target.value)}
-          >
-            <option value=''>Select closing time</option>
-            {/* Populate options with 24-hour format times */}
-            {Array.from({ length: 24 }, (_, i) => {
-              const hour = i < 10 ? `0${i}` : `${i}`;
-              return (
-                <option key={i} value={`${hour}:00`}>{`${hour}:00`}</option>
-              );
-            })}
-          </Form.Control>
+          <Form.Label>Days Open</Form.Label>
+          <div>
+            {daysOfWeek.map((day) => (
+              <Form.Check
+                type='checkbox'
+                key={day}
+                label={day.charAt(0).toUpperCase() + day.slice(1)}
+                checked={generalOperatingHours.daysOpen.includes(day)}
+                onChange={(e) => {
+                  const isChecked = e.target.checked;
+                  setGeneralOperatingHours((prev) => ({
+                    ...prev,
+                    daysOpen: isChecked
+                      ? [...prev.daysOpen, day]
+                      : prev.daysOpen.filter((d) => d !== day),
+                  }));
+                }}
+              />
+            ))}
+          </div>
         </Form.Group>
 
         <Form.Group controlId='paymentMethods' className='mt-2'>

@@ -265,3 +265,11 @@
   border-color: #6aff00; /* Darker black border */
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5); /* Optional shadow for focus */
 }
+
+/* SHippingScreen */
+.delivery-method-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 25px 0; /* Adjust padding as needed */
+}

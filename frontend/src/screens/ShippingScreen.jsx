@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { Form, Button } from 'react-bootstrap';
+import {
+  Form,
+  Button,
+  Alert,
+  ToggleButton,
+  ToggleButtonGroup,
+} from 'react-bootstrap';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
@@ -9,80 +15,92 @@ import AddressData from '../components/AddressData';
 import { saveShippingAddress } from '../slices/cartSlice';
 
 const ShippingScreen = () => {
+  const restaurantList = useSelector(
+    (state) => state.restaurant.restaurantList
+  );
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
 
   const [address, setAddress] = useState(null);
+  const [deliveryMethod, setDeliveryMethod] = useState(null); // 'delivery' or 'pickup'
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const restaurantItemWithProduct = restaurantList.find((restaurant) =>
+    cartItems.some((item) => item.user === restaurant.user._id)
+  );
+
+  if (!restaurantItemWithProduct) {
+    toast.error('Restaurant information not found. Please try again.');
+    navigate('/');
+    return null;
+  }
+
   const submitDeliveryHandler = (e) => {
     e.preventDefault();
-    try {
-      if (
-        address?.place != null &&
-        address?.lat != null &&
-        address?.lng != null
-      ) {
-        const location = address.place.address_components
-          .map((component) => component.long_name)
-          .join(' ');
-        const lat = address.lat;
-        const lng = address.lng;
-        const delivery = true;
-        dispatch(saveShippingAddress({ location, lat, lng, delivery }));
-        navigate('/payment');
-      } else {
-        toast.error('Please select address from google suggestions');
-      }
-    } catch (error) {
-      // Check if error has a specific message property
-      const errorMessage = error.message ? error.message : 'An error occurred';
-      toast.error(errorMessage);
+    if (address?.place && address?.lat && address?.lng) {
+      const location = address.place.address_components
+        .map((component) => component.long_name)
+        .join(' ');
+      const { lat, lng } = address;
+      dispatch(saveShippingAddress({ location, lat, lng, delivery: true }));
+      navigate('/payment');
+    } else {
+      toast.error('Please select an address from Google suggestions.');
     }
   };
 
   const submitPickUpHandler = (e) => {
     e.preventDefault();
-
-    const locationsSet = new Set(); // Using a Set to store unique addresses
-    cartItems.forEach((item) => {
-      const address = item.location?.address; // Get the address
-      if (address) {
-        locationsSet.add(address); // Add address to the Set
-      }
-    });
-
-    // Convert Set back to array if needed
-    const uniqueLocations = Array.from(locationsSet);
-
-    // Convert array of unique addresses to a single string separated by spaces
-    const location = uniqueLocations.join(' ');
-    // Extract latitude and longitude from the first item in the cart
     const firstItem = cartItems[0];
     if (firstItem) {
-      const delivery = false;
-      dispatch(
-        saveShippingAddress({
-          location,
-          lat: firstItem.location.latitude,
-          lng: firstItem.location.longitude,
-          delivery,
-        })
-      );
-      // Navigate to the payment page or any other necessary action
+      const location = firstItem.location.address;
+      const { latitude: lat, longitude: lng } = firstItem.location;
+      dispatch(saveShippingAddress({ location, lat, lng, delivery: false }));
       navigate('/payment');
     } else {
       toast.error('Sorry, no items found in the cart.');
-      return;
     }
   };
 
+  const handleDeliveryMethodChange = (method) => {
+    setDeliveryMethod(method);
+  };
+
   return (
-    <>
-      <FormContainer>
-        <CheckoutSteps step1 step2 />
-        <h1>Delivery</h1>
+    <FormContainer>
+      <CheckoutSteps step1 step2 />
+      {restaurantItemWithProduct.deliveryOptions.includes('delivery') && (
+        <div className='delivery-method-toggle'>
+          <ToggleButtonGroup
+            type='radio'
+            name='deliveryOptions'
+            value={deliveryMethod}
+            onChange={handleDeliveryMethodChange}
+          >
+            <ToggleButton
+              id='delivery'
+              value='delivery'
+              variant={
+                deliveryMethod === 'delivery' ? 'primary' : 'outline-primary'
+              }
+            >
+              Delivery
+            </ToggleButton>
+            <ToggleButton
+              id='pickup'
+              value='pickup'
+              variant={
+                deliveryMethod === 'pickup' ? 'primary' : 'outline-primary'
+              }
+            >
+              Pick-up
+            </ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+      )}
+
+      {deliveryMethod === 'delivery' && (
         <Form onSubmit={submitDeliveryHandler}>
           <div style={{ marginBottom: '20px' }}>
             <label
@@ -97,7 +115,7 @@ const ShippingScreen = () => {
             <AddressData setAddressCoordinates={setAddress} />
           </div>
           <Form.Group className='my-4' controlId='address'>
-            <Form.Label>Confrim Address</Form.Label>
+            <Form.Label>Confirm Address</Form.Label>
             <Form.Control
               type='text'
               placeholder='Confirm address'
@@ -112,21 +130,24 @@ const ShippingScreen = () => {
               readOnly
             ></Form.Control>
           </Form.Group>
-
           <Button type='submit' variant='primary'>
             Continue with Delivery
           </Button>
-          <Button
-            type='button'
-            variant='secondary'
-            className='mx-0 mx-sm-2 mt-2 mt-sm-0'
-            onClick={submitPickUpHandler}
-          >
-            Continue with Pick-up
-          </Button>
         </Form>
-      </FormContainer>
-    </>
+      )}
+
+      {deliveryMethod === 'pickup' && (
+        <Button type='button' variant='primary' onClick={submitPickUpHandler}>
+          Continue with Pick-up
+        </Button>
+      )}
+
+      {!restaurantItemWithProduct.deliveryOptions.includes('delivery') && (
+        <Button type='button' variant='secondary' onClick={submitPickUpHandler}>
+          Continue with Pick-up
+        </Button>
+      )}
+    </FormContainer>
   );
 };
 

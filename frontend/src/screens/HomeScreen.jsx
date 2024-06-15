@@ -7,16 +7,19 @@ import Meta from '../components/Meta';
 import SearchBox from '../components/SearchBox';
 import { useEffect, useRef, useState } from 'react';
 import { useGetAllRestaurantsQuery } from '../slices/restaurantApiSlice';
+import { setRestaurantList } from '../slices/restaurantSlice';
 import Restaurant from '../components/Restaurant';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const HomeScreen = () => {
+  const dispatch = useDispatch();
   const { userInfo } = useSelector((state) => state.auth);
   const { pageNumber, keyword } = useParams();
   const [latitude, setLatitude] = useState(null);
   const [longitude, setLongitude] = useState(null);
   const [showSearch, setShowSearch] = useState(true); // State to toggle search bar
   const searchBoxRef = useRef(null);
+  const h2Ref = useRef(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -43,6 +46,13 @@ const HomeScreen = () => {
     }
   }, []);
 
+  useEffect(() => {
+    // Focus on h2 element if there is a keyword when the component mounts
+    if (keyword && h2Ref.current) {
+      h2Ref.current.focus();
+    }
+  }, [keyword]);
+
   const {
     data: restaurantData,
     isLoading: restaurantIsLoading,
@@ -54,6 +64,11 @@ const HomeScreen = () => {
     longitude,
     state: true,
   });
+  useEffect(() => {
+    if (!restaurantIsLoading && restaurantData?.restaurants) {
+      dispatch(setRestaurantList(restaurantData?.restaurants));
+    }
+  }, [restaurantData, restaurantIsLoading, dispatch]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,7 +89,6 @@ const HomeScreen = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-  console.log(keyword);
   return (
     <>
       {!keyword &&
@@ -105,7 +119,7 @@ const HomeScreen = () => {
         </>
       ) : (
         <>
-          <h2 className='my-2'>
+          <h2 ref={h2Ref} className='my-2'>
             {keyword
               ? `Restaurants shown based on "${keyword}" search`
               : 'Shops near You'}

@@ -29,128 +29,111 @@ const createRestaurant = asyncHandler(async (req, res) => {
 // @route   Get /api/restaurant
 // @access  Public
 const getAllRestaurants = asyncHandler(async (req, res) => {
-  try {
-    const pageSize = process.env.PAGINATION_LIMIT;
-    const page = Number(req.query.pageNumber) || 1;
-    const { latitude, longitude, state } = req.query;
-    const keyword = req.query.keyword ? req.query.keyword : '';
-    const cuisine = req.query.cuisine ? req.query.cuisine : '';
+  const pageSize = parseInt(process.env.PAGINATION_LIMIT, 10) || 10;
+  const page = parseInt(req.query.pageNumber, 10) || 1;
+  const { latitude, longitude, state } = req.query;
+  const keyword = req.query.keyword ? req.query.keyword : '';
+  const cuisine = req.query.cuisine ? req.query.cuisine : '';
 
-    // Merge keyword and cuisine filters
-    const filters = {};
+  // Merge keyword and cuisine filters
+  const filters = {};
 
-    // Check if keyword is provided
-    if (keyword) {
-      // Construct a regex pattern to match the keyword in the name field case-insensitively
-      const regex = new RegExp(keyword, 'i');
-      // Set the name field to match the regex pattern
-      filters.name = regex;
-    }
+  // Check if keyword is provided
+  if (keyword) {
+    const regex = new RegExp(keyword, 'i');
+    filters.name = regex;
+  }
 
-    // Check if cuisine is provided
-    if (cuisine) {
-      filters.cuisine = { $regex: new RegExp(cuisine, 'i') };
-    }
+  // Check if cuisine is provided
+  if (cuisine) {
+    filters.cuisine = { $regex: new RegExp(cuisine, 'i') };
+  }
 
-    let count;
-    let restaurants;
+  let count;
+  let restaurants;
 
-    if (req.query.keyword) {
-      let products = await Product.find(filters)
-        .populate('user', '-password')
-        .sort({ IsFood: -1, rating: -1, numReviews: -1 }); // Sort in descending order by IsFood, rating, and numReviews
-      const productsOutOfRange = products;
-      // If latitude and longitude are provided, filter products based on distance
-      if (
-        latitude !== null &&
-        !isNaN(latitude) &&
-        longitude !== null &&
-        !isNaN(longitude)
-      ) {
-        // Filter products within the desired radius from the user's location
-        products = products.filter((product) => {
-          const productDistance = calculateUserDistance(
-            parseFloat(latitude),
-            parseFloat(longitude),
-            parseFloat(product.location.latitude),
-            parseFloat(product.location.longitude)
-          );
-          return productDistance <= 4; // Adjust the radius as needed
-        });
+  if (req.query.keyword) {
+    let products = await Product.find(filters)
+      .populate({ path: 'user', select: '_id restaurant name' })
+      .sort({ IsFood: -1, rating: -1, numReviews: -1 });
 
-        // Filter out duplicates between products within radius and all products
-        const uniqueProducts = productsOutOfRange.filter(
-          (product) =>
-            !products.some((pr) => pr._id.toString() === product._id.toString())
+    const productsOutOfRange = products;
+
+    // If latitude and longitude are provided, filter products based on distance
+    if (
+      latitude !== null &&
+      !isNaN(latitude) &&
+      longitude !== null &&
+      !isNaN(longitude)
+    ) {
+      // Filter products within the desired radius from the user's location
+      products = products.filter((product) => {
+        const productDistance = calculateUserDistance(
+          parseFloat(latitude),
+          parseFloat(longitude),
+          parseFloat(product.location.latitude),
+          parseFloat(product.location.longitude)
         );
+        return productDistance <= 4; // Adjust the radius as needed
+      });
 
-        // Concatenate products within radius and unique products from all products
-        const mergedProducts = [...products, ...uniqueProducts];
+      // Filter out duplicates between products within radius and all products
+      const uniqueProducts = productsOutOfRange.filter(
+        (product) =>
+          !products.some((pr) => pr._id.toString() === product._id.toString())
+      );
 
-        const userIds = mergedProducts.map((product) =>
-          product.user._id.toString()
-        );
+      // Concatenate products within radius and unique products from all products
+      const mergedProducts = [...products, ...uniqueProducts];
 
-        let counts = await Restaurant.countDocuments({
-          user: { $in: userIds },
-        });
+      const userIds = mergedProducts.map((product) => product.user._id.toString());
 
-        // Use user IDs to find the associated restaurants
-        restaurants = await Restaurant.find({ user: { $in: userIds } })
-          .populate('user', '-password')
-          .limit(pageSize)
-          .skip(pageSize * (page - 1));
-        res.json({
-          restaurants,
-          page,
-          pages: Math.ceil(counts / pageSize),
-        });
-        return;
-      }
-    } else {
-      count = await Restaurant.countDocuments(filters);
+      let counts = await Restaurant.countDocuments({ user: { $in: userIds } });
 
-      restaurants = await Restaurant.find(filters)
-        .populate('user', '-password')
+      // Use user IDs to find the associated restaurants
+      restaurants = await Restaurant.find({ user: { $in: userIds } })
+        .populate({ path: 'user', select: '_id restaurant name' })
         .limit(pageSize)
         .skip(pageSize * (page - 1));
-
-      // Filter products within the desired radius from the user's location
-      if (
-        latitude !== null &&
-        !isNaN(latitude) &&
-        longitude !== null &&
-        !isNaN(longitude) &&
-        state
-      ) {
-        restaurants.sort((a, b) => {
-          const distanceA = calculateUserDistance(
-            parseFloat(latitude),
-            parseFloat(longitude),
-            parseFloat(a.location.latitude),
-            parseFloat(a.location.longitude)
-          );
-
-          const distanceB = calculateUserDistance(
-            parseFloat(latitude),
-            parseFloat(longitude),
-            parseFloat(b.location.latitude),
-            parseFloat(b.location.longitude)
-          );
-
-          // Sort in ascending order based on distance
-          return distanceA - distanceB;
-        });
-      }
     }
+  } else {
+    count = await Restaurant.countDocuments(filters);
 
-    res
-      .status(200)
-      .json({ restaurants, page, pages: Math.ceil(count / pageSize) });
-  } catch (error) {
-    console.error('Error getting restaurants:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    restaurants = await Restaurant.find(filters)
+      .populate({ path: 'user', select: '_id restaurant name' })
+      .limit(pageSize)
+      .skip(pageSize * (page - 1));
+
+    // Filter products within the desired radius from the user's location
+    if (
+      latitude !== null &&
+      !isNaN(latitude) &&
+      longitude !== null &&
+      !isNaN(longitude) &&
+      state
+    ) {
+      restaurants.sort((a, b) => {
+        const distanceA = calculateUserDistance(
+          parseFloat(latitude),
+          parseFloat(longitude),
+          parseFloat(a.location.latitude),
+          parseFloat(a.location.longitude)
+        );
+
+        const distanceB = calculateUserDistance(
+          parseFloat(latitude),
+          parseFloat(longitude),
+          parseFloat(b.location.latitude),
+          parseFloat(b.location.longitude)
+        );
+
+        // Sort in ascending order based on distance
+        return distanceA - distanceB;
+      });
+    }
   }
+
+  res.status(200).json({ restaurants, page, pages: Math.ceil(count / pageSize) });
 });
 
 // @desc    Get a restaurant profile
@@ -189,7 +172,6 @@ const updateRestaurantById = async (req, res) => {
     }
     res.status(200).json({ success: true, data: restaurant });
   } catch (error) {
-    console.error('Error updating restaurant by ID:', error);
     res.status(500).json({ success: false, message: 'Something went wrong' });
   }
 };

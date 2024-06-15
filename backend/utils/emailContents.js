@@ -129,7 +129,7 @@ export function UserResetPasswordContent(name, id, token) {
     message: `<p>Dear ${name},</p><p>We have received a request to reset your password. 
         If you did not make this request, please ignore this email.</p>
        <p>To reset your password, please click on the following link:</p>
-       <p><a href="https://royalcradle-shop.onrender.com/reset-password/${id}/${token}/">
+       <p><a href="https://www.5tygaeats.co.za/reset-password/${id}/${token}/">
 Reset Password</a></p> <p>Thank you.</p>`,
     subject: 'Password Reset Request',
   };
