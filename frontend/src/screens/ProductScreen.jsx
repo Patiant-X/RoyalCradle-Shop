@@ -101,8 +101,7 @@ const ProductScreen = () => {
     toast.error('Restaurant information not found. Please try again.');
     navigate('/');
     return null;
-  }
-  
+  }  
   return (
     <>
       <Link
@@ -157,7 +156,7 @@ const ProductScreen = () => {
                     <Row>
                       <Col>Status:</Col>
                       <Col>
-                        {product.productIsAvailable ? (
+                        {product.productIsAvailable && restaurantItemWithProduct.status === "open" ? (
                           <span style={{ color: 'green' }}>Available</span>
                         ) : (
                           <span style={{ color: 'red' }}>Not Available</span>
@@ -167,7 +166,7 @@ const ProductScreen = () => {
                   </ListGroup.Item>
 
                   {/* Qty Select */}
-                  {product.productIsAvailable && (
+                  {product.productIsAvailable  && (
                     <ListGroup.Item>
                       <Row>
                         <Col>Qty</Col>
@@ -210,7 +209,7 @@ const ProductScreen = () => {
                     <Button
                       className='btn-block'
                       type='button'
-                      disabled={!product.productIsAvailable}
+                      disabled={!(restaurantItemWithProduct?.status === 'open' && product?.productIsAvailable)}
                       onClick={addToCartHandler}
                     >
                       Add To Cart

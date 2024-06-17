@@ -89,6 +89,7 @@ const HomeScreen = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+  console.log(restaurantData);
   return (
     <>
       {!keyword &&

@@ -233,6 +233,7 @@ const CreateRestaurantScreen = () => {
         deliveryOptions,
         restaurantMedia,
         menuPictures,
+        status,
         aboutPodcast: restaurantPodcast,
         operatingHours: {
           openingTime: generalOperatingHours.openingTime,

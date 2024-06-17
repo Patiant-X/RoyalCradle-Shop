@@ -159,7 +159,8 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
       return 1;
     }
     return 0;
-  });  
+  });
+  
   res
     .status(200)
     .json({ restaurants, page, pages: Math.ceil(count / pageSize) });
