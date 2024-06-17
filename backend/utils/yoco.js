@@ -38,9 +38,9 @@ export async function makeYocoPayment(order) {
       const body = JSON.stringify({
         amount: amount,
         currency: 'ZAR',
-        successUrl: `https://royalcradle-shop.onrender.com/orders/${order._id}`,
-        cancelUrl: `https://royalcradle-shop.onrender.com/`,
-        failureUrl: `https://royalcradle-shop.onrender.com/`,
+        successUrl: `https://www.5tygaeats.co.za/orders/${order._id}`,
+        cancelUrl: `https://www.5tygaeats.co.za`,
+        failureUrl: `https://www.5tygaeats.co.za`,
         metadata: {
           orderId: order._id,
           userId: order.user,
