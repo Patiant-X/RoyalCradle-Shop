@@ -92,7 +92,7 @@ const HomeScreen = () => {
   return (
     <>
       {!keyword &&
-        (userInfo?.isPremiumCustomer || userInfo?.role === 'admin') && (
+        (userInfo?.isPremiumCustomer || userInfo?.role === 'admin' || true) && (
           <Alert variant='info'>
             <h4
               style={{ letterSpacing: '4px', fontFamily: 'serif' }}

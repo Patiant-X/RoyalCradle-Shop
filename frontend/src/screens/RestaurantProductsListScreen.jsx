@@ -127,7 +127,7 @@ const RestaurantProductsListScreen = () => {
             }}
             className='mb-2'
           >
-            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin') && (
+            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin' || true) && (
               <h1>#{restaurantData?.data?.name?.toUpperCase()}</h1>
             )}
           </div>
@@ -166,13 +166,13 @@ const RestaurantProductsListScreen = () => {
           <>
             {' '}
             <Meta />
-            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin') && (
+            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin' || true) && (
               <MenuCategoryDisplay
                 menuPictures={restaurantData?.data?.menuPictures}
                 restauarantId={restaurantData?.data?.user}
               />
             )}
-            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin') &&
+            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin' || true) &&
               restaurantData?.data?.aboutPodcast?.podcast && ( // Update this condition with your audio field name
                 <div
                   className='my-2'

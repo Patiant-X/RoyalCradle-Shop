@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 const RestaurantProductCarousal = ({ products, restaurantData, restaurantId }) => {
   const { userInfo } = useSelector((state) => state.auth);
 
-  const isPremiumUserOrAdmin = userInfo?.isPremiumCustomer || userInfo?.role === 'admin';
+  const isPremiumUserOrAdmin = userInfo?.isPremiumCustomer || userInfo?.role === 'admin' || true;
   return (
     <Carousel pause='hover' className='bg-primary mb-4'>
        {isPremiumUserOrAdmin && restaurantData?.restaurantMedia?.team && (
