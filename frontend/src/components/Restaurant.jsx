@@ -138,11 +138,11 @@ const Restaurant = ({ restaurant, latitude, longitude }) => {
             className='text-right fw-semi mt-2'
             style={{
               textAlign: 'right',
-              fontSize: '0.6rem',
+              fontSize: '0.75rem',
               fontFamily: 'sans-serif',
             }}
           >
-            {clientRestaurantDistance}km Away
+             &lt; {clientRestaurantDistance} km Away
           </Card.Text>
         )}
       </Card.Footer>

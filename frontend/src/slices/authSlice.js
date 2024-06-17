@@ -34,12 +34,15 @@ const authSlice = createSlice({
         return acc;
       }, {});
 
-      // Add new IDs to the onlineUsers list
+      // Update existing users or add new ones
       newOnlineUserIds.forEach((userId) => {
         if (!existingUsers[userId]) {
-          state.onlineUsers.push({ userId, messageCount: 0 });
+          existingUsers[userId] = { userId, messageCount: 0 };
         }
       });
+
+      // Update the state with the new list
+      state.onlineUsers = Object.values(existingUsers);
 
       // Update localStorage with the new online users
       setOnlineUsersToLocalStorage(state.onlineUsers);
@@ -47,7 +50,6 @@ const authSlice = createSlice({
     setSelectUser: (state, action) => {
       if (action.payload.customer === 'customer') {
         const selectedUserId = action.payload.id;
-        state.selectedUser = action.payload.id;
         state.selectedUser = selectedUserId;
 
         // Check if the user already exists in onlineUser

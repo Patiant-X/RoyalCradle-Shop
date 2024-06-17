@@ -21,17 +21,20 @@ const restaurantSlice = createSlice({
   reducers: {
     setRestaurantList: (state, action) => {
       const newRestaurants = action.payload;
+
+      // Create a map for quick look-up of existing restaurants
       const existingRestaurants = state.restaurantList.reduce((acc, restaurant) => {
         acc[restaurant._id] = restaurant;
         return acc;
       }, {});
 
-      // Add only new restaurants to the restaurantList
+      // Update or add new restaurants
       newRestaurants.forEach((newRestaurant) => {
-        if (!existingRestaurants[newRestaurant._id]) {
-          state.restaurantList.push(newRestaurant);
-        }
+        existingRestaurants[newRestaurant._id] = newRestaurant;
       });
+
+      // Update the state with the new list
+      state.restaurantList = Object.values(existingRestaurants);
 
       // Update localStorage with the new restaurant list
       setRestaurantListToLocalStorage(state.restaurantList);
