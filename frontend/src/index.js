@@ -56,6 +56,7 @@ import EveryWhereServiceScreen from './screens/premiumUser/EveryWhereServiceScre
 import AdminEveryWhereService from './screens/admin/AdminEveryWhereService';
 import RestaurantChatScreen from './screens/restaurant/RestaurantChatScreen';
 import RoyalCradleBlogScreen from './screens/premiumUser/royalCradleBlog/RoyalCradleBlogScreen';
+import AboutUsScreen from './screens/AboutUsScreen';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -103,6 +104,10 @@ const router = createBrowserRouter(
       <Route
         path='/premium-member/royal-cradle/blog'
         element={<RoyalCradleBlogScreen />}
+      />
+      <Route
+        path='/about-us'
+        element={<AboutUsScreen />}
       />
 
       {/* Registered users */}

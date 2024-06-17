@@ -57,7 +57,7 @@ const PaymentScreen = () => {
               <Form.Check
                 className='my-2'
                 type='radio'
-                label='Debit or Credit Card'
+                label='Debit or Credit Card (Online)'
                 id='Card'
                 name='paymentMethod'
                 value='card'
@@ -69,7 +69,7 @@ const PaymentScreen = () => {
               <Form.Check
                 className='my-2'
                 type='radio'
-                label='Cash'
+                label='Cash /or Use Restaurant Swiping Machine'
                 id='Cash'
                 name='paymentMethod'
                 value='cash'

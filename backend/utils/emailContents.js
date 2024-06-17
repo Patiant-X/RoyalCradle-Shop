@@ -107,7 +107,7 @@ export function OrderConfirmationContent(order) {
     </table>
     <p>Thank you for choosing us. We hope you enjoy your purchase!</p>
     <div class="website-link">
-      <a href="https://royalcradle-shop.onrender.com">Visit our website</a>
+      <a href="https://www.5tygaeats.co.za">Visit our website</a>
     </div>
   </div>
   `;

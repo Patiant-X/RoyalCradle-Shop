@@ -23,15 +23,17 @@ const CartScreen = () => {
   );
   const cart = useSelector((state) => state.cart);
   const { cartItems } = cart;
-
-  const restaurantItemWithProduct = restaurantList.find((restaurant) =>
-    cartItems.some((item) => item.user === restaurant.user._id)
-  );
-  const restaurantId = restaurantItemWithProduct?._id;
-  if (!restaurantItemWithProduct) {
-    toast.error('Restaurant information not found. Please try again.');
-    navigate('/');
-    return null;
+  let restaurantId;
+  if (cartItems.length > 0) {
+    const restaurantItemWithProduct = restaurantList.find((restaurant) =>
+      cartItems.some((item) => item.user === restaurant.user._id)
+    );
+    restaurantId = restaurantItemWithProduct?._id;
+    if (!restaurantItemWithProduct) {
+      toast.error('Restaurant information not found. Please try again.');
+      navigate('/');
+      return null;
+    }
   }
 
   // NOTE: no need for an async function here as we are not awaiting the
@@ -69,7 +71,13 @@ const CartScreen = () => {
                       <Image src={item.image} alt={item.name} fluid rounded />
                     </Col>
                     <Col md={3} className='mt-2 mt-md-0'>
-                      <Link to={`/product/${item._id}/image/${restaurantId}`}>{item.name}</Link>
+                      <Link
+                        to={`/product/${item._id}/${encodeURIComponent(
+                          JSON.stringify(item.image)
+                        )}/${restaurantId}`}
+                      >
+                        {item.name}
+                      </Link>
                     </Col>
                     <Col md={2} className='mt-2 mt-md-0'>
                       R{item.price}

@@ -40,7 +40,7 @@ const ProductScreen = () => {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    if (encodedImage && encodedImage !== "image") {
+    if (encodedImage) {
       const decodedImage = JSON.parse(decodeURIComponent(encodedImage));
       setImage(decodedImage);
     }
@@ -307,13 +307,18 @@ const maxItemsInCart = (cartItems, newProduct, qty) => {
         newRestLat,
         newRestLng
       );
-      if (restaurantDistance > 1) {
-        toast.error('Restaurants too far apart, please remove items in cart');
+      // if (restaurantDistance > 1) {
+      //   toast.error('Restaurants too far apart, please remove items in cart');
+      //   return true;
+      // }
+      // if (restaurantDistance === 0) {
+      //   sameRestaurant += 1;
+      // }
+      if (product.user !== newProduct.user) {
+        toast.error('You can only order from one restaurant at a time.');
         return true;
       }
-      if (restaurantDistance === 0) {
-        sameRestaurant += 1;
-      }
+      sameRestaurant += 1;
     }
     if (sameRestaurant === 0) {
       toast.warning(

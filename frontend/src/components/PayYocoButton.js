@@ -19,17 +19,20 @@ const PayYocoButton = ({
     try {
       // Check if there are any unpaid cash orders
       const undeliveredCashOrders = orders.filter(
+        //This filter should check if there is a Cash? and a Card swipe order.
         (order) => !order.isDelivered && order.paymentMethod === 'cash'
       );
 
       if (undeliveredCashOrders.length > 0) {
         // Inform the user about the existing unpaid cash order
         toast('There is a cash order in progress. Please complete order.');
+        // Toast to user that there is a confirmed order.
         return;
       }
 
       // Check if there are any unpaid card orders
       const unpaidCardOrders = orders.filter(
+        //this should be renamed to online
         (order) => !order.isPaid && order.paymentMethod === 'card'
       );
 
@@ -56,8 +59,8 @@ const PayYocoButton = ({
         // Redirect the user to the redirectUrl link
         window.location.href = res.redirectUrl;
       } else if (!res.redirectUrl) {
-        dispatch(clearCartItems());
-        navigate(`/order/${res._id}`);
+      dispatch(clearCartItems());
+      navigate(`/order/${res._id}`);
       }
     } catch (err) {
       toast.error(err?.data?.message || err.error || 'An error occurred');

@@ -88,6 +88,7 @@ const OrderScreen = () => {
     refetch();
   };
 
+  //This should be changed to restaurant driver has arrived and is outside please collect your order.
   const driverArrivedHandler = async () => {
     await driverArrivedOrder(orderId);
     if (isErrordriverArrivedOrder) {
@@ -101,6 +102,9 @@ const OrderScreen = () => {
     refetch();
   };
 
+  // This will be instead of order collected will be a function for the restaurant to confirm order
+  // Also create a function where the restaurant will say the order is almost ready
+  // These functions should be independent of either it's a delivery or collection
   const handleOrderCollected = async () => {
     await collectOrder(orderId);
 

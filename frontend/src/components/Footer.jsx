@@ -49,6 +49,15 @@ const Footer = () => {
             </Col>
 
             <Col md='3' lg='3' xl='3' className='mx-auto mb-4'>
+              <h6 className='text-uppercase fw-bold mb-4'>Learn</h6>
+              <p>
+                <a href='/about-us' className='text-reset'>
+                  About Us
+                </a>{' '}
+                
+              </p>
+            </Col>
+            <Col md='3' lg='3' xl='3' className='mx-auto mb-4'>
               <h6 className='text-uppercase fw-bold mb-4'>Legal</h6>
               <p>
                 <a href='/terms-and-conditions' className='text-reset'>

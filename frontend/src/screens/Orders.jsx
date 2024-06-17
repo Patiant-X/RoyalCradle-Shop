@@ -37,6 +37,7 @@ const OrdersScreen = () => {
         ) : (
           <Table striped hover responsive className='table-sm'>
             <thead>
+            {/*Add a confirmation state which will depend on the restaurant if order is not confirmed by restaurant then there is a problem*/}
               <tr>
                 <th>DATE</th>
                 <th>TOTAL</th>

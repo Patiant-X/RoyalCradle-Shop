@@ -12,10 +12,15 @@ import {
 import { clearCartItems } from '../slices/cartSlice';
 import { useGetMyOrdersQuery } from '../slices/ordersApiSlice';
 import PayYocoButton from '../components/PayYocoButton';
+import { toast } from 'react-toastify';
 
 const PlaceOrderScreen = () => {
   const navigate = useNavigate();
+  const restaurantList = useSelector(
+    (state) => state.restaurant.restaurantList
+  );
   const cart = useSelector((state) => state.cart);
+
   const { shippingAddress } = cart;
 
   const [createOrder, { isLoading, error }] = useCreateOrderMutation();

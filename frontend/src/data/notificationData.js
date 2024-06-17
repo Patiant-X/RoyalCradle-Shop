@@ -10,6 +10,7 @@ export const driverArrivedNotification = {
 };
 
 export const orderDeliveredNotification = {
+  // I should use the restaurant name even when sending email
   title: '5TygaEats',
   body: 'You have a new message',
   // icon: '/path/to/icon.png',
@@ -20,6 +21,7 @@ export const orderDeliveredNotification = {
   },
 };
 
+//CHange this notification to order is almost ready 
 export const orderCollectedNotification = {
   title: '5TygaEats',
   body: 'You have a new message',

@@ -35,6 +35,24 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
   const keyword = req.query.keyword ? req.query.keyword : '';
   const cuisine = req.query.cuisine ? req.query.cuisine : '';
 
+  // Special case: return only the restaurant with the specific ID
+  const specificRestaurantId = '6625be557e9562917044d452';
+
+  // if (specificRestaurantId) {
+  //   try {
+  //     const restaurant = await Restaurant.findById(specificRestaurantId)
+  //       .populate({ path: 'user', select: '_id restaurant name' });
+
+  //     if (!restaurant) {
+  //       return res.status(404).json({ success: false, message: 'Restaurant not found' });
+  //     }
+  //     return res.status(200).json({ success: true, data: restaurant });
+  //   } catch (error) {
+  //     console.error('Error getting specific restaurant:', error);
+  //     return res.status(500).json({ success: false, message: 'Internal server error' });
+  //   }
+  // }
+
   // Merge keyword and cuisine filters
   const filters = {};
 
@@ -86,9 +104,11 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
       // Concatenate products within radius and unique products from all products
       const mergedProducts = [...products, ...uniqueProducts];
 
-      const userIds = mergedProducts.map((product) => product.user._id.toString());
+      const userIds = mergedProducts.map((product) =>
+        product.user._id.toString()
+      );
 
-      let counts = await Restaurant.countDocuments({ user: { $in: userIds } });
+      //let counts = await Restaurant.countDocuments({ user: { $in: userIds } });
 
       // Use user IDs to find the associated restaurants
       restaurants = await Restaurant.find({ user: { $in: userIds } })
@@ -103,7 +123,6 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
       .populate({ path: 'user', select: '_id restaurant name' })
       .limit(pageSize)
       .skip(pageSize * (page - 1));
-
     // Filter products within the desired radius from the user's location
     if (
       latitude !== null &&
@@ -132,8 +151,18 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
       });
     }
   }
-
-  res.status(200).json({ restaurants, page, pages: Math.ceil(count / pageSize) });
+  restaurants = restaurants.sort((a, b) => {
+    if (a.status === 'open' && b.status !== 'open') {
+      return -1;
+    }
+    if (a.status !== 'open' && b.status === 'open') {
+      return 1;
+    }
+    return 0;
+  });  
+  res
+    .status(200)
+    .json({ restaurants, page, pages: Math.ceil(count / pageSize) });
 });
 
 // @desc    Get a restaurant profile

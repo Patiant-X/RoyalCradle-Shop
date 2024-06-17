@@ -173,6 +173,11 @@ const Header = () => {
                   )}
                 </Nav.Link>
               </LinkContainer>
+              <LinkContainer to='/about-us'>
+                <Nav.Link>
+                  About
+                </Nav.Link>
+              </LinkContainer>
               {userInfo ? (
                 <>
                   <NavDropdown title={userInfo.name} id='username'>

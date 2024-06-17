@@ -32,7 +32,7 @@ const SearchBox = forwardRef((props, ref) => {
         placeholder='Craving something?'
         className='mr-sm-2 ml-sm-5 search-box-input' // Add the custom class here
       ></Form.Control>
-      <Button type='submit' variant='outline-success' className='p-2 mx-2'>
+      <Button type='submit' className='p-2 mx-2'>
         Search
       </Button>
     </Form>

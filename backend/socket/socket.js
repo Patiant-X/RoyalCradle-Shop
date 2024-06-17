@@ -227,10 +227,8 @@ io.on('connection', async (socket) => {
     }
   });
 
-
   socket.on('answer', (answerData) => {
     const { answer, senderData, receiverData, accepted } = answerData;
-
 
     const senderSocketId =
       customerSocketMap[senderData._id] ||
@@ -270,11 +268,10 @@ io.on('connection', async (socket) => {
       driverSocketMap[user._id] ||
       adminSocketMap[user._id];
 
-      if (receiverSocketId) {
-        io.to(receiverSocketId).emit('call-ended', user);
-      }
-  })
-
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('call-ended', user);
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log('user disconnected', socket.id);
