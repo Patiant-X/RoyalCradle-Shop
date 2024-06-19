@@ -2,13 +2,16 @@ import moment from 'moment-timezone';
 import asyncHandler from '../middleware/asyncHandler.js';
 import Order from '../models/orderModel.js';
 import Product from '../models/productModel.js';
-import User from '../models/userModel.js';
+import Restaurant from '../models/restaurantModel.js';
 import SendEmail from '../utils/SendEmail.js';
 import { calcPrices } from '../utils/calcPrices.js';
 import { OrderConfirmationContent } from '../utils/emailContents.js';
 import { makeYocoPayment, registerYocoWebHook } from '../utils/yoco.js';
 import { informUserDriverArrived, notifyNewOrder } from '../socket/socket.js';
-import { sendDriverNotification, sendRestaurantNotification } from './pushNotificationController.js';
+import {
+  sendDriverNotification,
+  sendRestaurantNotification,
+} from './pushNotificationController.js';
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -276,6 +279,51 @@ const acceptOrder = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: 'Order Picked up successfully' });
 });
+// @desc    Restaurant order confirmation
+// @route   PUT /api/orders/:id/confirm
+// @access  Private/restaurant
+const confirmOrder = asyncHandler(async (req, res) => {
+  try {
+    const orderId = req.params.id;
+    const restaurantUserId = req.user._id;
+
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    // Find the restaurant by the restaurant ID in the order
+    const restaurant = await Restaurant.findOne({ user: order?.restaurant });
+
+    if (!restaurant) {
+      return res.status(404).json({ error: 'Restaurant not found' });
+    }
+
+    // Check if the current user is associated with the restaurant
+    if (restaurant.user.toString() !== restaurantUserId.toString()) {
+      return res
+        .status(403)
+        .json({ error: 'User not authorized to confirm this order' });
+    }
+
+    // Check if the order has already been confirmed by the restaurant
+    if (order.restaurantConfirmation) {
+      return res.status(400).json({ error: 'Order already confirmed' });
+    }
+
+    // Confirm the order
+    order.restaurantConfirmation = true;
+    await order.save();
+
+    res.status(200).json({ message: 'Order confirmed successfully' });
+  } catch (error) {
+    // Handle any unexpected errors
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 // @desc    Driver arrived at delivery location
 // @route   PUT /api/orders/:id/arrived
@@ -417,6 +465,7 @@ export {
   updateOrderToDelivered,
   getOrders,
   registerWebHookYoco,
+  confirmOrder,
   deleteOrder,
   acceptOrder,
   driverArrivedOrder,

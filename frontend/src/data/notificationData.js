@@ -1,3 +1,13 @@
+export const restaurantConfirmationNotification = {
+  title: '5TygaEats',
+  body: 'You have a new message',
+  // icon: '/path/to/icon.png',
+  data: {
+    title: 'Driver Arrived',
+    message: 'Driver has arrived please collect the order',
+    timestamp: Date.now(),
+  },
+};
 export const driverArrivedNotification = {
   title: '5TygaEats',
   body: 'You have a new message',
@@ -21,7 +31,7 @@ export const orderDeliveredNotification = {
   },
 };
 
-//CHange this notification to order is almost ready 
+//CHange this notification to order is almost ready
 export const orderCollectedNotification = {
   title: '5TygaEats',
   body: 'You have a new message',

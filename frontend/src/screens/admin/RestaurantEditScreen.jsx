@@ -54,7 +54,7 @@ const CreateRestaurantScreen = () => {
     quote: '',
     video: '',
   });
-  const [restaurantPodcast, setRestaurantPodcast] = useState();
+  const [restaurantPodcast, setRestaurantPodcast] = useState("");
   const [menuPictures, setMenuPictures] = useState({});
   const [menuPictureCategory, setMenuPictureCategory] = useState('');
 
@@ -74,7 +74,7 @@ const CreateRestaurantScreen = () => {
     }
   }, [restaurantData, refetch]);
 
-  const [createRestaurant, { isLoading, isError, error }] =
+  const [createRestaurant, { isLoading, isError }] =
     useCreateRestaurantMutation();
 
   const [updateRestaurantById] = useUpdateRestaurantByIdMutation();
@@ -260,8 +260,7 @@ const CreateRestaurantScreen = () => {
         toast.success('Restaurant created successfully');
       }
     } catch (err) {
-      toast.error(err.err || err.message);
-      console.error('Error creating restaurant:', err);
+      toast.error(err.err || err.message || "Error Crreating or Updating Restaurant");
     }
   };
 
@@ -278,7 +277,7 @@ const CreateRestaurantScreen = () => {
       )}
 
       {isLoading && <Loader />}
-      {isError && <Message variant='danger'>{error.message}</Message>}
+      {isError && <Message variant='danger'>{isError.message}</Message>}
       <Form onSubmit={submitHandler}>
         <Form.Group controlId='name'>
           <Form.Label>Name</Form.Label>

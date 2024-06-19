@@ -93,6 +93,7 @@ const ProductScreen = () => {
   const restaurantItemWithProduct = restaurantList.find(
     (restaurant) => product?.user === restaurant.user._id
   );
+
   const restaurantId = restaurantItemWithProduct?._id;
   if (isLoading) {
     return <Loader />;

@@ -18,7 +18,6 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: [
-      'http://localhost:5000',
       'https://royalcradle-shop.onrender.com',
       'https://www.5tygaeats.co.za',
       'https://5tygaeats.co.za'
@@ -189,8 +188,6 @@ io.on('connection', async (socket) => {
           timestamp: Date.now(),
         },
       };
-
-      console.log(userSubscription);
       // Send push notification
       await webpush
         .sendNotification(

@@ -17,6 +17,7 @@ import {
   useDeliverOrderMutation,
   useDriverArrivedOrderMutation,
   useGetOrderDetailsQuery,
+  useRestaurantConfirmationOrderMutation,
 } from '../slices/ordersApiSlice';
 import usePushNotifications from '../hooks/usePushNotifications.js';
 import useSendNotification from '../hooks/useSendNotification.js';
@@ -46,6 +47,14 @@ const OrderScreen = () => {
   const restaurantAddress =
     order?.orderItems.find((item) => item.IsFood)?.location?.address ||
     'Find Item at closest shop';
+
+  const [
+    restaurantConfirmationOrder,
+    {
+      isLoading: loadingRestaurantCOnfrimation,
+      isError: isErrorRestaurantConfirmation,
+    },
+  ] = useRestaurantConfirmationOrderMutation();
 
   const [
     deliverOrder,
@@ -120,6 +129,26 @@ const OrderScreen = () => {
     refetch();
   };
 
+  const handleAction = async (
+    mutation,
+    notification,
+    successMessage,
+    errorMessage
+  ) => {
+    try {
+      await mutation(orderId);
+      sendNotification({
+        notification,
+        userId: order?.user?._id,
+      });
+      toast.success(successMessage);
+    } catch (error) {
+      toast.error(errorMessage || error?.error);
+    } finally {
+      refetch();
+    }
+  };
+
   const hasFoodProduct = order?.orderItems?.some(
     (item) => item.IsFood === true
   );
@@ -178,7 +207,6 @@ const OrderScreen = () => {
       statusMessage.time = '15min';
     }
   }
-
 
   return isLoading ? (
     <Loader />
@@ -351,6 +379,64 @@ const OrderScreen = () => {
 
               {loadingDeliver && <Loader />}
 
+              {/** Restaurant Order Process Logic */}
+
+              {/* {
+                //The restaurant must confirm the order.
+                userInfo &&
+                  (userInfo.role === 'admin' ||
+                    userInfo.role === 'restaurant') &&
+                  order.isPaid &&
+                  !order.isDelivered && (
+                    <ListGroup.Item>
+                      {loadingDeliver && <Loader />}
+                      <Button
+                        type='button'
+                        className='btn btn-block danger'
+                        style={{ backgroundColor: 'red' }}
+                        onClick={() => handleAction(restaurantConfirmationOrder, )}
+                      >
+                        Confirm Order
+                      </Button>
+                    </ListGroup.Item>
+                  )
+              } */}
+
+              {userInfo &&
+                (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
+                order.isPaid &&
+                !order.isDelivered && ( //This should be checked
+                  <ListGroup.Item>
+                    {loadingDeliver && <Loader />}
+                    <Button
+                      type='button'
+                      className='btn btn-block danger'
+                      style={{ backgroundColor: 'red' }}
+                      onClick={deliverHandler}
+                    >
+                      Order Collected
+                    </Button>
+                  </ListGroup.Item>
+                )}
+              {userInfo &&
+                !order.isDelivered &&
+                (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
+                !order.shippingAddress?.delivery && (
+                  // Change the function name
+                  <ListGroup.Item>
+                    <Button
+                      type='button'
+                      className='btn btn-block btn-order'
+                      style={{ backgroundColor: 'green' }}
+                      onClick={userCollectsOrderHandler}
+                    >
+                      Order is Ready
+                    </Button>
+                  </ListGroup.Item>
+                )}
+
+              {/** Restaurant Order Process Logic */}
+
               {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
@@ -369,23 +455,7 @@ const OrderScreen = () => {
                     </Button>
                   </ListGroup.Item>
                 )}
-              {userInfo &&
-                (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
-                order.isPaid &&
-                !order.isDelivered &&
-                 (
-                  <ListGroup.Item>
-                    {loadingDeliver && <Loader />}
-                    <Button
-                      type='button'
-                      className='btn btn-block danger'
-                      style={{ backgroundColor: 'red' }}
-                      onClick={deliverHandler}
-                    >
-                      Order Collected
-                    </Button>
-                  </ListGroup.Item>
-                )}
+
               {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
@@ -402,20 +472,6 @@ const OrderScreen = () => {
                     >
                       Collect Order
                     </Button>
-                  </ListGroup.Item>
-                )}
-              {userInfo && !order.isDelivered &&
-                (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
-                !order.shippingAddress?.delivery && (
-                  <ListGroup.Item>
-                  <Button
-                    type='button'
-                    className='btn btn-block btn-order'
-                    style={{ backgroundColor: 'green' }}
-                    onClick={userCollectsOrderHandler}
-                  >
-                    Order is Ready
-                  </Button>
                   </ListGroup.Item>
                 )}
               {userInfo &&
