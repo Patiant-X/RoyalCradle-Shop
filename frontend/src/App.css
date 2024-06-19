@@ -220,6 +220,16 @@
   color: red;
 }
 
+.no-messages {
+  color: #333; /* Darker text color for better readability */
+  font-size: 1em;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  text-align: center;
+  margin: 20px;
+}
+
 /* UseWebRTC  */
 
 .icon {

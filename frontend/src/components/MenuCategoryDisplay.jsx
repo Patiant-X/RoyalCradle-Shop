@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Image, Button, Card } from 'react-bootstrap';
+import { Container, Row, Col, Image, Button, Card, Modal } from 'react-bootstrap';
 import useConversations from '../hooks/useConversations';
 import MessageComponent from './MessageComponent';
 import { RiChat4Line } from 'react-icons/ri';
@@ -8,9 +8,7 @@ import { useDispatch } from 'react-redux';
 
 const MenuCategoryDisplay = ({ menuPictures, restauarantId }) => {
   const dispatch = useDispatch();
-  // Use the useConversations hook to fetch conversations data
   const [adminService, setAdminService] = useState(restauarantId);
-  // State to manage the visibility of the MessageComponent
   const [showMessage, setShowMessage] = useState(false);
   const handleToggleCardComponent = () => {
     dispatch(resetUserMessageCount(adminService));
@@ -19,15 +17,17 @@ const MenuCategoryDisplay = ({ menuPictures, restauarantId }) => {
     setAdminService(restauarantId);
   };
   const conversation = useConversations(adminService);
-  // Set an initial category to be displayed when the page loads
   const initialCategory = menuPictures && Object.keys(menuPictures)[0];
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
-  // Update the selected category when the component mounts
+  const [showModal, setShowModal] = useState(false);
+  const handleOpenModal = () => setShowModal(true);
+  const handleCloseModal = () => setShowModal(false);
+
   useEffect(() => {
     setSelectedCategory(initialCategory);
     return () => {
-      dispatch(setSelectUser('')); // Dispatch setSelectedUser('') when component unmounts
+      dispatch(setSelectUser(''));
     }
   }, [initialCategory, dispatch]);
 
@@ -63,22 +63,25 @@ const MenuCategoryDisplay = ({ menuPictures, restauarantId }) => {
           ))}
       </Row>
 
-      {selectedCategory && (
+      {selectedCategory && menuPictures && menuPictures[selectedCategory] && (
         <Row className='justify-content-center'>
           <Col xs={12} md={8} className='text-center'>
             <Image
               src={menuPictures[selectedCategory]}
               alt={selectedCategory}
               fluid
+              onClick={handleOpenModal}
               style={{
                 maxHeight: '400px',
                 objectFit: 'cover',
                 transition: 'opacity 0.3s ease',
+                cursor: 'pointer',
               }}
             />
           </Col>
         </Row>
       )}
+
       <style jsx>{`
         .scrolling-wrapper {
           display: flex;
@@ -108,9 +111,24 @@ const MenuCategoryDisplay = ({ menuPictures, restauarantId }) => {
       </Card>
 
       <div className='mt-3 mb-5'>
-        {' '}
-        {showMessage && <MessageComponent conversation={conversation} />}{' '}
+        {showMessage && <MessageComponent conversation={conversation} />}
       </div>
+
+      <Modal show={showModal} onHide={handleCloseModal} centered size="lg">
+        <Modal.Body>
+          {selectedCategory && menuPictures && menuPictures[selectedCategory] && (
+            <Image
+              src={menuPictures[selectedCategory]}
+              alt={selectedCategory}
+              fluid
+              style={{ width: '100%', height: 'auto' }}
+            />
+          )}
+          <Button variant="secondary" onClick={handleCloseModal} className="mt-3">
+            Close
+          </Button>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 };

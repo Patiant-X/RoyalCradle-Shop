@@ -8,12 +8,9 @@ import Avatar from './Avatar';
 import moment from 'moment';
 import backgroundImage from '../assets/wallapaper.jpeg';
 import useWebRTC from '../hooks/useWebRTC';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import usePushNotifications from '../hooks/usePushNotifications';
 
 const MessageComponent = ({ conversation }) => {
-  // Hook for subscribing user
   usePushNotifications();
   const dispatch = useDispatch();
   const { callInProgress, remoteStream } = useSelector((state) => state.webrtc);
@@ -64,7 +61,7 @@ const MessageComponent = ({ conversation }) => {
   const allMessage = conversation?.allMessage;
   const user = conversation?.userData;
 
-  const { startCall, endCall } = useWebRTC(user, userInfo); // Assuming useWebRTC returns these functions
+  const { startCall, endCall } = useWebRTC(user, userInfo);
 
   useEffect(() => {
     if (currentMessage.current) {
@@ -153,7 +150,7 @@ const MessageComponent = ({ conversation }) => {
                   </div>
                   <div
                     className='message-text'
-                    dangerouslySetInnerHTML={{ __html: msg.text }} // Render HTML content
+                    dangerouslySetInnerHTML={{ __html: msg.text }}
                   />
                   <p className='message-timestamp'>
                     {moment(msg.createdAt).fromNow()}
@@ -161,10 +158,14 @@ const MessageComponent = ({ conversation }) => {
                 </div>
               ))
             ) : (
-              <div className='no-messages'>No messages yet</div>
+              <div className='no-messages'>
+                Welcome to the restaurant / everwhere service chat app. Here you can communicate with the restaurant regarding menu, orders, and more. 
+                Please note, you must be logged in to use the chat functionality.
+              </div>
             )}
           </div>
         </section>
+
         <section className='input-section flex-none'>
           <div className='attach-button'>
             <FaPlus size={20} />
@@ -175,17 +176,20 @@ const MessageComponent = ({ conversation }) => {
               className='message-input'
               value={message.text}
               onChange={handleOnChange}
-              rows='1' // Initial number of rows
-              style={{ maxHeight: '150px', minHeight: '50px' }} // Set the initial and max height
+              rows='1'
+              style={{ maxHeight: '150px', minHeight: '50px' }}
+              disabled={!userInfo} // Disable input if user is not logged in
             />
-            <button type='submit' className='send-button'>
+            <button type='submit' className='send-button' disabled={!userInfo}>
               <IoMdSend size={28} />
             </button>
           </form>
         </section>
         <audio ref={remoteAudioRef} autoPlay />
       </div>
-      <style jsx>{``}</style>
+      <style jsx>{`
+      `}</style>
+
     </>
   );
 };
