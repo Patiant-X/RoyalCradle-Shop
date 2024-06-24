@@ -1,0 +1,15 @@
+/* RestaurantProductCarousal.css */
+.restaurant-carousel-control-next,
+.restaurant-carousel-control-prev {
+  z-index: 1;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.restaurant-carousel-control-next {
+  right: 10px;
+}
+
+.restaurant-carousel-control-prev {
+  left: 10px;
+}
