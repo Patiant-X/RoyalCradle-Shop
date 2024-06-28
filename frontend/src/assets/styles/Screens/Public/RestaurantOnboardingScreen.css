@@ -1,0 +1,39 @@
+.onboarding-container {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    line-height: 1.6;
+  }
+  
+  .onboarding-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .onboarding-section h2 {
+    color: #333;
+  }
+  
+  .onboarding-section ol {
+    padding-left: 20px;
+  }
+  
+  .onboarding-section ol li {
+    margin-bottom: 10px;
+  }
+  
+  .onboarding-section p {
+    margin-bottom: 10px;
+  }
+  
+  .onboarding-section strong {
+    color: #555;
+  }
+  
+  .onboarding-section-additional {
+    justify-content: center;
+    font-size: medium;
+    font-style: italic;
+  }
