@@ -14,9 +14,23 @@ const PayYocoButton = ({
   clearCartItems,
   navigate,
   isLoading,
+  restaurantId,
 }) => {
   const placeOrderHandler = async () => {
     try {
+      // Filter out confirmed orders
+      const confirmedOrders = orders.filter(
+        (order) => order?.restaurantConfirmation
+      );
+
+      if (confirmedOrders.length >= 2) {
+        // Inform the user about the existing confirmed orders
+        toast(
+          'You have two confirmed orders in progress. Please complete them before placing a new order.'
+        );
+        return;
+      }
+
       // Check if there are any unpaid cash orders
       const undeliveredCashOrders = orders.filter(
         //This filter should check if there is a Cash? and a Card swipe order.
@@ -45,6 +59,7 @@ const PayYocoButton = ({
       const res = await createOrder({
         orderItems: cart.cartItems,
         shippingAddress,
+        restaurant: restaurantId,
         paymentMethod: cart.paymentMethod,
         itemsPrice: cart.itemsPrice,
         shippingPrice: cart.shippingPrice,
@@ -59,8 +74,8 @@ const PayYocoButton = ({
         // Redirect the user to the redirectUrl link
         window.location.href = res.redirectUrl;
       } else if (!res.redirectUrl) {
-      dispatch(clearCartItems());
-      navigate(`/order/${res._id}`);
+        dispatch(clearCartItems());
+        navigate(`/order/${res._id}`);
       }
     } catch (err) {
       toast.error(err?.data?.message || err.error || 'An error occurred');

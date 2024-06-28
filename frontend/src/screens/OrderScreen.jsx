@@ -25,6 +25,7 @@ import {
   driverArrivedNotification,
   orderCollectedNotification,
   orderDeliveredNotification,
+  restaurantConfirmedNotification,
   userCollectsOrderNotification,
 } from '../data/notificationData.js';
 
@@ -144,6 +145,21 @@ const OrderScreen = () => {
       toast.success(successMessage);
     } catch (error) {
       toast.error(errorMessage || error?.error);
+    } finally {
+      refetch();
+    }
+  };
+
+  const handleRestaurantConfirmation = async () => {
+    try {
+      await restaurantConfirmationOrder(orderId);
+      sendNotification({
+        notification: restaurantConfirmedNotification,
+        userId: order?.user?._id,
+      });
+      toast.success('Restaurant has confirmed the order');
+    } catch (error) {
+      toast.error('Restaurant confirmation failed');
     } finally {
       refetch();
     }
@@ -381,30 +397,31 @@ const OrderScreen = () => {
 
               {/** Restaurant Order Process Logic */}
 
-              {/* {
+              {
                 //The restaurant must confirm the order.
                 userInfo &&
                   (userInfo.role === 'admin' ||
                     userInfo.role === 'restaurant') &&
                   order.isPaid &&
-                  !order.isDelivered && (
+                  !order.restaurantConfirmation && (
                     <ListGroup.Item>
                       {loadingDeliver && <Loader />}
                       <Button
                         type='button'
                         className='btn btn-block danger'
                         style={{ backgroundColor: 'red' }}
-                        onClick={() => handleAction(restaurantConfirmationOrder, )}
+                        onClick={handleRestaurantConfirmation}
                       >
                         Confirm Order
                       </Button>
                     </ListGroup.Item>
                   )
-              } */}
+              }
 
               {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
                 order.isPaid &&
+                order.restaurantConfirmation &&
                 !order.isDelivered && ( //This should be checked
                   <ListGroup.Item>
                     {loadingDeliver && <Loader />}
@@ -421,6 +438,7 @@ const OrderScreen = () => {
               {userInfo &&
                 !order.isDelivered &&
                 (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
+                order.restaurantConfirmation &&
                 !order.shippingAddress?.delivery && (
                   // Change the function name
                   <ListGroup.Item>
@@ -440,6 +458,7 @@ const OrderScreen = () => {
               {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
+                order.restaurantConfirmation &&
                 !order.isDelivered &&
                 order?.driverAccepted &&
                 !order?.driverArrived && (
@@ -459,6 +478,7 @@ const OrderScreen = () => {
               {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
+                order.restaurantConfirmation &&
                 !order.isDelivered &&
                 !order?.driverAccepted &&
                 order.shippingAddress?.delivery && (
@@ -478,6 +498,7 @@ const OrderScreen = () => {
                 order.shippingAddress?.delivery &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
                 order.isPaid &&
+                order.restaurantConfirmation &&
                 !order.isDelivered &&
                 order?.driverAccepted &&
                 !order?.driverArrived && (

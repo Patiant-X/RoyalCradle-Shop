@@ -1,10 +1,10 @@
-export const restaurantConfirmationNotification = {
+export const restaurantConfirmedNotification = {
   title: '5TygaEats',
   body: 'You have a new message',
   // icon: '/path/to/icon.png',
   data: {
-    title: 'Driver Arrived',
-    message: 'Driver has arrived please collect the order',
+    title: 'Restuarant Confirmation',
+    message: 'Restuarant has confirmed order',
     timestamp: Date.now(),
   },
 };

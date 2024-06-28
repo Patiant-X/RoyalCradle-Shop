@@ -20,11 +20,11 @@ const orderSchema = mongoose.Schema(
       required: true,
       ref: 'User',
     },
-    // restaurant: {
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   required: true,
-    //   ref: 'Restaurant',
-    // },
+    restaurant: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: 'Restaurant',
+    },
     driver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -109,11 +109,11 @@ const orderSchema = mongoose.Schema(
       required: true,
       default: false,
     },
-    // restaurantConfirmation: {
-    //   type: Boolean,
-    //   required: true,
-    //   default: false,
-    // },
+    restaurantConfirmation: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
     deliveredAt: {
       type: Date,
     },

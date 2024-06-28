@@ -17,7 +17,7 @@ import {
 // @route   POST /api/orders
 // @access  Private
 const addOrderItems = asyncHandler(async (req, res) => {
-  const { orderItems, shippingAddress, paymentMethod } = req.body;
+  const { orderItems, shippingAddress, paymentMethod, restaurant } = req.body;
 
   if (!['card', 'cash'].includes(paymentMethod)) {
     res.status(400).json({ error: 'Invalid payment method' });
@@ -69,6 +69,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
         longitude: shippingAddress?.lng ? shippingAddress?.lng : '',
         delivery: shippingAddress.delivery,
       },
+      restaurant,
       paymentMethod,
       isPaid: paymentMethod === 'cash',
       itemsPrice,
@@ -289,13 +290,12 @@ const confirmOrder = asyncHandler(async (req, res) => {
 
     // Find the order by ID
     const order = await Order.findById(orderId);
-
     if (!order) {
       return res.status(404).json({ error: 'Order not found' });
     }
 
     // Find the restaurant by the restaurant ID in the order
-    const restaurant = await Restaurant.findOne({ user: order?.restaurant });
+    const restaurant = await Restaurant.findById(order?.restaurant);
 
     if (!restaurant) {
       return res.status(404).json({ error: 'Restaurant not found' });
@@ -315,6 +315,7 @@ const confirmOrder = asyncHandler(async (req, res) => {
 
     // Confirm the order
     order.restaurantConfirmation = true;
+    console.log(order);
     await order.save();
 
     res.status(200).json({ message: 'Order confirmed successfully' });

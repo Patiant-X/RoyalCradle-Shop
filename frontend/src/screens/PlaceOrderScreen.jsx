@@ -20,6 +20,7 @@ const PlaceOrderScreen = () => {
     (state) => state.restaurant.restaurantList
   );
   const cart = useSelector((state) => state.cart);
+  const { cartItems } = cart;
 
   const { shippingAddress } = cart;
 
@@ -39,7 +40,18 @@ const PlaceOrderScreen = () => {
     }
   }, [cart.paymentMethod, cart.shippingAddress.location, navigate]);
 
-
+  let restaurantId;
+  if (cartItems.length > 0) {
+    const restaurantItemWithProduct = restaurantList.find((restaurant) =>
+      cartItems.some((item) => item.user === restaurant.user._id)
+    );
+    restaurantId = restaurantItemWithProduct?._id;
+    if (!restaurantItemWithProduct) {
+      toast.error('Restaurant information not found. Please try again.');
+      navigate('/');
+      return null;
+    }
+  }
 
   return (
     <>
@@ -148,6 +160,7 @@ const PlaceOrderScreen = () => {
                 clearCartItems={clearCartItems}
                 navigate={navigate}
                 isLoading={isLoading}
+                restaurantId = {restaurantId}
               />
               {loadingOrders && <Loader />}
               {isLoading && <Loader />}
