@@ -24,7 +24,6 @@ const RestaurantProductsListScreen = () => {
   const [longitude, setLongitude] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('');
 
-
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(success, Geoerror);
@@ -127,15 +126,15 @@ const RestaurantProductsListScreen = () => {
             }}
             className='mb-2'
           >
-            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin' || true) && (
-              <h1>#{restaurantData?.data?.name?.toUpperCase()}</h1>
-            )}
+            {(userInfo?.isPremiumCustomer ||
+              userInfo?.role === 'admin' ||
+              true) && <h1>#{restaurantData?.data?.name?.toUpperCase()}</h1>}
           </div>
           <RestaurantProductCarousal
             products={data.products}
             image={image}
             restaurantData={restaurantData?.data}
-            restauarantId = {restaurantId}
+            restauarantId={restaurantId}
           />
         </>
       )}
@@ -166,13 +165,18 @@ const RestaurantProductsListScreen = () => {
           <>
             {' '}
             <Meta />
-            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin' || true) && (
+            {(userInfo?.isPremiumCustomer ||
+              userInfo?.role === 'admin' ||
+              true) && (
               <MenuCategoryDisplay
                 menuPictures={restaurantData?.data?.menuPictures}
                 restauarantId={restaurantData?.data?.user}
+                userInfo={userInfo ? userInfo : null}
               />
             )}
-            {(userInfo?.isPremiumCustomer || userInfo?.role === 'admin' || true) &&
+            {(userInfo?.isPremiumCustomer ||
+              userInfo?.role === 'admin' ||
+              true) &&
               restaurantData?.data?.aboutPodcast?.podcast && ( // Update this condition with your audio field name
                 <div
                   className='my-2'
@@ -204,7 +208,7 @@ const RestaurantProductsListScreen = () => {
                     latitude={latitude}
                     longitude={longitude}
                     image={image}
-                    restauarantId = {restaurantId}
+                    restauarantId={restaurantId}
                   />
                 </Col>
               ))}

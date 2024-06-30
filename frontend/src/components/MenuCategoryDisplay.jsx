@@ -5,12 +5,17 @@ import MessageComponent from './MessageComponent';
 import { RiChat4Line } from 'react-icons/ri';
 import { resetUserMessageCount, setSelectUser } from '../slices/authSlice';
 import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
 
-const MenuCategoryDisplay = ({ menuPictures, restauarantId }) => {
+const MenuCategoryDisplay = ({ menuPictures, restauarantId, userInfo }) => {
   const dispatch = useDispatch();
   const [adminService, setAdminService] = useState(restauarantId);
   const [showMessage, setShowMessage] = useState(false);
   const handleToggleCardComponent = () => {
+    if(userInfo === null){
+      toast.error("Please Login to chat with restaurant")
+      return
+    }
     dispatch(resetUserMessageCount(adminService));
     dispatch(setSelectUser({ id: adminService, customer: 'customer' }));
     setShowMessage(!showMessage);

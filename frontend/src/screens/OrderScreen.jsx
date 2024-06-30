@@ -230,31 +230,43 @@ const OrderScreen = () => {
     <Message variant='danger'>{error?.data?.message || error.error}</Message>
   ) : (
     <>
-      <Alert variant='info'>
-        <h2>Order Status: {statusMessage.orderMessage}</h2>
-        <h4>Estimated Time: {statusMessage.time}</h4>
-        {!(userInfo.role === 'customer')
-          ? order.driver && (
-              <>
-                <p style={{ margin: '0', paddingBottom: '8px' }}>
-                  Driver Details: {order?.driver?._id}, {order?.driver?.name},{' '}
-                  {order?.driver?.mobileNumber}
-                </p>
-              </>
-            )
-          : order.driver && (
-              <>
-                <p style={{ margin: '0', paddingBottom: '8px' }}>
-                  Driver Details: {order?.driver?.name},{' '}
-                  {order?.driver?.mobileNumber}
-                </p>
-              </>
-            )}
-        <p style={{ margin: '0' }}>Order Number:{order?._id}</p>
-        <p className='m-0 mt-4 fw-bold italics center'>
-          **Please allow notifications to receive updates about order**
-        </p>
-      </Alert>
+      {order.restaurantConfirmation ? (
+        <Alert variant='info'>
+          <h2>Order Status: {statusMessage.orderMessage}</h2>
+          <h4>Estimated Time: {statusMessage.time}</h4>
+          {!(userInfo.role === 'customer')
+            ? order.driver && (
+                <>
+                  <p style={{ margin: '0', paddingBottom: '8px' }}>
+                    Driver Details: {order?.driver?._id}, {order?.driver?.name},{' '}
+                    {order?.driver?.mobileNumber}
+                  </p>
+                </>
+              )
+            : order.driver && (
+                <>
+                  <p style={{ margin: '0', paddingBottom: '8px' }}>
+                    Driver Details: {order?.driver?.name},{' '}
+                    {order?.driver?.mobileNumber}
+                  </p>
+                </>
+              )}
+          <p style={{ margin: '0' }}>Order Number:{order?._id}</p>
+          <p className='m-0 mt-4 fw-bold italics center'>
+            **Please allow notifications to receive updates about order**
+          </p>
+        </Alert>
+      ) : (
+        <Alert variant='info'>
+          <h2>Awaiting Restaurant Confirmation, Please be patient......</h2>
+          <h4>Average wait Time: 5 minutes</h4>
+          <p style={{ margin: '0' }}>Order Number:{order?._id}</p>
+          <p className='m-0 mt-4 fw-bold italics center'>
+            **Please allow notifications to receive updates about order**
+          </p>
+        </Alert>
+      )}
+
       <Row>
         <Col md={8}>
           <ListGroup variant='flush'>
@@ -421,6 +433,7 @@ const OrderScreen = () => {
               {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'restaurant') &&
                 order.isPaid &&
+                !order.shippingAddress?.delivery &&
                 order.restaurantConfirmation &&
                 !order.isDelivered && ( //This should be checked
                   <ListGroup.Item>
@@ -453,7 +466,7 @@ const OrderScreen = () => {
                   </ListGroup.Item>
                 )}
 
-              {/** Restaurant Order Process Logic */}
+              {/** Driver Order Process Logic */}
 
               {userInfo &&
                 (userInfo.role === 'admin' || userInfo.role === 'driver') &&
