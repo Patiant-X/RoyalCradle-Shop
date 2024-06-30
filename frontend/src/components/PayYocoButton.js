@@ -20,7 +20,7 @@ const PayYocoButton = ({
     try {
       // Filter out confirmed orders
       const confirmedOrders = orders.filter(
-        (order) => order?.restaurantConfirmation
+        (order) => order?.restaurantConfirmation && !order.isDelivered
       );
 
       if (confirmedOrders.length >= 2) {
