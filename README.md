@@ -33,7 +33,7 @@ This full-stack web application was developed to **market and support local food
 🚧 **Note:** The domain `5tygaEats` is currently not active as it has not been paid for.  
 However, here's a demo showcasing how the application functioned:
 
-🔗 [![App Demo](https://img.icons8.com/fluency/96/video-playlist.png)](https://res.cloudinary.com/duwfiikgg/video/upload/v1749344534/Sequence_02_3_s8xx1d.mp4)
+🔗 [Watch the App Demo](https://res.cloudinary.com/duwfiikgg/video/upload/v1749344534/Sequence_02_3_s8xx1d.mp4)
 
 
 
