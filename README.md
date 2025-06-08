@@ -28,6 +28,14 @@ This full-stack web application was developed to **market and support local food
 - **Axios** – API communication
 - **React Toastify** – UI notifications
 
+## 🎥 Demo Video
+
+🚧 **Note:** The domain `5tygaEats` is currently not active as it has not been paid for.  
+However, here's a demo showcasing how the application functioned:
+
+🔗 [Watch the App Demo](https://res.cloudinary.com/duwfiikgg/video/upload/v1749344534/Sequence_02_3_s8xx1d.mp4)
+
+
 ## 📦 Architecture
 
 The backend is built on **Express** with **MongoDB** as the database, integrated closely with **Socket.io** to power real-time chat functionality. Payments are securely processed through YOCO, with webhooks confirming the status. Media uploads are managed through Cloudinary for speed and reliability.
