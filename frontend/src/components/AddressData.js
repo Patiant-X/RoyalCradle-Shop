@@ -62,7 +62,7 @@ const MapComponent = ({ setAddressCoordinates }) => {
     } else {
       const script = document.createElement('script');
       script.src =
-      'https://maps.googleapis.com/maps/api/js?key=AIzaSyCOzCJeQBUPM_kVwwsawUwvd8QxRsW78dg&libraries=places';
+      '';
       script.async = true;
       script.onload = loadMap;
       script.onerror = () =>
